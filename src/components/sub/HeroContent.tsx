@@ -59,7 +59,9 @@ const HeroContent: FC = () => {
           Guilherme Menezes
         </span>
         <PointerHighlight rectangleClassName="rounded-none">
-          <span className="text-primary p-3 text-3xl lg:text-6xl">Desenvolvedor Full-Stack</span>
+          <span className="text-primary inline-flex items-center justify-center p-3 text-3xl lg:text-6xl leading-none">
+            Desenvolvedor Full-Stack
+          </span>
         </PointerHighlight>
         <span className="text-base text-muted-foreground italic max-w-[500px] mx-auto">
           Migração de legados, performance e escalabilidade com Vue.js e .NET.

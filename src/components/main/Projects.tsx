@@ -8,61 +8,57 @@ import {
   IconTableColumn,
 } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { FaGithub } from 'react-icons/fa'
 import { Badge } from '../ui/badge'
 import { BentoGrid, BentoGridItem } from '../ui/bento-grid'
 
 const projectsData = [
   {
-    title: 'ShopXIndia',
+    title: 'Projeto Mock 1',
     description:
-      'A microservices-based e-commerce platform using AWS ECS Fargate, CI/CD, and full observability on AWS.',
-    imageURL: '/shopxindia.png',
-    github: 'https://github.com/Ashlok2003/ShopxIndia',
-    live: 'https://github.com/Ashlok2003/ShopxIndia',
+      'Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.',
+    github: '#',
+    live: '#',
     icon: <IconClipboardCopy className="h-4 w-4 text-muted-foreground" />,
   },
   {
-    title: 'SocialPedia',
+    title: 'Projeto Mock 2',
     description:
-      'A social media platform with real-time chat, JWT auth, and responsive design using MERN stack.',
-    imageURL: '/socialpedia.png',
-    github: 'https://github.com/Ashlok2003/Socialpedia',
-    live: 'https://socialpedia-tau.vercel.app/',
+      'Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.',
+    github: '#',
+    live: '#',
     icon: <IconFileBroken className="h-4 w-4 text-muted-foreground" />,
   },
   {
-    title: 'FileShareX',
-    description: 'File sharing app with QR code, SMTP email integration, and clean React UI.',
-    imageURL: '/filesharex.png',
-    github: 'https://github.com/Ashlok2003/File-Sharer',
-    live: 'https://file-sharer-sepia.vercel.app/',
+    title: 'Projeto Mock 3',
+    description:
+      'Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.',
+    github: '#',
+    live: '#',
     icon: <IconSignature className="h-4 w-4 text-muted-foreground" />,
   },
   {
-    title: 'Portfolio',
+    title: 'Projeto Mock 4',
     description:
-      'Modern portfolio built with Next.js, TailwindCSS, and ShadCN, deployed on Cloudflare Pages.',
-    imageURL: '/portfolio-project.png',
-    github: 'https://github.com/Ashlok2003/portfolio',
-    live: 'https://ashlok.dev/',
+      'Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.',
+    github: '#',
+    live: '#',
     icon: <IconTableColumn className="h-4 w-4 text-muted-foreground" />,
   },
   {
-    title: 'Scheduly.AI',
-    description: 'AI assistant for booking Google Calendar meetings via conversational chat.',
-    imageURL: '/scheduly-ai.png',
-    github: 'https://github.com/Ashlok2003/Scheduly.AI',
-    live: 'https://scheduly-ai-client.onrender.com/',
+    title: 'Projeto Mock 5',
+    description:
+      'Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.',
+    github: '#',
+    live: '#',
     icon: <IconArrowWaveRightUp className="h-4 w-4 text-muted-foreground" />,
   },
 ]
 
 const LiveIndicator = () => (
   <span className="relative flex h-2 w-2">
-    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
   </span>
 )
 
@@ -96,37 +92,28 @@ const Projects = () => {
                   <Badge asChild variant="secondary" className="gap-1 rounded-full">
                     <a
                       href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 cursor-default"
+                      onClick={(e) => e.preventDefault()}
                     >
                       <FaGithub className="size-3" />
-                      GitHub
+                      GitHub (Mock)
                     </a>
                   </Badge>
 
                   <a
                     href={project.live}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-0.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-0.5 text-xs font-medium text-foreground shadow-sm transition-colors cursor-default"
+                    onClick={(e) => e.preventDefault()}
                   >
                     <LiveIndicator />
-                    Live
+                    Demo (Mock)
                   </a>
                 </div>
               </div>
             }
             header={
-              <div className="relative w-full h-full min-h-[6rem] rounded-xl overflow-hidden">
-                <Image
-                  src={project.imageURL}
-                  alt={project.title}
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  quality={80}
-                  fill
-                />
+              <div className="relative w-full h-full min-h-[6rem] rounded-xl overflow-hidden bg-muted/20 border border-dashed border-border/60 flex items-center justify-center">
+                <span className="text-xs text-muted-foreground/80 font-mono">Mock Preview</span>
               </div>
             }
             icon={project.icon}

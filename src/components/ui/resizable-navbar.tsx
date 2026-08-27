@@ -4,7 +4,7 @@ import { IconMenu2, IconX } from '@tabler/icons-react'
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, LayoutGroup } from 'motion/react'
 import Image from 'next/image'
 
-import React, { JSX, useRef, useState } from 'react'
+import React, { JSX, useEffect, useRef, useState } from 'react'
 
 interface NavbarProps {
   children: React.ReactNode
@@ -80,30 +80,55 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   )
 }
 
-const sharedTransition = { type: 'spring', stiffness: 200, damping: 50 }
+const sharedTransition = { type: 'spring', stiffness: 200, damping: 50 } as const
 
 export const NavBody = ({ children, className, visible }: NavBodyProps) => {
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [contentWidth, setContentWidth] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!measureRef.current) return
+    const updateWidth = () => {
+      if (measureRef.current) {
+        setContentWidth(measureRef.current.getBoundingClientRect().width)
+      }
+    }
+    updateWidth()
+    const observer = new ResizeObserver(updateWidth)
+    observer.observe(measureRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <motion.div
-      layout
       animate={{
         backdropFilter: visible ? 'blur(10px)' : 'none',
         boxShadow: visible
           ? '0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset'
           : 'none',
+        width: visible ? (contentWidth ? `${contentWidth + 32}px` : 'auto') : '100%',
         y: visible ? 20 : 0,
       }}
       transition={sharedTransition}
-      style={{
-        minWidth: '200px',
-      }}
       className={cn(
-        'relative z-[60] mx-auto hidden max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 md:flex dark:bg-transparent gap-4',
-        visible ? 'w-fit bg-white/80 dark:bg-neutral-950/80' : 'w-full',
+        'relative z-[60] mx-auto hidden max-w-7xl flex-row items-center justify-between rounded-full bg-transparent px-4 py-2 md:flex dark:bg-transparent overflow-hidden',
+        visible && 'bg-white/80 dark:bg-neutral-950/80',
         className,
       )}
     >
-      {children}
+      {/* Conteúdo real, exibido — SEMPRE w-full, nunca alterna classe */}
+      <div className="flex w-full items-center justify-between gap-2 lg:gap-4">
+        {children}
+      </div>
+
+      {/* Clone invisível, só para medição — SEMPRE w-max, nunca alterna, nunca exibido */}
+      <div
+        ref={measureRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 top-0 -z-10 inline-flex w-max items-center gap-2 lg:gap-4 whitespace-nowrap opacity-0"
+      >
+        {children}
+      </div>
     </motion.div>
   )
 }
@@ -115,7 +140,7 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
     <motion.div
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        'hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 md:flex md:space-x-2',
+        'hidden flex-row items-center justify-center space-x-1 lg:space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 md:flex',
         className,
       )}
     >
@@ -127,7 +152,7 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
             onItemClick?.()
             document.getElementById(item.link.slice(1))?.scrollIntoView({ behavior: 'smooth' })
           }}
-          className="relative px-4 py-2 text-neutral-600 dark:text-neutral-300"
+          className="relative px-2 py-1.5 lg:px-4 lg:py-2 text-neutral-600 dark:text-neutral-300 shrink-0"
           key={`link-${item.name}`}
           href={item.link}
         >
@@ -139,11 +164,10 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
             <AnimatePresence>
               {!isScrolled && (
                 <motion.span
-                  layout
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  transition={{ ...sharedTransition, opacity: { duration: 0.2 } }}
+                  transition={{ duration: 0.18, ease: 'easeInOut', opacity: { duration: 0.15 } }}
                   className="font-semibold overflow-hidden whitespace-nowrap"
                 >
                   {item.name}
@@ -247,7 +271,7 @@ export const NavbarLogo = ({ isScrolled, text = "Guilherme Menezes" }: { isScrol
   return (
     <a
       href="#about"
-      className="group relative z-10 flex items-center space-x-3"
+      className="group relative z-10 flex items-center space-x-2 lg:space-x-3 shrink-0"
       aria-label="Navigate to About section"
     >
       <Image
@@ -258,7 +282,14 @@ export const NavbarLogo = ({ isScrolled, text = "Guilherme Menezes" }: { isScrol
         className="rounded-full"
       />
       <span className="font-mono text-sm md:text-base font-semibold group-hover:text-brand-highlight transition-colors flex items-center">
-        {text === "Guilherme Menezes" ? "guilherme-menezes@home:~$" : text}
+        {text === "Guilherme Menezes" ? (
+          <>
+            <span className="inline lg:hidden">gui@home:~$</span>
+            <span className="hidden lg:inline">guilherme-menezes@home:~$</span>
+          </>
+        ) : (
+          text
+        )}
         {text === "Guilherme Menezes" && (
           <span className="ml-[2px] inline-block text-current animate-blink">█</span>
         )}

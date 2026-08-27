@@ -7,35 +7,27 @@ import { useState } from 'react'
 const blogs = [
   {
     id: 1,
-    title: '🛒 ShopXIndia: A Scalable E-Commerce Platform',
+    title: '📝 Post Mock 1: Título de Exemplo',
     excerpt:
-      'Behind the scenes of ShopXIndia — a microservices-based e-commerce platform built with GraphQL Federation.',
-    content: `ShopXIndia is a fully-featured e-commerce platform built with a microservices architecture
-and powered by GraphQL Federation for unified APIs.
-It leverages modern technologies to provide a seamless shopping experience while keeping the backend
-modular and maintainable.
-In this blog, I discuss how I designed the federated services, implemented authentication,
-and optimized query performance for scalability.`,
+      'Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.',
+    content: `Este é um conteúdo demonstrativo para o Post Mock 1.
+O artigo técnico real será cadastrado e publicado diretamente através do painel administrativo nas próximas fases do roadmap.`,
   },
   {
     id: 2,
-    title: '💬 SocialPedia: A Modern Social Media Platform',
+    title: '💡 Post Mock 2: Título de Exemplo',
     excerpt:
-      'From real-time chat to WebRTC calls — building SocialPedia, a full-stack social media app.',
-    content: `SocialPedia is a social media platform built using Node.js, React, MongoDB, Redux, WebSockets, and WebRTC.
-It supports features like real-time chat, notifications, friend management, and live audio/video calls.
-In this blog, I share how I implemented real-time capabilities, tackled state management challenges,
-and created an engaging, responsive user experience.`,
+      'Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.',
+    content: `Este é um conteúdo demonstrativo para o Post Mock 2.
+O artigo técnico real será cadastrado e publicado diretamente através do painel administrativo nas próximas fases do roadmap.`,
   },
   {
     id: 3,
-    title: '🔒 FileShareX: Secure File Sharing Made Easy',
+    title: '🚀 Post Mock 3: Título de Exemplo',
     excerpt:
-      'Designing and building FileShareX — a secure, simple, and user-friendly file sharing app.',
-    content: `FileShareX is a secure file-sharing application built with React, Node.js, and MongoDB.
-It enables users to share files easily using QR codes, email links, or direct links — no complex setup required.
-In this blog, I explain how I implemented secure file uploads & downloads, integrated QR and email sharing,
-and designed a clean UX for hassle-free collaboration.`,
+      'Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.',
+    content: `Este é um conteúdo demonstrativo para o Post Mock 3.
+O artigo técnico real será cadastrado e publicado diretamente através do painel administrativo nas próximas fases do roadmap.`,
   },
 ]
 
@@ -71,7 +63,7 @@ export function BlogsSection() {
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-6 prose prose-zinc dark:prose-invert max-w-none">
-                <p className="text-base text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                <p className="text-base text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
                   {selectedBlog.content}
                 </p>
               </div>

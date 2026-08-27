@@ -1,5 +1,3 @@
-export const runtime = 'edge'
-
 import { Resend } from 'resend'
 
 interface FormData {

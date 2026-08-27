@@ -1,4 +1,5 @@
 'use client'
+import { motion } from 'motion/react'
 
 import {
   MobileNav,
@@ -44,7 +45,7 @@ export function Navbar() {
 
           <NavItems items={navItems} isScrolled={isScrolled} />
 
-          <div className="relative z-10 flex items-center gap-2">
+          <div className="relative z-10 flex items-center gap-1.5 lg:gap-2 shrink-0">
             <LanguageToggle />
             <ThemeToggle />
             <Button
