@@ -1,7 +1,7 @@
 'use client'
 import { cn } from '@/lib/utils'
 import { IconMenu2, IconX } from '@tabler/icons-react'
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, LayoutGroup } from 'motion/react'
 import Image from 'next/image'
 
 import React, { JSX, useRef, useState } from 'react'
@@ -69,37 +69,37 @@ export const Navbar = ({ children, className }: NavbarProps) => {
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn('sticky inset-x-0 top-20 z-40 w-full', className)}
     >
-      {React.Children.map(children, (child) =>
-        React.isValidElement(child)
-          ? React.cloneElement(child as React.ReactElement<{ visible?: boolean }>, { visible })
-          : child,
-      )}
+      <LayoutGroup>
+        {React.Children.map(children, (child) =>
+          React.isValidElement(child)
+            ? React.cloneElement(child as React.ReactElement<{ visible?: boolean }>, { visible })
+            : child,
+        )}
+      </LayoutGroup>
     </motion.div>
   )
 }
 
+const sharedTransition = { type: 'spring', stiffness: 200, damping: 50 }
+
 export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   return (
     <motion.div
+      layout
       animate={{
         backdropFilter: visible ? 'blur(10px)' : 'none',
         boxShadow: visible
           ? '0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset'
           : 'none',
-        width: visible ? '40%' : '100%',
         y: visible ? 20 : 0,
       }}
-      transition={{
-        type: 'spring',
-        stiffness: 200,
-        damping: 50,
-      }}
+      transition={sharedTransition}
       style={{
         minWidth: '200px',
       }}
       className={cn(
-        'relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 lg:flex dark:bg-transparent',
-        visible && 'bg-white/80 dark:bg-neutral-950/80',
+        'relative z-[60] mx-auto hidden max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 md:flex dark:bg-transparent gap-4',
+        visible ? 'w-fit bg-white/80 dark:bg-neutral-950/80' : 'w-full',
         className,
       )}
     >
@@ -115,7 +115,7 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
     <motion.div
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        'absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 lg:flex lg:space-x-2',
+        'hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 md:flex md:space-x-2',
         className,
       )}
     >
@@ -135,7 +135,21 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
             <motion.div className="absolute inset-0 h-full w-full rounded-full bg-gray-100 dark:bg-neutral-800" />
           )}
           <div className="relative z-20 flex items-center justify-between gap-2">
-            {item.icon} {!isScrolled && <span className="font-semibold">{item.name}</span>}
+            {item.icon}
+            <AnimatePresence>
+              {!isScrolled && (
+                <motion.span
+                  layout
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ ...sharedTransition, opacity: { duration: 0.2 } }}
+                  className="font-semibold overflow-hidden whitespace-nowrap"
+                >
+                  {item.name}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </a>
       ))}
@@ -163,7 +177,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
         damping: 50,
       }}
       className={cn(
-        'relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 lg:hidden',
+        'relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 md:hidden',
         visible && 'bg-white/80 dark:bg-neutral-950/80',
         className,
       )}
@@ -229,11 +243,11 @@ export const MobileNavToggle = ({
   )
 }
 
-export const NavbarLogo = ({ isScrolled }: { isScrolled: boolean }) => {
+export const NavbarLogo = ({ isScrolled, text = "Guilherme Menezes" }: { isScrolled?: boolean, text?: string }) => {
   return (
     <a
       href="#about"
-      className="group flex items-center space-x-3"
+      className="group relative z-10 flex items-center space-x-3"
       aria-label="Navigate to About section"
     >
       <Image
@@ -243,11 +257,12 @@ export const NavbarLogo = ({ isScrolled }: { isScrolled: boolean }) => {
         height={32}
         className="rounded-full"
       />
-      {!isScrolled && (
-        <span className="text-lg font-bold group-hover:text-red-500 transition-colors">
-          Guilherme Menezes
-        </span>
-      )}
+      <span className="font-mono text-sm md:text-base font-semibold group-hover:text-brand-highlight transition-colors flex items-center">
+        {text === "Guilherme Menezes" ? "guilherme-menezes@home:~$" : text}
+        {text === "Guilherme Menezes" && (
+          <span className="ml-[2px] inline-block text-current animate-blink">█</span>
+        )}
+      </span>
     </a>
   )
 }

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { FaDownload } from 'react-icons/fa'
 
 const Document = dynamic(() => import('react-pdf').then((mod) => mod.Document), { ssr: false })
@@ -13,12 +13,39 @@ import 'react-pdf/dist/Page/TextLayer.css'
 
 const ResumeSection = () => {
   const [error, setError] = useState<string | null>(null)
+  const [containerWidth, setContainerWidth] = useState<number>(890)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     import('react-pdf').then(({ pdfjs }) => {
       pdfjs.GlobalWorkerOptions.workerSrc =
-        'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.3.31/build/pdf.worker.min.mjs'
+        `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
     })
+
+    const handleResize = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      timeoutRef.current = setTimeout(() => {
+        if (wrapperRef.current) {
+          setContainerWidth(Math.min(890, wrapperRef.current.clientWidth))
+        }
+      }, 200)
+    }
+
+    // Calcula imediatamente ao montar para corrigir o tamanho inicial (sem debounce)
+    if (wrapperRef.current) {
+      setContainerWidth(Math.min(890, wrapperRef.current.clientWidth))
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
   const onDocumentLoadError = (error: Error) => {
@@ -50,7 +77,7 @@ const ResumeSection = () => {
         viewport={{ once: true }}
         className="w-full max-w-4xl bg-card border border-border rounded-lg shadow-lg overflow-hidden"
       >
-        <div className="relative w-full overflow-y-auto">
+        <div ref={wrapperRef} className="relative w-full overflow-y-auto">
           {error ? (
             <p className="text-destructive text-center text-lg p-4">Failed to load PDF: {error}</p>
           ) : (
@@ -64,7 +91,7 @@ const ResumeSection = () => {
                 className="flex justify-center"
                 renderTextLayer
                 renderAnnotationLayer
-                width={Math.min(890, typeof window !== 'undefined' ? window.innerWidth - 20 : 1200)}
+                width={containerWidth}
                 scale={1}
               />
             </Document>

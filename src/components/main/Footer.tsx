@@ -21,6 +21,8 @@ const Footer: FC = () => {
       localStorage.setItem('lastVisit', today)
     }
 
+    // Syncing external storage to React state
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisitorCount(count)
   }, [])
 

@@ -10,7 +10,9 @@ import {
   NavbarLogo,
   Navbar as NavbarWrapper,
 } from '@/components/ui/resizable-navbar'
+import { LanguageToggle } from '@/components/ui/language-toggle'
 import { ThemeToggle } from '@/hooks/use-toogle'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { FaBlog, FaBriefcase, FaCode, FaEnvelope, FaProjectDiagram, FaUser } from 'react-icons/fa'
@@ -38,11 +40,12 @@ export function Navbar() {
     <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-300`}>
       <NavbarWrapper className="flex flex-col items-center justify-between gap-4 px-4 py-2">
         <NavBody>
-          <NavbarLogo isScrolled={isScrolled} />
+          <NavbarLogo />
 
           <NavItems items={navItems} isScrolled={isScrolled} />
 
-          <div className="flex items-center gap-2">
+          <div className="relative z-10 flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
             <Button
               variant="default"
@@ -57,12 +60,37 @@ export function Navbar() {
         </NavBody>
 
         <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo isScrolled={isScrolled} />
-            <MobileNavToggle
-              isOpen={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            />
+          <MobileNavHeader className="relative">
+            <Link
+              href="#about"
+              className="z-10 flex items-center"
+              aria-label="Navigate to About section"
+            >
+              <Image
+                src="/guilherme.jpg"
+                alt="Guilherme Menezes"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            </Link>
+
+            <span className="absolute left-1/2 -translate-x-1/2 z-10 text-lg font-bold text-neutral-800 dark:text-neutral-200 pointer-events-none">
+              {isMobileMenuOpen ? 'Menu' : 'Portfólio'}
+            </span>
+
+            <div className="flex flex-1 items-center justify-end gap-4 z-10">
+              {isMobileMenuOpen && (
+                <>
+                  <LanguageToggle />
+                  <ThemeToggle />
+                </>
+              )}
+              <MobileNavToggle
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+            </div>
           </MobileNavHeader>
 
           <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
@@ -82,7 +110,6 @@ export function Navbar() {
               </Link>
             ))}
             <div className="flex w-full flex-col gap-4">
-              <ThemeToggle />
               <Button
                 onClick={() => {
                   setIsMobileMenuOpen(false)
