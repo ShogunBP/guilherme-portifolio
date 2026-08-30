@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Script from 'next/script'
 import { FC, useEffect, useState } from 'react'
 import { FaLinkedin, FaTwitter } from 'react-icons/fa'
 import { RxGithubLogo } from 'react-icons/rx'
@@ -122,11 +123,27 @@ const Footer: FC = () => {
         </motion.div>
 
         <motion.div
-          className="mt-12 text-center space-y-2"
+          className="mt-12 flex flex-col items-center justify-center space-y-3 text-center"
           variants={childVariants}
           initial="hidden"
           animate="visible"
         >
+          <a
+            href="https://www.dmca.com/Protection/Status.aspx?ID=13bc7f35-14af-4ecc-9c0b-5e19f1f8795b"
+            title="DMCA.com Protection Status"
+            className="dmca-badge inline-block"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://images.dmca.com/Badges/dmca-badge-w100-5x1-06.png?ID=13bc7f35-14af-4ecc-9c0b-5e19f1f8795b"
+              alt="DMCA.com Protection Status"
+            />
+          </a>
+          <Script
+            src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js"
+            strategy="lazyOnload"
+          />
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Built with ❤️ by Guilherme Menezes.
           </p>

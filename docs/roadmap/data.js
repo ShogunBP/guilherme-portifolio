@@ -1,55 +1,55 @@
 var ROADMAP_TASKS = [
   {
-    "id": "dockerizacao-standalone",
-    "title": "Fase 1: Dockerização (Next.js Standalone) do Guilherme-Portifólio",
-    "category": "refactoring",
+    "id": "badge-dmca-footer",
+    "title": "Badge DMCA Protection Status no Footer",
+    "category": "enhancements",
     "status": "ready-for-review",
     "area": "active",
-    "date": "2026-08-27",
-    "priority": "alta",
+    "date": "2026-08-28",
+    "priority": "baixa",
     "tags": [
-      "infra",
-      "frontend"
+      "frontend",
+      "ui-ux"
     ],
-    "progress": 77,
+    "progress": 67,
     "progressFraction": {
-      "done": 10,
-      "total": 13
+      "done": 6,
+      "total": 9
     },
-    "summary": "Dockerização do Next.js em modo standalone, correção de runtime na API de contato e criação de compose para Portainer GitOps.",
+    "summary": "Inserção do badge DMCA Protection Status no rodapé do site com script externo lazyOnload.",
     "sections": [
       {
-        "heading": "Motivação",
-        "content": "Preparar a infraestrutura de deploy do Guilherme-Portifólio para execução em container Docker único na VPS, utilizando o modo `output: 'standalone'` do Next.js para manter a imagem leve e compatível com a stack GitOps nativa do Portainer via Webhook, sem depender de deploys manuais via SSH."
+        "heading": "Contexto",
+        "content": "O domínio `guilhermemenezes.dev` foi registrado e validado no DMCA.com. Para assegurar proteção de direitos autorais e sinalizar formalmente o status de proteção de conteúdo, é necessário exibir o selo oficial \"Protection Status\" do DMCA.com no rodapé do site."
       },
       {
-        "heading": "Situação Atual",
-        "content": "- A rota [`src/app/api/contact/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/contact/route.ts) possuía `export const runtime = 'edge'`, que restringia APIs de Node e era desnecessário para self-hosting em Docker/VPS.\n- O [`next.config.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/next.config.ts) não gerava bundle autocontido (`output: 'standalone'`).\n- O projeto não possuía `Dockerfile`, `.dockerignore` e `docker-compose.yml` padronizados para o deploy da stack."
+        "heading": "Problema Atual",
+        "content": "O rodapé continha os links rápidos, redes sociais e contador de visitas, mas carecia de sinalização formal e link de verificação de proteção de propriedade intelectual / DMCA."
       },
       {
-        "heading": "Situação Desejada",
-        "content": "- `src/app/api/contact/route.ts` executando no runtime Node padrão.\n- `next.config.ts` configurado com `output: 'standalone'`, gerando `.next/standalone` com dependências enxutas e `server.js`.\n- `Dockerfile` multi-stage (`deps`, `builder`, `runner`) com usuário não-root `nextjs` e porta 3000 exposta.\n- `.dockerignore` configurado excluindo arquivos `.env*`, `.git`, `node_modules`, `.next`, `docs/` e `dev/`.\n- `docker-compose.yml` configurado com `127.0.0.1:3000:3000` (porta isolada para Nginx de borda), `RESEND_API_KEY` injetada por variável de ambiente e healthcheck via `wget`."
+        "heading": "Melhoria Proposta",
+        "content": "Inserção do link oficial com a imagem do badge do DMCA e carregamento assíncrono não-bloqueante do script auxiliar `DMCABadgeHelper.min.js` via `next/script` com estratégia `lazyOnload` no componente [`src/components/main/Footer.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/components/main/Footer.tsx)."
       },
       {
-        "heading": "Riscos",
-        "content": "- Risco de arquivos estáticos (CSS, JS, PDF) retornarem 404 em runtime standalone caso `public` e `.next/static` não fossem copiados: mitigado no `Dockerfile` com instruções explícitas de cópia (`COPY --from=builder /app/public ./public` e `COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static`).\n- Risco de quebra no renderizador de PDF (`react-pdf` / `pdfjs-dist`): testado e validado visualmente via navegador."
+        "heading": "Impacto Esperado",
+        "content": "- Proteção visual e jurídica explícita para o conteúdo do portfólio.\n- Sem impacto negativo de performance/LCP graças à estratégia `lazyOnload`.\n- Link seguro com `target=\"_blank\"` e `rel=\"noopener noreferrer\"`."
       },
       {
-        "heading": "Estratégia de Execução",
-        "content": "1. **Parte 0 — Remoção do Runtime Edge:**\n   - Remoção de `export const runtime = 'edge'` em `src/app/api/contact/route.ts` e `src/app/api/hello/route.ts`.\n2. **Parte 1 — Output Standalone:**\n   - Adição de `output: 'standalone'` em `next.config.ts`.\n   - Ajuste em `tsconfig.json` para ignorar pastas auxiliares `dev` e `docs` na checagem de tipos do build.\n   - Ajuste no tipo de transição do `resizable-navbar.tsx` com `as const`.\n3. **Parte 2 & 3 — Dockerfile e .dockerignore:**\n   - Criação do `Dockerfile` multi-stage com `node:20-alpine` e `npm ci` (confirmado `package-lock.json`).\n   - Criação do `.dockerignore`.\n4. **Parte 4 — Docker Compose:**\n   - Criação do `docker-compose.yml` com binding `127.0.0.1:3000:3000` e injeção de `${RESEND_API_KEY}`.\n5. **Validação:**\n   - Build de produção via `npm run build` gerando `.next/standalone/server.js`.\n   - Execução do servidor standalone em porta local (`3005`) com os assets estáticos mapeados.\n   - Validação visual completa via navegador de todas as seções (Hero, Skills, Timeline, PDF Viewer do Resume, Projects Mock e Blogs Mock).\n\n---"
+        "heading": "Plano de Implementação",
+        "content": "1. Importar `Script` de `next/script` em `Footer.tsx`.\n2. Adicionar o link do badge (`<a>` com `<img>`) e `<Script>` dentro do container inferior do rodapé.\n3. Validar build (`npm run build`) e carregamento no navegador."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [x] Linha `export const runtime = 'edge'` removida de `src/app/api/contact/route.ts`\n- [x] `output: 'standalone'` adicionado ao `next.config.ts`\n- [x] `npm run build` executado com sucesso gerando `.next/standalone/server.js`\n- [x] `Dockerfile` multi-stage criado na raiz\n- [x] `.dockerignore` criado excluindo segredos, dependências e documentação\n- [x] `docker-compose.yml` criado com binding local `127.0.0.1:3000:3000`\n- [x] Validação visual do servidor standalone com renderização do currículo em PDF realizada via navegador\n\n---"
+        "content": "- [x] Componente `Footer.tsx` atualizado com badge e script DMCA\n- [x] Script configurado com estratégia `lazyOnload`\n- [x] Imagem e link do DMCA carregando corretamente\n- [x] `npm run build` executado com sucesso sem erros ou quebras de tipo\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [x] Build standalone gerado e funcional\n- [x] Todas as páginas e renderizador de PDF carregam visualmente sem erros\n- [x] Arquivos Dockerfile, docker-compose.yml e .dockerignore prontos para a stack do Portainer\n- [ ] **Pasta renomeada para `[done]-dockerizacao-standalone` e movida para `archive/refactoring/` (aguardando aprovação humana e configuração manual na VPS)**"
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Badge exibido visualmente no rodapé em ambiente de desenvolvimento\n- [x] Script DMCA carregado sem erros no console\n- [ ] **Pasta renomeada para `[done]-badge-dmca-footer` e movida para `archive/enhancements/` (aguardando aprovação humana)**"
       }
     ],
-    "path": "docs/active/refactoring/[ready-for-review]-dockerizacao-standalone"
+    "path": "docs/active/enhancements/[ready-for-review]-badge-dmca-footer"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -756,6 +756,58 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/archive/enhancements/[done]-navbar-mobile-menu-reorganizacao"
+  },
+  {
+    "id": "dockerizacao-standalone",
+    "title": "Fase 1: Dockerização (Next.js Standalone) do Guilherme-Portifólio",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-27",
+    "priority": "alta",
+    "tags": [
+      "infra",
+      "frontend"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 12,
+      "total": 13
+    },
+    "summary": "Dockerização do Next.js em modo standalone, correção de runtime na API de contato e criação de compose para Portainer GitOps.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "Preparar a infraestrutura de deploy do Guilherme-Portifólio para execução em container Docker único na VPS, utilizando o modo `output: 'standalone'` do Next.js para manter a imagem leve e compatível com a stack GitOps nativa do Portainer via Webhook, sem depender de deploys manuais via SSH."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- A rota [`src/app/api/contact/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/contact/route.ts) possuía `export const runtime = 'edge'`, que restringia APIs de Node e era desnecessário para self-hosting em Docker/VPS.\n- O [`next.config.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/next.config.ts) não gerava bundle autocontido (`output: 'standalone'`).\n- O projeto não possuía `Dockerfile`, `.dockerignore` e `docker-compose.yml` padronizados para o deploy da stack."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- `src/app/api/contact/route.ts` executando no runtime Node padrão.\n- `next.config.ts` configurado com `output: 'standalone'`, gerando `.next/standalone` com dependências enxutas e `server.js`.\n- `Dockerfile` multi-stage (`deps`, `builder`, `runner`) com usuário não-root `nextjs` e porta 3000 exposta.\n- `.dockerignore` configurado excluindo arquivos `.env*`, `.git`, `node_modules`, `.next`, `docs/` e `dev/`.\n- `docker-compose.yml` configurado com `127.0.0.1:3000:3000` (porta isolada para Nginx de borda), `RESEND_API_KEY` injetada por variável de ambiente e healthcheck via `wget`."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Risco de arquivos estáticos (CSS, JS, PDF) retornarem 404 em runtime standalone caso `public` e `.next/static` não fossem copiados: mitigado no `Dockerfile` com instruções explícitas de cópia (`COPY --from=builder /app/public ./public` e `COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static`).\n- Risco de quebra no renderizador de PDF (`react-pdf` / `pdfjs-dist`): testado e validado visualmente via navegador."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. **Parte 0 — Remoção do Runtime Edge:**\n   - Remoção de `export const runtime = 'edge'` em `src/app/api/contact/route.ts` e `src/app/api/hello/route.ts`.\n2. **Parte 1 — Output Standalone:**\n   - Adição de `output: 'standalone'` em `next.config.ts`.\n   - Ajuste em `tsconfig.json` para ignorar pastas auxiliares `dev` e `docs` na checagem de tipos do build.\n   - Ajuste no tipo de transição do `resizable-navbar.tsx` com `as const`.\n3. **Parte 2 & 3 — Dockerfile e .dockerignore:**\n   - Criação do `Dockerfile` multi-stage com `node:20-alpine` e `npm ci` (confirmado `package-lock.json`).\n   - Criação do `.dockerignore`.\n4. **Parte 4 — Docker Compose:**\n   - Criação do `docker-compose.yml` com binding `127.0.0.1:3000:3000` e injeção de `${RESEND_API_KEY}`.\n5. **Validação:**\n   - Build de produção via `npm run build` gerando `.next/standalone/server.js`.\n   - Execução do servidor standalone em porta local (`3005`) com os assets estáticos mapeados.\n   - Validação visual completa via navegador de todas as seções (Hero, Skills, Timeline, PDF Viewer do Resume, Projects Mock e Blogs Mock).\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Linha `export const runtime = 'edge'` removida de `src/app/api/contact/route.ts`\n- [x] `output: 'standalone'` adicionado ao `next.config.ts`\n- [x] `npm run build` executado com sucesso gerando `.next/standalone/server.js`\n- [x] `Dockerfile` multi-stage criado na raiz\n- [x] `.dockerignore` criado excluindo segredos, dependências e documentação\n- [x] `docker-compose.yml` criado com binding local `127.0.0.1:3000:3000`\n- [x] Validação visual do servidor standalone com renderização do currículo em PDF realizada via navegador\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Build standalone gerado e funcional\n- [x] Todas as páginas e renderizador de PDF carregam visualmente sem erros\n- [x] Arquivos Dockerfile, docker-compose.yml e .dockerignore prontos para a stack do Portainer\n- [x] **Pasta renomeada para `[done]-dockerizacao-standalone` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-dockerizacao-standalone"
   },
   {
     "id": "preparar-repositorio-publico",

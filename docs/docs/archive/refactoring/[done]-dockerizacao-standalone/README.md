@@ -1,6 +1,6 @@
 # ♻️ Fase 1: Dockerização (Next.js Standalone) do Guilherme-Portifólio
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-27
 **Prioridade:** `alta`
 **Tags:** `infra`, `frontend`
@@ -63,7 +63,7 @@ Preparar a infraestrutura de deploy do Guilherme-Portifólio para execução em 
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
@@ -75,4 +75,4 @@ Preparar a infraestrutura de deploy do Guilherme-Portifólio para execução em 
 - [x] Build standalone gerado e funcional
 - [x] Todas as páginas e renderizador de PDF carregam visualmente sem erros
 - [x] Arquivos Dockerfile, docker-compose.yml e .dockerignore prontos para a stack do Portainer
-- [ ] **Pasta renomeada para `[done]-dockerizacao-standalone` e movida para `archive/refactoring/` (aguardando aprovação humana e configuração manual na VPS)**
+- [x] **Pasta renomeada para `[done]-dockerizacao-standalone` e movida para `archive/refactoring/`**
