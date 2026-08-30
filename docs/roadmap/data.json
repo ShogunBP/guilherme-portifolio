@@ -1,5 +1,57 @@
 [
   {
+    "id": "remover-workflows-legados",
+    "title": "Remover Workflows Legados (ci.yaml, cd.yaml, issue-bot.yaml)",
+    "category": "refactoring",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-30",
+    "priority": "baixa",
+    "tags": [
+      "infra",
+      "dx"
+    ],
+    "progress": 56,
+    "progressFraction": {
+      "done": 5,
+      "total": 9
+    },
+    "summary": "Remoção dos workflows legados e quebrados (ci.yaml, cd.yaml, issue-bot.yaml) mantendo apenas deploy.yml.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O repositório possuía 3 workflows herdados de templates anteriores (`cd.yaml`, `ci.yaml` e `issue-bot.yaml`) que não refletiam a arquitetura atual do projeto. O `cd.yaml` tentava realizar deploy para o Cloudflare Pages (infraestrutura não mais utilizada), o `ci.yaml` falhava devido a incompatibilidades de flags e actions deprecadas (CodeQL v2), e o `issue-bot.yaml` era desnecessário. Essas execuções geravam notificações de erro falsas a cada push no GitHub."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- Existência de múltiplos workflows legados gerando falhas nos checks do GitHub.\n- Apenas [`.github/workflows/deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) (SSH direto na VPS) é o mecanismo oficial e funcional de deploy."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- Workflows `cd.yaml`, `ci.yaml` e `issue-bot.yaml` removidos de `.github/workflows/`.\n- Apenas `deploy.yml` mantido em `.github/workflows/`."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Nenhum risco para a aplicação ou para o fluxo de deploy oficial, já que o deploy em produção depende exclusivamente de `deploy.yml`."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Remoção dos arquivos `ci.yaml`, `cd.yaml` e `issue-bot.yaml`.\n2. Validação da listagem de arquivos no diretório `.github/workflows/` (apenas `deploy.yml`).\n3. Commit e push para o repositório remoto.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Arquivo `.github/workflows/cd.yaml` removido\n- [x] Arquivo `.github/workflows/ci.yaml` removido\n- [x] Arquivo `.github/workflows/issue-bot.yaml` removido\n- [x] Arquivo `.github/workflows/deploy.yml` preservado intacto\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Listagem de `.github/workflows/` confirmada contendo exclusivamente `deploy.yml`\n- [ ] Push realizado e verificado na aba Actions do GitHub que apenas \"Deploy to VPS\" executa\n- [ ] **Pasta renomeada para `[done]-remover-workflows-legados` e movida para `archive/refactoring/` (aguardando aprovação humana)**"
+      }
+    ],
+    "path": "docs/active/refactoring/[ready-for-review]-remover-workflows-legados"
+  },
+  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
