@@ -1,108 +1,5 @@
 [
   {
-    "id": "badge-dmca-footer",
-    "title": "Badge DMCA Protection Status no Footer",
-    "category": "enhancements",
-    "status": "ready-for-review",
-    "area": "active",
-    "date": "2026-08-28",
-    "priority": "baixa",
-    "tags": [
-      "frontend",
-      "ui-ux"
-    ],
-    "progress": 67,
-    "progressFraction": {
-      "done": 6,
-      "total": 9
-    },
-    "summary": "Inserção do badge DMCA Protection Status no rodapé do site com script externo lazyOnload.",
-    "sections": [
-      {
-        "heading": "Contexto",
-        "content": "O domínio `guilhermemenezes.dev` foi registrado e validado no DMCA.com. Para assegurar proteção de direitos autorais e sinalizar formalmente o status de proteção de conteúdo, é necessário exibir o selo oficial \"Protection Status\" do DMCA.com no rodapé do site."
-      },
-      {
-        "heading": "Problema Atual",
-        "content": "O rodapé continha os links rápidos, redes sociais e contador de visitas, mas carecia de sinalização formal e link de verificação de proteção de propriedade intelectual / DMCA."
-      },
-      {
-        "heading": "Melhoria Proposta",
-        "content": "Inserção do link oficial com a imagem do badge do DMCA e carregamento assíncrono não-bloqueante do script auxiliar `DMCABadgeHelper.min.js` via `next/script` com estratégia `lazyOnload` no componente [`src/components/main/Footer.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/components/main/Footer.tsx)."
-      },
-      {
-        "heading": "Impacto Esperado",
-        "content": "- Proteção visual e jurídica explícita para o conteúdo do portfólio.\n- Sem impacto negativo de performance/LCP graças à estratégia `lazyOnload`.\n- Link seguro com `target=\"_blank\"` e `rel=\"noopener noreferrer\"`."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Importar `Script` de `next/script` em `Footer.tsx`.\n2. Adicionar o link do badge (`<a>` com `<img>`) e `<Script>` dentro do container inferior do rodapé.\n3. Validar build (`npm run build`) e carregamento no navegador."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Componente `Footer.tsx` atualizado com badge e script DMCA\n- [x] Script configurado com estratégia `lazyOnload`\n- [x] Imagem e link do DMCA carregando corretamente\n- [x] `npm run build` executado com sucesso sem erros ou quebras de tipo\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [x] Badge exibido visualmente no rodapé em ambiente de desenvolvimento\n- [x] Script DMCA carregado sem erros no console\n- [ ] **Pasta renomeada para `[done]-badge-dmca-footer` e movida para `archive/enhancements/` (aguardando aprovação humana)**"
-      }
-    ],
-    "path": "docs/active/enhancements/[ready-for-review]-badge-dmca-footer"
-  },
-  {
-    "id": "deploy-automatico-github-actions",
-    "title": "Deploy Automático via GitHub Actions (SSH na VPS)",
-    "category": "refactoring",
-    "status": "ready-for-review",
-    "area": "active",
-    "date": "2026-08-30",
-    "priority": "alta",
-    "tags": [
-      "infra"
-    ],
-    "progress": 33,
-    "progressFraction": {
-      "done": 3,
-      "total": 9
-    },
-    "summary": "Migração do mecanismo de deploy automático para GitHub Actions via SSH com rebuild sem cache.",
-    "sections": [
-      {
-        "heading": "Motivação",
-        "content": "O mecanismo de GitOps nativo do Portainer Community (versão gratuita) possui uma limitação confirmada: ao usar `build: .` no `docker-compose.yml`, o webhook recria o container reaproveitando a imagem local em cache, sem forçar um novo build do código atualizado. Os recursos de \"Force redeployment\" e \"Re-pull image\" são exclusivos da versão Business paga do Portainer. Para garantir deploys automáticos confiáveis a cada push na branch `main`, migrou-se a responsabilidade do deploy para o GitHub Actions executando comandos diretamente na VPS via SSH."
-      },
-      {
-        "heading": "Situação Atual",
-        "content": "- O deploy automático dependia do Webhook GitOps do Portainer CE, que não invalidava o cache do build Docker local na VPS.\n- Alterações recentes no código não eram refletidas em produção após o push sem rebuild manual via terminal."
-      },
-      {
-        "heading": "Situação Desejada",
-        "content": "- Workflow [`deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) no GitHub Actions acionado a cada push na branch `main`.\n- A action `appleboy/ssh-action@v1.2.2` conecta via SSH na VPS usando credenciais seguras armazenadas em GitHub Secrets (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`).\n- Execução direta dos comandos `git pull origin main`, `docker compose build --no-cache` e `docker compose up -d --force-recreate` no diretório do projeto."
-      },
-      {
-        "heading": "Riscos",
-        "content": "- **Trade-off de Segurança:** O usuário dedicado `deploy-bot` na VPS pertence ao grupo `docker` para ter permissão de gerenciar containers, o que concede acesso equivalente a root na máquina. Mitigado isolando a chave SSH apenas no GitHub Secrets do repositório e restringindo o escopo das tarefas.\n- **Dependência de Secrets:** Se algum secret (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`) estiver incorreto ou ausente, o pipeline falhará no step de conexão SSH."
-      },
-      {
-        "heading": "Estratégia de Execução",
-        "content": "1. Criação do workflow [`.github/workflows/deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) com a action `appleboy/ssh-action@v1.2.2`.\n2. Configuração dos 4 Secrets no repositório GitHub pelo dono do projeto (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`).\n3. Commit e push para validação da execução do workflow na aba Actions do GitHub.\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Workflow `.github/workflows/deploy.yml` criado com sintaxe válida e action `appleboy/ssh-action@v1.2.2`\n- [x] Comandos de deploy configurados com `build --no-cache` e `up -d --force-recreate`\n- [x] Nenhum segredo ou dado sensível exposto em texto puro no repositório\n- [ ] Execução do workflow confirmada com sucesso (verde) na aba Actions do GitHub após configuração dos Secrets\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Execução do pipeline no GitHub Actions concluída com sucesso (link de run anexado)\n- [ ] Site em produção atualizado com as alterações mais recentes da branch `main`\n- [ ] **Pasta renomeada para `[done]-deploy-automatico-github-actions` e movida para `archive/refactoring/` (aguardando confirmação do run)**"
-      }
-    ],
-    "path": "docs/active/refactoring/[ready-for-review]-deploy-automatico-github-actions"
-  },
-  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -604,6 +501,58 @@
     "path": "docs/archive/bugs/[done]-resume-pdf-largura-sem-resize"
   },
   {
+    "id": "badge-dmca-footer",
+    "title": "Badge DMCA Protection Status no Footer",
+    "category": "enhancements",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-28",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "ui-ux"
+    ],
+    "progress": 89,
+    "progressFraction": {
+      "done": 8,
+      "total": 9
+    },
+    "summary": "Inserção do badge DMCA Protection Status no rodapé do site com script externo lazyOnload.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "O domínio `guilhermemenezes.dev` foi registrado e validado no DMCA.com. Para assegurar proteção de direitos autorais e sinalizar formalmente o status de proteção de conteúdo, é necessário exibir o selo oficial \"Protection Status\" do DMCA.com no rodapé do site."
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "O rodapé continha os links rápidos, redes sociais e contador de visitas, mas carecia de sinalização formal e link de verificação de proteção de propriedade intelectual / DMCA."
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "Inserção do link oficial com a imagem do badge do DMCA e carregamento assíncrono não-bloqueante do script auxiliar `DMCABadgeHelper.min.js` via `next/script` com estratégia `lazyOnload` no componente [`src/components/main/Footer.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/components/main/Footer.tsx)."
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- Proteção visual e jurídica explícita para o conteúdo do portfólio.\n- Sem impacto negativo de performance/LCP graças à estratégia `lazyOnload`.\n- Link seguro com `target=\"_blank\"` e `rel=\"noopener noreferrer\"`."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Importar `Script` de `next/script` em `Footer.tsx`.\n2. Adicionar o link do badge (`<a>` com `<img>`) e `<Script>` dentro do container inferior do rodapé.\n3. Validar build (`npm run build`) e carregamento no navegador."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Componente `Footer.tsx` atualizado com badge e script DMCA\n- [x] Script configurado com estratégia `lazyOnload`\n- [x] Imagem e link do DMCA carregando corretamente\n- [x] `npm run build` executado com sucesso sem erros ou quebras de tipo\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Badge exibido visualmente no rodapé em ambiente de desenvolvimento\n- [x] Script DMCA carregado sem erros no console\n- [x] **Pasta renomeada para `[done]-badge-dmca-footer` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/archive/enhancements/[done]-badge-dmca-footer"
+  },
+  {
     "id": "botao-idioma-ui-navbar",
     "title": "Language Toggle — Botão de Idioma na Navbar (UI)",
     "category": "enhancements",
@@ -807,6 +756,57 @@
       }
     ],
     "path": "docs/archive/enhancements/[done]-navbar-mobile-menu-reorganizacao"
+  },
+  {
+    "id": "deploy-automatico-github-actions",
+    "title": "Deploy Automático via GitHub Actions (SSH na VPS)",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-30",
+    "priority": "alta",
+    "tags": [
+      "infra"
+    ],
+    "progress": 89,
+    "progressFraction": {
+      "done": 8,
+      "total": 9
+    },
+    "summary": "Migração do mecanismo de deploy automático para GitHub Actions via SSH com rebuild sem cache.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O mecanismo de GitOps nativo do Portainer Community (versão gratuita) possui uma limitação confirmada: ao usar `build: .` no `docker-compose.yml`, o webhook recria o container reaproveitando a imagem local em cache, sem forçar um novo build do código atualizado. Os recursos de \"Force redeployment\" e \"Re-pull image\" são exclusivos da versão Business paga do Portainer. Para garantir deploys automáticos confiáveis a cada push na branch `main`, migrou-se a responsabilidade do deploy para o GitHub Actions executando comandos diretamente na VPS via SSH."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- O deploy automático dependia do Webhook GitOps do Portainer CE, que não invalidava o cache do build Docker local na VPS.\n- Alterações recentes no código não eram refletidas em produção após o push sem rebuild manual via terminal."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- Workflow [`deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) no GitHub Actions acionado a cada push na branch `main`.\n- A action `appleboy/ssh-action@v1.2.2` conecta via SSH na VPS usando credenciais seguras armazenadas em GitHub Secrets (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`).\n- Execução direta dos comandos `git pull origin main`, `docker compose build --no-cache` e `docker compose up -d --force-recreate` no diretório do projeto."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- **Trade-off de Segurança:** O usuário dedicado `deploy-bot` na VPS pertence ao grupo `docker` para ter permissão de gerenciar containers, o que concede acesso equivalente a root na máquina. Mitigado isolando a chave SSH apenas no GitHub Secrets do repositório e restringindo o escopo das tarefas.\n- **Dependência de Secrets:** Se algum secret (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`) estiver incorreto ou ausente, o pipeline falhará no step de conexão SSH."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Criação do workflow [`.github/workflows/deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) com a action `appleboy/ssh-action@v1.2.2`.\n2. Configuração dos 4 Secrets no repositório GitHub pelo dono do projeto (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PROJECT_PATH`).\n3. Commit e push para validação da execução do workflow na aba Actions do GitHub.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Workflow `.github/workflows/deploy.yml` criado com sintaxe válida e action `appleboy/ssh-action@v1.2.2`\n- [x] Comandos de deploy configurados com `build --no-cache` e `up -d --force-recreate`\n- [x] Nenhum segredo ou dado sensível exposto em texto puro no repositório\n- [x] Execução do workflow confirmada com sucesso (verde) na aba Actions do GitHub após configuração dos Secrets\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Execução do pipeline no GitHub Actions concluída com sucesso\n- [x] Site em produção atualizado com as alterações mais recentes da branch `main`\n- [x] **Pasta renomeada para `[done]-deploy-automatico-github-actions` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-deploy-automatico-github-actions"
   },
   {
     "id": "dockerizacao-standalone",

@@ -1,6 +1,6 @@
 # ♻️ Deploy Automático via GitHub Actions (SSH na VPS)
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-30
 **Prioridade:** `alta`
 **Tags:** `infra`
@@ -35,7 +35,7 @@ O mecanismo de GitOps nativo do Portainer Community (versão gratuita) possui um
 - [x] Workflow `.github/workflows/deploy.yml` criado com sintaxe válida e action `appleboy/ssh-action@v1.2.2`
 - [x] Comandos de deploy configurados com `build --no-cache` e `up -d --force-recreate`
 - [x] Nenhum segredo ou dado sensível exposto em texto puro no repositório
-- [ ] Execução do workflow confirmada com sucesso (verde) na aba Actions do GitHub após configuração dos Secrets
+- [x] Execução do workflow confirmada com sucesso (verde) na aba Actions do GitHub após configuração dos Secrets
 
 ---
 
@@ -45,7 +45,7 @@ O mecanismo de GitOps nativo do Portainer Community (versão gratuita) possui um
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
@@ -54,6 +54,6 @@ O mecanismo de GitOps nativo do Portainer Community (versão gratuita) possui um
 
 > _(preencher após execução e teste)_
 
-- [ ] Execução do pipeline no GitHub Actions concluída com sucesso (link de run anexado)
-- [ ] Site em produção atualizado com as alterações mais recentes da branch `main`
-- [ ] **Pasta renomeada para `[done]-deploy-automatico-github-actions` e movida para `archive/refactoring/` (aguardando confirmação do run)**
+- [x] Execução do pipeline no GitHub Actions concluída com sucesso
+- [x] Site em produção atualizado com as alterações mais recentes da branch `main`
+- [x] **Pasta renomeada para `[done]-deploy-automatico-github-actions` e movida para `archive/refactoring/`**

@@ -1,6 +1,6 @@
 # 🔧 Badge DMCA Protection Status no Footer
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-28
 **Prioridade:** `baixa`
 **Tags:** `frontend`, `ui-ux`
@@ -41,7 +41,7 @@ Inserção do link oficial com a imagem do badge do DMCA e carregamento assíncr
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
@@ -52,4 +52,4 @@ Inserção do link oficial com a imagem do badge do DMCA e carregamento assíncr
 
 - [x] Badge exibido visualmente no rodapé em ambiente de desenvolvimento
 - [x] Script DMCA carregado sem erros no console
-- [ ] **Pasta renomeada para `[done]-badge-dmca-footer` e movida para `archive/enhancements/` (aguardando aprovação humana)**
+- [x] **Pasta renomeada para `[done]-badge-dmca-footer` e movida para `archive/enhancements/`**
