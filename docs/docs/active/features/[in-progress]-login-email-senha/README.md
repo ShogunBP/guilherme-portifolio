@@ -1,6 +1,6 @@
 # ✨ Login via Email e Senha (Auth.js)
 
-**Status:** `ready-for-review`
+**Status:** `in-progress`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -51,11 +51,13 @@ Tela de login em `/admin` (ou rota de login associada) com campos de email e sen
 6. Página placeholder pós-login para validar o fluxo completo.
 
 ## Critérios de Conclusão
-- [ ] Login com credencial correta gera sessão válida e redireciona para `/admin`
-- [ ] Login com credencial incorreta mostra erro genérico, sem revelar detalhes
-- [ ] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login
-- [ ] Sessão persiste em produção (testado em `https://guilhermemenezes.dev`, não só localhost)
-- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas
+- [x] Login com credencial correta gera sessão válida e redireciona para `/admin`
+- [x] Login com credencial incorreta mostra erro genérico, sem revelar detalhes
+- [x] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login (`src/middleware.ts`)
+- [x] Script one-off de geração de hash (`scripts/hash-password.ts`) criado e testado
+- [x] Sessão configurada via JWT com `trustHost: true` para compatibilidade com proxy Nginx
+- [ ] Sessão validada em produção (testado em `https://guilhermemenezes.dev`, não só localhost)
+- [ ] Variáveis sensíveis configuradas na stack do Portainer / ambiente de produção
 
 ---
 
@@ -65,7 +67,7 @@ Tela de login em `/admin` (ou rota de login associada) com campos de email e sen
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---

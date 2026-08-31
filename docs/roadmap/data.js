@@ -1,5 +1,62 @@
 var ROADMAP_TASKS = [
   {
+    "id": "login-email-senha",
+    "title": "Login via Email e Senha (Auth.js)",
+    "category": "features",
+    "status": "in-progress",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 9,
+    "progressFraction": {
+      "done": 1,
+      "total": 11
+    },
+    "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
+    "sections": [
+      {
+        "heading": "Depende de",
+        "content": "`[draft]-sqlite-persistencia-inicial` não é pré-requisito direto deste card (a credencial de login vem de variável de ambiente, não do banco) — pode ser executado em paralelo ou antes, mas o card de 2FA (mais adiante nesta mesma fase) depende deste estar concluído."
+      },
+      {
+        "heading": "Objetivo",
+        "content": "Permitir que o dono do portfólio acesse `/admin` com email e senha, sem expor cadastro público nem gerenciar múltiplos usuários."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Tela de login em `/admin` (ou rota de login associada) com campos de email e senha. A credencial correta é fixa, vinda de variável de ambiente — não há tabela de usuários. Login incorreto mostra erro genérico (não revela se o e-mail existe ou não, por segurança). Login correto cria uma sessão JWT."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Configuração inicial do Auth.js (NextAuth v5) no projeto.\n- Provider Credentials configurado, validando contra `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` (hash bcrypt/argon2).\n- Script one-off para gerar o hash da senha a partir de um texto (rodado uma vez, manualmente, para configurar a variável de ambiente).\n- Tela de login em `/admin`.\n- Sessão via JWT.\n- Configuração de cookies seguros atrás do proxy Nginx (confiar em `X-Forwarded-Proto`, necessário para a sessão persistir corretamente em produção).\n- Middleware protegendo rotas sob `/admin` (redireciona para login se não houver sessão válida).\n- `NEXTAUTH_SECRET` e `NEXTAUTH_URL` configurados.\n\n### Não inclui\n- Login social (card separado).\n- 2FA (card separado, depende deste).\n- Layout completo do painel pós-login (card separado) — após login bem-sucedido nesta tarefa, uma página simples de confirmação/placeholder é suficiente para validar o fluxo.\n- \"Esqueci minha senha\" (não se aplica a usuário único fixo via env var)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (tela de login) e backend (Auth.js, callbacks, middleware).\n- **Dependências novas:** `next-auth@beta` (v5), `bcryptjs` ou `argon2`.\n- **Variáveis de ambiente novas:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` — todas configuradas na stack do Portainer, nunca commitadas.\n- **Impactos em outras partes do sistema:** nenhum impacto no site público existente."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Instalar Auth.js (v5) e configurar o provider Credentials.\n2. Criar script one-off para gerar `ADMIN_PASSWORD_HASH`.\n3. Implementar tela de login em `/admin`.\n4. Configurar cookies seguros atrás do proxy Nginx.\n5. Implementar middleware de proteção das rotas `/admin/*`.\n6. Página placeholder pós-login para validar o fluxo completo."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [ ] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [ ] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login\n- [ ] Sessão persiste em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[in-progress]-login-email-senha"
+  },
+  {
     "id": "2fa-layout-painel-admin",
     "title": "2FA (TOTP) e Layout Base do Painel Admin",
     "category": "features",
@@ -56,63 +113,6 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/active/features/[ready-for-review]-2fa-layout-painel-admin"
-  },
-  {
-    "id": "login-email-senha",
-    "title": "Login via Email e Senha (Auth.js)",
-    "category": "features",
-    "status": "ready-for-review",
-    "area": "active",
-    "date": "2026-08-31",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "frontend",
-      "segurança"
-    ],
-    "progress": 0,
-    "progressFraction": {
-      "done": 0,
-      "total": 11
-    },
-    "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
-    "sections": [
-      {
-        "heading": "Depende de",
-        "content": "`[draft]-sqlite-persistencia-inicial` não é pré-requisito direto deste card (a credencial de login vem de variável de ambiente, não do banco) — pode ser executado em paralelo ou antes, mas o card de 2FA (mais adiante nesta mesma fase) depende deste estar concluído."
-      },
-      {
-        "heading": "Objetivo",
-        "content": "Permitir que o dono do portfólio acesse `/admin` com email e senha, sem expor cadastro público nem gerenciar múltiplos usuários."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "Tela de login em `/admin` (ou rota de login associada) com campos de email e senha. A credencial correta é fixa, vinda de variável de ambiente — não há tabela de usuários. Login incorreto mostra erro genérico (não revela se o e-mail existe ou não, por segurança). Login correto cria uma sessão JWT."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n- Configuração inicial do Auth.js (NextAuth v5) no projeto.\n- Provider Credentials configurado, validando contra `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` (hash bcrypt/argon2).\n- Script one-off para gerar o hash da senha a partir de um texto (rodado uma vez, manualmente, para configurar a variável de ambiente).\n- Tela de login em `/admin`.\n- Sessão via JWT.\n- Configuração de cookies seguros atrás do proxy Nginx (confiar em `X-Forwarded-Proto`, necessário para a sessão persistir corretamente em produção).\n- Middleware protegendo rotas sob `/admin` (redireciona para login se não houver sessão válida).\n- `NEXTAUTH_SECRET` e `NEXTAUTH_URL` configurados.\n\n### Não inclui\n- Login social (card separado).\n- 2FA (card separado, depende deste).\n- Layout completo do painel pós-login (card separado) — após login bem-sucedido nesta tarefa, uma página simples de confirmação/placeholder é suficiente para validar o fluxo.\n- \"Esqueci minha senha\" (não se aplica a usuário único fixo via env var)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** frontend (tela de login) e backend (Auth.js, callbacks, middleware).\n- **Dependências novas:** `next-auth@beta` (v5), `bcryptjs` ou `argon2`.\n- **Variáveis de ambiente novas:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` — todas configuradas na stack do Portainer, nunca commitadas.\n- **Impactos em outras partes do sistema:** nenhum impacto no site público existente."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Instalar Auth.js (v5) e configurar o provider Credentials.\n2. Criar script one-off para gerar `ADMIN_PASSWORD_HASH`.\n3. Implementar tela de login em `/admin`.\n4. Configurar cookies seguros atrás do proxy Nginx.\n5. Implementar middleware de proteção das rotas `/admin/*`.\n6. Página placeholder pós-login para validar o fluxo completo."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [ ] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [ ] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login\n- [ ] Sessão persiste em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[ready-for-review]-login-email-senha"
   },
   {
     "id": "login-social-google-github",
