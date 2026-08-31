@@ -1,5 +1,58 @@
 var ROADMAP_TASKS = [
   {
+    "id": "auth-painel-admin",
+    "title": "Autenticação + Esqueleto do Painel Admin",
+    "category": "features",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "backend",
+      "segurança"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 12
+    },
+    "summary": "Sistema de login único com email/senha, social e 2FA TOTP com esqueleto de navegação do painel admin.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Todo o gerenciamento de conteúdo das fases seguintes (i18n, CRUD de Hero/Skills/Currículo, Projects, Blog, Guestbook) depende da existência de uma área administrativa protegida por autenticação segura. Esta fase estabelece a fundação: autenticação robusta (com suporte a credenciais, login social e 2FA TOTP) e a estrutura de navegação do painel administrativo, mantendo as seções com conteúdo placeholder antes da introdução dos formulários de edição reais."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "O administrador acessa `/admin` e é recebido por uma interface de login com duas opções: email+senha ou login social (Google/GitHub). O acesso é restrito exclusivamente à conta do dono do portfólio (sem cadastro público). Após a validação do primeiro fator, é exigido um código TOTP de 6 dígitos (2FA via autenticador como Google Authenticator ou 1Password) antes de liberar a sessão. Uma vez autenticado, o administrador tem acesso ao layout do painel com navegação entre as 6 seções principais (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Login via email e senha com credenciais configuradas via variáveis de ambiente (sem necessidade de banco de dados para tabela de usuários).\n- Login social via Google e GitHub, com callback de verificação restringindo o acesso exclusivamente ao `ADMIN_EMAIL`.\n- Segundo fator de autenticação (2FA) via TOTP, obrigatório após o primeiro fator.\n- Gerenciamento de sessão segura via JWT.\n- Proteção de rotas sob `/admin` via Middleware do Next.js (redirecionamento automático para `/admin/login` caso não autenticado).\n- Layout base do painel administrativo (sidebar/header de navegação entre as 6 seções: Hero, Skills, Currículo, Projetos, Idioma, Guestbook), utilizando a identidade visual existente (Tailwind CSS, ShadCN UI).\n- Páginas estruturais de placeholder para cada seção com rotas navegáveis.\n\n### Não inclui\n- Formulários de edição e persistência de dados reais (escopo das Fases 3 a 9).\n- Fluxo de recuperação de senha \"Esqueci minha senha\" (usuário único configurado via ambiente).\n- Sistema de cadastro de múltiplos usuários ou controle de permissões por roles."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (telas de login, desafio 2FA e layout do painel) e backend (rotas de auth, callbacks e validação TOTP).\n- **Biblioteca de Autenticação:** Auth.js (NextAuth v5) com providers `Credentials`, `Google` e `GitHub`.\n- **Validação de Hash e 2FA:** biblioteca de hashing de senhas (`bcryptjs`/`argon2`) e validação de tokens TOTP (`otpauth`/`speakeasy`).\n- **Variáveis de Ambiente:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`.\n- **Impacto no site público:** nenhum impacto visual ou funcional nas páginas públicas existentes."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Instalar e configurar Auth.js (NextAuth v5) com os providers de Credenciais, Google e GitHub.\n2. Criar script auxiliar para geração inicial do hash de senha (`ADMIN_PASSWORD_HASH`) e secret TOTP (`ADMIN_TOTP_SECRET`).\n3. Implementar callback `signIn` validando a correspondência estrita com `ADMIN_EMAIL`.\n4. Implementar tela e fluxo de desafio 2FA com validação de token TOTP.\n5. Criar `middleware.ts` para proteção de todas as rotas sob `/admin` (exceto login).\n6. Construir o layout do painel admin com navegação responsiva e suporte a tema dark/light.\n7. Criar as páginas placeholder para as 6 seções: Hero, Skills, Currículo, Projetos, Idioma e Guestbook.\n8. Documentar instruções de setup inicial dos secrets e pareamento do 2FA."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Login via email/senha funcional com credenciais validadas via variáveis de ambiente\n- [ ] Login via Google e GitHub funcional e restrito exclusivamente ao `ADMIN_EMAIL`\n- [ ] Desafio 2FA TOTP obrigatório e validado com sucesso após o primeiro fator\n- [ ] Middleware bloqueando acessos não autenticados a `/admin/*`\n- [ ] Layout do painel administrativo navegável entre as 6 seções (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)\n- [ ] Nenhuma credencial ou segredo versionado no repositório Git\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente o fluxo de autenticação e navegação\n- [ ] Nenhuma regressão identificada no site público\n- [ ] **Pasta renomeada para `[done]-auth-painel-admin` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[ready-for-review]-auth-painel-admin"
+  },
+  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
