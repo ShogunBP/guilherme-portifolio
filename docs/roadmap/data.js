@@ -176,7 +176,7 @@ var ROADMAP_TASKS = [
     "id": "sqlite-persistencia-inicial",
     "title": "Introdução do SQLite e Persistência via Volume Docker",
     "category": "refactoring",
-    "status": "ready-for-review",
+    "status": "in-progress",
     "area": "active",
     "date": "2026-08-31",
     "priority": "alta",
@@ -185,9 +185,9 @@ var ROADMAP_TASKS = [
       "infra",
       "banco"
     ],
-    "progress": 0,
+    "progress": 9,
     "progressFraction": {
-      "done": 0,
+      "done": 1,
       "total": 11
     },
     "summary": "Introduzir SQLite como primeiro banco de dados do projeto, com volume Docker persistente, como base para autenticação e futuras fases de CRUD.",
@@ -227,7 +227,7 @@ var ROADMAP_TASKS = [
         "content": "> _(preencher após execução e teste)_\n\n- [ ] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**"
       }
     ],
-    "path": "docs/active/refactoring/[ready-for-review]-sqlite-persistencia-inicial"
+    "path": "docs/active/refactoring/[in-progress]-sqlite-persistencia-inicial"
   },
   {
     "id": "dropdown-remove-scroll-pagina",

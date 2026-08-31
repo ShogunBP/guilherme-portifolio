@@ -5,8 +5,11 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8083:3000"
+    volumes:
+      - portfolio-data:/app/data
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/portfolio.db
       - RESEND_API_KEY=${RESEND_API_KEY}
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.status < 400 ? 0 : 1)).catch(() => process.exit(1))\""]
@@ -14,3 +17,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+
+volumes:
+  portfolio-data:
+

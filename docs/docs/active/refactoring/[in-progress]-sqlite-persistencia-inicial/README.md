@@ -1,6 +1,6 @@
 # ♻️ Introdução do SQLite e Persistência via Volume Docker
 
-**Status:** `ready-for-review`
+**Status:** `in-progress`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `infra`, `banco`
@@ -36,11 +36,11 @@ SQLite configurado (via `better-sqlite3` ou Prisma com adapter SQLite — decidi
 ---
 
 ## Critérios de Conclusão
-- [ ] SQLite configurado e biblioteca de acesso escolhida
-- [ ] Volume Docker nomeado declarado e funcionando
-- [ ] Schema inicial criado (tabela para 2FA, extensível para uso futuro)
-- [ ] `.gitignore` atualizado para excluir o arquivo `.db`
-- [ ] Teste local de persistência (derrubar/subir container) confirmado
+- [x] SQLite configurado e biblioteca de acesso escolhida (Prisma + SQLite)
+- [x] Volume Docker nomeado declarado e funcionando (`portfolio-data:/app/data`)
+- [x] Schema inicial criado (tabela `TwoFactorAuth` para 2FA, extensível para uso futuro)
+- [x] `.gitignore` atualizado para excluir o arquivo `.db`
+- [x] Teste local de persistência (`scripts/test-db.ts`) confirmado
 - [ ] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado
 
 ---
@@ -51,7 +51,7 @@ SQLite configurado (via `better-sqlite3` ou Prisma com adapter SQLite — decidi
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
