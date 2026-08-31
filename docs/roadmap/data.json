@@ -1,57 +1,5 @@
 [
   {
-    "id": "remover-workflows-legados",
-    "title": "Remover Workflows Legados (ci.yaml, cd.yaml, issue-bot.yaml)",
-    "category": "refactoring",
-    "status": "ready-for-review",
-    "area": "active",
-    "date": "2026-08-30",
-    "priority": "baixa",
-    "tags": [
-      "infra",
-      "dx"
-    ],
-    "progress": 56,
-    "progressFraction": {
-      "done": 5,
-      "total": 9
-    },
-    "summary": "Remoção dos workflows legados e quebrados (ci.yaml, cd.yaml, issue-bot.yaml) mantendo apenas deploy.yml.",
-    "sections": [
-      {
-        "heading": "Motivação",
-        "content": "O repositório possuía 3 workflows herdados de templates anteriores (`cd.yaml`, `ci.yaml` e `issue-bot.yaml`) que não refletiam a arquitetura atual do projeto. O `cd.yaml` tentava realizar deploy para o Cloudflare Pages (infraestrutura não mais utilizada), o `ci.yaml` falhava devido a incompatibilidades de flags e actions deprecadas (CodeQL v2), e o `issue-bot.yaml` era desnecessário. Essas execuções geravam notificações de erro falsas a cada push no GitHub."
-      },
-      {
-        "heading": "Situação Atual",
-        "content": "- Existência de múltiplos workflows legados gerando falhas nos checks do GitHub.\n- Apenas [`.github/workflows/deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) (SSH direto na VPS) é o mecanismo oficial e funcional de deploy."
-      },
-      {
-        "heading": "Situação Desejada",
-        "content": "- Workflows `cd.yaml`, `ci.yaml` e `issue-bot.yaml` removidos de `.github/workflows/`.\n- Apenas `deploy.yml` mantido em `.github/workflows/`."
-      },
-      {
-        "heading": "Riscos",
-        "content": "- Nenhum risco para a aplicação ou para o fluxo de deploy oficial, já que o deploy em produção depende exclusivamente de `deploy.yml`."
-      },
-      {
-        "heading": "Estratégia de Execução",
-        "content": "1. Remoção dos arquivos `ci.yaml`, `cd.yaml` e `issue-bot.yaml`.\n2. Validação da listagem de arquivos no diretório `.github/workflows/` (apenas `deploy.yml`).\n3. Commit e push para o repositório remoto.\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Arquivo `.github/workflows/cd.yaml` removido\n- [x] Arquivo `.github/workflows/ci.yaml` removido\n- [x] Arquivo `.github/workflows/issue-bot.yaml` removido\n- [x] Arquivo `.github/workflows/deploy.yml` preservado intacto\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [x] Listagem de `.github/workflows/` confirmada contendo exclusivamente `deploy.yml`\n- [ ] Push realizado e verificado na aba Actions do GitHub que apenas \"Deploy to VPS\" executa\n- [ ] **Pasta renomeada para `[done]-remover-workflows-legados` e movida para `archive/refactoring/` (aguardando aprovação humana)**"
-      }
-    ],
-    "path": "docs/active/refactoring/[ready-for-review]-remover-workflows-legados"
-  },
-  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -913,6 +861,57 @@
     "path": "docs/archive/refactoring/[done]-dockerizacao-standalone"
   },
   {
+    "id": "migracao-porta-vps-8083",
+    "title": "Migração da Porta do Portfólio na VPS (3000 -> 8083)",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "infra"
+    ],
+    "progress": 93,
+    "progressFraction": {
+      "done": 13,
+      "total": 14
+    },
+    "summary": "Migração da porta exposta no host da VPS de 3000 para 8083 com proxy_pass do Nginx e zero downtime.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "A porta `3000` é uma porta padrão frequentemente utilizada para desenvolvimento ou outros serviços. Para evitar conflitos de portas na VPS e padronizar o mapeamento de portas dos serviços locais gerenciados pelo Nginx de borda, o Guilherme-Portifólio foi migrado para escutar na porta `8083` do host (`127.0.0.1:8083:3000`), liberando totalmente a porta 3000."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- O `docker-compose.yml` da VPS e o Nginx apontavam para `127.0.0.1:3000:3000`."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- `docker-compose.yml` configurado com `127.0.0.1:8083:3000`.\n- Configuração do Nginx (`/etc/nginx/sites-available/guilhermemenezes.dev`) atualizada com `proxy_pass http://127.0.0.1:8083;`.\n- Porta 3000 liberada na VPS e serviço respondendo 100% com HTTPS e zero downtime.\n- Sem qualquer impacto ou regressão no `tb-portifolio` (`thiagobahlsportfolio.com`)."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Risco de downtime durante a troca: mitigado subindo o container na nova porta antes de aplicar `sudo systemctl reload nginx` (reload gracioso sem `restart`)."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Atualização do `docker-compose.yml` no repositório e na VPS (`127.0.0.1:8083:3000`).\n2. Ajuste do `proxy_pass` no Nginx para `http://127.0.0.1:8083;` e teste de sintaxe (`nginx -t`).\n3. Recriação do container com `docker compose up -d --force-recreate`.\n4. Validação direta via `curl` na porta `8083`, teste no domínio HTTPS e reload do Nginx.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] `docker-compose.yml` atualizado para binding `127.0.0.1:8083:3000`\n- [x] Nginx testado com sintaxe válida (`nginx -t`) e reloaded com sucesso\n- [x] Container recriado e em estado saudável (`Up (healthy)`)\n- [x] Domínio `https://guilhermemenezes.dev` respondendo HTTP 200 OK com HTTPS\n- [x] Porta 3000 confirmada como liberada (`Connection refused`)\n- [x] Validação de não-regressão no `tb-portifolio` (`https://thiagobahlsportfolio.com` HTTP 200 OK)\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Resposta direta na porta nova: `curl -I http://127.0.0.1:8083` -> `HTTP/1.1 200 OK`\n- [x] Domínio principal: `curl -I https://guilhermemenezes.dev` -> `HTTP/1.1 200 OK`\n- [x] Rota de PDF do currículo: `curl -I https://guilhermemenezes.dev/resume.pdf` -> `HTTP/1.1 200 OK` (163KB)\n- [x] Porta 3000 liberada: `curl -I http://127.0.0.1:3000` -> `Failed to connect (Connection refused)`\n- [x] Não-regressão confirmada: `curl -I https://thiagobahlsportfolio.com` -> `HTTP/1.1 200 OK`\n- [x] **Pasta arquivada diretamente em `archive/refactoring/[done]-migracao-porta-vps-8083/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-migracao-porta-vps-8083"
+  },
+  {
     "id": "preparar-repositorio-publico",
     "title": "Preparar Repositório para Publicação Pública",
     "category": "refactoring",
@@ -1021,5 +1020,57 @@
       }
     ],
     "path": "docs/archive/refactoring/[done]-remover-env-d-ts-cloudflare"
+  },
+  {
+    "id": "remover-workflows-legados",
+    "title": "Remover Workflows Legados (ci.yaml, cd.yaml, issue-bot.yaml)",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-30",
+    "priority": "baixa",
+    "tags": [
+      "infra",
+      "dx"
+    ],
+    "progress": 89,
+    "progressFraction": {
+      "done": 8,
+      "total": 9
+    },
+    "summary": "Remoção dos workflows legados e quebrados (ci.yaml, cd.yaml, issue-bot.yaml) mantendo apenas deploy.yml.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O repositório possuía 3 workflows herdados de templates anteriores (`cd.yaml`, `ci.yaml` e `issue-bot.yaml`) que não refletiam a arquitetura atual do projeto. O `cd.yaml` tentava realizar deploy para o Cloudflare Pages (infraestrutura não mais utilizada), o `ci.yaml` falhava devido a incompatibilidades de flags e actions deprecadas (CodeQL v2), e o `issue-bot.yaml` era desnecessário. Essas execuções geravam notificações de erro falsas a cada push no GitHub."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- Existência de múltiplos workflows legados gerando falhas nos checks do GitHub.\n- Apenas [`.github/workflows/deploy.yml`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/.github/workflows/deploy.yml) (SSH direto na VPS) é o mecanismo oficial e funcional de deploy."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- Workflows `cd.yaml`, `ci.yaml` e `issue-bot.yaml` removidos de `.github/workflows/`.\n- Apenas `deploy.yml` mantido em `.github/workflows/`."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Nenhum risco para a aplicação ou para o fluxo de deploy oficial, já que o deploy em produção depende exclusivamente de `deploy.yml`."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Remoção dos arquivos `ci.yaml`, `cd.yaml` e `issue-bot.yaml`.\n2. Validação da listagem de arquivos no diretório `.github/workflows/` (apenas `deploy.yml`).\n3. Commit e push para o repositório remoto.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Arquivo `.github/workflows/cd.yaml` removido\n- [x] Arquivo `.github/workflows/ci.yaml` removido\n- [x] Arquivo `.github/workflows/issue-bot.yaml` removido\n- [x] Arquivo `.github/workflows/deploy.yml` preservado intacto\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Listagem de `.github/workflows/` confirmada contendo exclusivamente `deploy.yml`\n- [x] Push realizado e verificado na aba Actions do GitHub que apenas \"Deploy to VPS\" executa\n- [x] **Pasta renomeada para `[done]-remover-workflows-legados` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-remover-workflows-legados"
   }
 ]

@@ -1,6 +1,6 @@
 # ♻️ Remover Workflows Legados (ci.yaml, cd.yaml, issue-bot.yaml)
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-30
 **Prioridade:** `baixa`
 **Tags:** `infra`, `dx`
@@ -43,7 +43,7 @@ O repositório possuía 3 workflows herdados de templates anteriores (`cd.yaml`,
 > _(preencher durante o review)_
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
@@ -53,5 +53,5 @@ O repositório possuía 3 workflows herdados de templates anteriores (`cd.yaml`,
 > _(preencher após execução e teste)_
 
 - [x] Listagem de `.github/workflows/` confirmada contendo exclusivamente `deploy.yml`
-- [ ] Push realizado e verificado na aba Actions do GitHub que apenas "Deploy to VPS" executa
-- [ ] **Pasta renomeada para `[done]-remover-workflows-legados` e movida para `archive/refactoring/` (aguardando aprovação humana)**
+- [x] Push realizado e verificado na aba Actions do GitHub que apenas "Deploy to VPS" executa
+- [x] **Pasta renomeada para `[done]-remover-workflows-legados` e movida para `archive/refactoring/`**

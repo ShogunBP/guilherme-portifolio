@@ -4,7 +4,7 @@ services:
     container_name: guilherme-portfolio
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:8083:3000"
     environment:
       - NODE_ENV=production
       - RESEND_API_KEY=${RESEND_API_KEY}
