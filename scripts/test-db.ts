@@ -1,44 +1,47 @@
 import { db } from '../src/lib/db'
 
-async function main() {
-  console.log('Testing Prisma SQLite connection...')
-  
+function main() {
+  console.log('Testing better-sqlite3 connection and schema...')
+
   // Clean up previous test entry if exists
-  await db.twoFactorAuth.deleteMany({ where: { id: 'test' } })
+  db.prepare('DELETE FROM two_factor_auth WHERE id = ?').run('test')
 
   // Create record
-  const created = await db.twoFactorAuth.create({
-    data: {
-      id: 'test',
-      secret: 'BASE32SECRETTEST123',
-      enabled: false,
-    },
-  })
-  console.log('Created record:', created)
+  db.prepare(`
+    INSERT INTO two_factor_auth (id, secret, enabled)
+    VALUES (?, ?, ?)
+  `).run('test', 'BASE32SECRETTEST123', 0)
 
   // Read record
-  const fetched = await db.twoFactorAuth.findUnique({
-    where: { id: 'test' },
-  })
+  interface TwoFactorRecord {
+    id: string
+    secret: string
+    enabled: number
+    created_at: string
+    updated_at: string
+  }
+
+  const fetched = db
+    .prepare('SELECT * FROM two_factor_auth WHERE id = ?')
+    .get('test') as TwoFactorRecord | undefined
+
   console.log('Fetched record:', fetched)
 
   if (fetched?.secret === 'BASE32SECRETTEST123') {
-    console.log('✅ SQLite persistence test passed!')
+    console.log('✅ better-sqlite3 persistence test passed!')
   } else {
     console.error('❌ Failed: secret does not match')
     process.exit(1)
   }
 
   // Clean up
-  await db.twoFactorAuth.delete({ where: { id: 'test' } })
+  db.prepare('DELETE FROM two_factor_auth WHERE id = ?').run('test')
   console.log('Test record cleaned up successfully.')
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await db.$disconnect()
-  })
+try {
+  main()
+} catch (e) {
+  console.error(e)
+  process.exit(1)
+}

@@ -1,8 +1,8 @@
 # Stage 1: dependências
 FROM node:20-alpine AS deps
+RUN apk add --no-cache python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY prisma ./prisma/
 RUN npm ci
 
 # Stage 2: build
@@ -10,7 +10,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx prisma generate && npm run build
+RUN npm run build
 
 # Stage 3: runtime
 FROM node:20-alpine AS runner
@@ -24,7 +24,6 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
 EXPOSE 3000
