@@ -8,6 +8,10 @@
 
 ---
 
+## Depende de
+
+`[draft]-login-email-senha` — este card estende a mesma configuração do Auth.js já feita ali (middleware, sessão JWT, cookies seguros). Não iniciar sem o login por email/senha já validado em produção.
+
 ## Objetivo
 Oferecer uma forma mais rápida de login (sem digitar senha) para o dono do portfólio, sem abrir a porta para cadastro público — a segurança do "usuário único" precisa ser garantida mesmo com OAuth de terceiros no meio.
 

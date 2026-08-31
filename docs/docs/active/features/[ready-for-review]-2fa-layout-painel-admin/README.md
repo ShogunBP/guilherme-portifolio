@@ -8,6 +8,10 @@
 
 ---
 
+## Depende de
+
+`[draft]-sqlite-persistencia-inicial` (para armazenar o secret TOTP), `[draft]-login-email-senha` e `[draft]-login-social-google-github` (2FA se aplica a todos os métodos já existentes). Este é o último card da fase — só inicia depois que os três anteriores estiverem `[done]`.
+
 ## Objetivo
 Adicionar uma segunda camada de segurança ao login (já que o painel vai controlar edição de conteúdo real do site público a partir da Fase 4), e entregar a navegação funcional do painel para as fases seguintes construírem em cima.
 

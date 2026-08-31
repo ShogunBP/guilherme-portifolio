@@ -8,6 +8,10 @@
 
 ---
 
+## Depende de
+
+Nenhum card anterior — esta é a base de infraestrutura para os demais.
+
 ## Motivação
 O painel admin (próximos cards desta mesma fase) precisa persistir dados que não existiam até agora no projeto: o secret TOTP do 2FA, e futuramente (Fases 4+) o próprio conteúdo editável do site (Hero, Skills, Currículo, Projects, Blog). Resolver isso com um banco de dados leve agora evita retrabalho de migrar de uma solução descartável (ex: arquivo solto) para banco de verdade depois.
 

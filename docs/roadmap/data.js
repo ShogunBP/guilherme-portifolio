@@ -21,6 +21,10 @@ var ROADMAP_TASKS = [
     "summary": "Segunda camada de autenticação via TOTP para todos os métodos de login, e a navegação base do painel entre as 6 seções administrativas.",
     "sections": [
       {
+        "heading": "Depende de",
+        "content": "`[draft]-sqlite-persistencia-inicial` (para armazenar o secret TOTP), `[draft]-login-email-senha` e `[draft]-login-social-google-github` (2FA se aplica a todos os métodos já existentes). Este é o último card da fase — só inicia depois que os três anteriores estiverem `[done]`."
+      },
+      {
         "heading": "Objetivo",
         "content": "Adicionar uma segunda camada de segurança ao login (já que o painel vai controlar edição de conteúdo real do site público a partir da Fase 4), e entregar a navegação funcional do painel para as fases seguintes construírem em cima."
       },
@@ -73,6 +77,10 @@ var ROADMAP_TASKS = [
     },
     "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
     "sections": [
+      {
+        "heading": "Depende de",
+        "content": "`[draft]-sqlite-persistencia-inicial` não é pré-requisito direto deste card (a credencial de login vem de variável de ambiente, não do banco) — pode ser executado em paralelo ou antes, mas o card de 2FA (mais adiante nesta mesma fase) depende deste estar concluído."
+      },
       {
         "heading": "Objetivo",
         "content": "Permitir que o dono do portfólio acesse `/admin` com email e senha, sem expor cadastro público nem gerenciar múltiplos usuários."
@@ -128,6 +136,10 @@ var ROADMAP_TASKS = [
     "summary": "Login via Google e GitHub, aceitando apenas a conta específica do dono do portfólio, sem cadastro aberto.",
     "sections": [
       {
+        "heading": "Depende de",
+        "content": "`[draft]-login-email-senha` — este card estende a mesma configuração do Auth.js já feita ali (middleware, sessão JWT, cookies seguros). Não iniciar sem o login por email/senha já validado em produção."
+      },
+      {
         "heading": "Objetivo",
         "content": "Oferecer uma forma mais rápida de login (sem digitar senha) para o dono do portfólio, sem abrir a porta para cadastro público — a segurança do \"usuário único\" precisa ser garantida mesmo com OAuth de terceiros no meio."
       },
@@ -180,6 +192,10 @@ var ROADMAP_TASKS = [
     },
     "summary": "Introduzir SQLite como primeiro banco de dados do projeto, com volume Docker persistente, como base para autenticação e futuras fases de CRUD.",
     "sections": [
+      {
+        "heading": "Depende de",
+        "content": "Nenhum card anterior — esta é a base de infraestrutura para os demais."
+      },
       {
         "heading": "Motivação",
         "content": "O painel admin (próximos cards desta mesma fase) precisa persistir dados que não existiam até agora no projeto: o secret TOTP do 2FA, e futuramente (Fases 4+) o próprio conteúdo editável do site (Hero, Skills, Currículo, Projects, Blog). Resolver isso com um banco de dados leve agora evita retrabalho de migrar de uma solução descartável (ex: arquivo solto) para banco de verdade depois."
