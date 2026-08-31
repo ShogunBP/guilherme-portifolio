@@ -1,6 +1,6 @@
 # ✨ Autenticação + Esqueleto do Painel Admin
 
-**Status:** `ready-for-review`
+**Status:** `cancelled`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `frontend`, `backend`, `segurança`
@@ -60,11 +60,11 @@ O administrador acessa `/admin` e é recebido por uma interface de login com dua
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+> Descartado a pedido do dono do projeto para ser decomposto em 4 cards menores, modulares e incrementais: `sqlite-persistencia-inicial`, `login-email-senha`, `login-social-google-github` e `2fa-layout-painel-admin`.
 
 ## Decisão
 - [ ] Aprovado
-- [ ] Alterações solicitadas
+- [x] Alterações solicitadas
 
 ---
 
@@ -75,4 +75,4 @@ O administrador acessa `/admin` e é recebido por uma interface de login com dua
 - [ ] Todos os critérios de conclusão atendidos
 - [ ] Testado manualmente o fluxo de autenticação e navegação
 - [ ] Nenhuma regressão identificada no site público
-- [ ] **Pasta renomeada para `[done]-auth-painel-admin` e movida para `archive/features/`**
+- [x] **Pasta renomeada para `[cancelled]-auth-painel-admin` e movida para `archive/features/`**

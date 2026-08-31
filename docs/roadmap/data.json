@@ -1,56 +1,217 @@
 [
   {
-    "id": "auth-painel-admin",
-    "title": "Autenticação + Esqueleto do Painel Admin",
+    "id": "2fa-layout-painel-admin",
+    "title": "2FA (TOTP) e Layout Base do Painel Admin",
     "category": "features",
     "status": "ready-for-review",
     "area": "active",
     "date": "2026-08-31",
     "priority": "alta",
     "tags": [
-      "frontend",
       "backend",
-      "segurança"
+      "frontend",
+      "segurança",
+      "ui-ux"
     ],
     "progress": 0,
     "progressFraction": {
       "done": 0,
-      "total": 12
+      "total": 13
     },
-    "summary": "Sistema de login único com email/senha, social e 2FA TOTP com esqueleto de navegação do painel admin.",
+    "summary": "Segunda camada de autenticação via TOTP para todos os métodos de login, e a navegação base do painel entre as 6 seções administrativas.",
     "sections": [
       {
         "heading": "Objetivo",
-        "content": "Todo o gerenciamento de conteúdo das fases seguintes (i18n, CRUD de Hero/Skills/Currículo, Projects, Blog, Guestbook) depende da existência de uma área administrativa protegida por autenticação segura. Esta fase estabelece a fundação: autenticação robusta (com suporte a credenciais, login social e 2FA TOTP) e a estrutura de navegação do painel administrativo, mantendo as seções com conteúdo placeholder antes da introdução dos formulários de edição reais."
+        "content": "Adicionar uma segunda camada de segurança ao login (já que o painel vai controlar edição de conteúdo real do site público a partir da Fase 4), e entregar a navegação funcional do painel para as fases seguintes construírem em cima."
       },
       {
         "heading": "Descrição Funcional",
-        "content": "O administrador acessa `/admin` e é recebido por uma interface de login com duas opções: email+senha ou login social (Google/GitHub). O acesso é restrito exclusivamente à conta do dono do portfólio (sem cadastro público). Após a validação do primeiro fator, é exigido um código TOTP de 6 dígitos (2FA via autenticador como Google Authenticator ou 1Password) antes de liberar a sessão. Uma vez autenticado, o administrador tem acesso ao layout do painel com navegação entre as 6 seções principais (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)."
+        "content": "Após completar o primeiro fator (senha ou social), o usuário é solicitado a inserir um código de 6 dígitos gerado por um app autenticador (Google Authenticator ou similar) antes de a sessão ser liberada. Na primeira vez, uma tela dedicada de setup (`/admin/setup-2fa`, acessível apenas com o primeiro fator já validado) gera o secret, exibe um QR code para escanear, e confirma o primeiro código antes de ativar o 2FA definitivamente. Após o 2FA estar ativo, todo login subsequente (qualquer método) exige o código TOTP. Uma vez autenticado com os dois fatores, o usuário acessa o layout do painel: navegação entre Hero, Skills, Currículo, Projetos, Idioma e Guestbook — cada seção como página placeholder."
       },
       {
         "heading": "Escopo",
-        "content": "### Inclui\n- Login via email e senha com credenciais configuradas via variáveis de ambiente (sem necessidade de banco de dados para tabela de usuários).\n- Login social via Google e GitHub, com callback de verificação restringindo o acesso exclusivamente ao `ADMIN_EMAIL`.\n- Segundo fator de autenticação (2FA) via TOTP, obrigatório após o primeiro fator.\n- Gerenciamento de sessão segura via JWT.\n- Proteção de rotas sob `/admin` via Middleware do Next.js (redirecionamento automático para `/admin/login` caso não autenticado).\n- Layout base do painel administrativo (sidebar/header de navegação entre as 6 seções: Hero, Skills, Currículo, Projetos, Idioma, Guestbook), utilizando a identidade visual existente (Tailwind CSS, ShadCN UI).\n- Páginas estruturais de placeholder para cada seção com rotas navegáveis.\n\n### Não inclui\n- Formulários de edição e persistência de dados reais (escopo das Fases 3 a 9).\n- Fluxo de recuperação de senha \"Esqueci minha senha\" (usuário único configurado via ambiente).\n- Sistema de cadastro de múltiplos usuários ou controle de permissões por roles."
+        "content": "### Inclui\n- Tela `/admin/setup-2fa`: gera secret TOTP, salva no SQLite, exibe QR code, confirma primeiro código.\n- Verificação de código TOTP como etapa obrigatória após o primeiro fator, em todos os métodos de login (email/senha, Google, GitHub).\n- Layout base do painel: navegação entre as 6 seções (Hero, Skills, Currículo, Projetos, Idioma, Guestbook), reaproveitando componentes ShadCN e a paleta já existente no site público.\n- Cada seção como página com rota e navegação funcionais, conteúdo placeholder (sem edição real).\n\n### Não inclui\n- Qualquer funcionalidade de edição de conteúdo real (Fase 4 em diante).\n- Recuperação de acesso caso o dispositivo com o app autenticador seja perdido (considerar isso como melhoria futura, não crítico para usuário único com acesso à VPS)."
       },
       {
         "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** frontend (telas de login, desafio 2FA e layout do painel) e backend (rotas de auth, callbacks e validação TOTP).\n- **Biblioteca de Autenticação:** Auth.js (NextAuth v5) com providers `Credentials`, `Google` e `GitHub`.\n- **Validação de Hash e 2FA:** biblioteca de hashing de senhas (`bcryptjs`/`argon2`) e validação de tokens TOTP (`otpauth`/`speakeasy`).\n- **Variáveis de Ambiente:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`.\n- **Impacto no site público:** nenhum impacto visual ou funcional nas páginas públicas existentes."
+        "content": "- **Camadas envolvidas:** frontend (tela de setup, tela de verificação, layout do painel) e backend (geração/validação TOTP).\n- **Dependências novas:** `otpauth` ou `speakeasy` (geração e validação TOTP), biblioteca de geração de QR code (ex: `qrcode`).\n- **Persistência:** utiliza a tabela de 2FA configurada no card de SQLite."
       },
       {
         "heading": "Plano de Implementação",
-        "content": "1. Instalar e configurar Auth.js (NextAuth v5) com os providers de Credenciais, Google e GitHub.\n2. Criar script auxiliar para geração inicial do hash de senha (`ADMIN_PASSWORD_HASH`) e secret TOTP (`ADMIN_TOTP_SECRET`).\n3. Implementar callback `signIn` validando a correspondência estrita com `ADMIN_EMAIL`.\n4. Implementar tela e fluxo de desafio 2FA com validação de token TOTP.\n5. Criar `middleware.ts` para proteção de todas as rotas sob `/admin` (exceto login).\n6. Construir o layout do painel admin com navegação responsiva e suporte a tema dark/light.\n7. Criar as páginas placeholder para as 6 seções: Hero, Skills, Currículo, Projetos, Idioma e Guestbook.\n8. Documentar instruções de setup inicial dos secrets e pareamento do 2FA."
+        "content": "1. Implementar tela `/admin/setup-2fa` (geração de secret, QR code, confirmação).\n2. Implementar verificação de código TOTP como etapa pós-primeiro-fator, para os 3 métodos de login já existentes.\n3. Layout base do painel (navegação lateral/superior entre as 6 seções).\n4. Páginas placeholder para cada seção."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [ ] Login via email/senha funcional com credenciais validadas via variáveis de ambiente\n- [ ] Login via Google e GitHub funcional e restrito exclusivamente ao `ADMIN_EMAIL`\n- [ ] Desafio 2FA TOTP obrigatório e validado com sucesso após o primeiro fator\n- [ ] Middleware bloqueando acessos não autenticados a `/admin/*`\n- [ ] Layout do painel administrativo navegável entre as 6 seções (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)\n- [ ] Nenhuma credencial ou segredo versionado no repositório Git\n\n---"
+        "content": "- [ ] Setup inicial do 2FA funcional (gera secret, QR code escaneável, confirma ativação)\n- [ ] Login via email/senha exige código TOTP após a senha\n- [ ] Login via Google exige código TOTP após a autenticação social\n- [ ] Login via GitHub exige código TOTP após a autenticação social\n- [ ] Código TOTP incorreto rejeita o login, mesmo com primeiro fator correto\n- [ ] Layout do painel navegável entre as 6 seções, visualmente consistente com o site público\n- [ ] Secret TOTP persiste corretamente após redeploy (reutilizando o teste de persistência do card de SQLite)\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente o fluxo de autenticação e navegação\n- [ ] Nenhuma regressão identificada no site público\n- [ ] **Pasta renomeada para `[done]-auth-painel-admin` e movida para `archive/features/`**"
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário (setup completo + login com 2FA em todos os métodos)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-layout-painel-admin` e movida para `archive/features/`**"
       }
     ],
-    "path": "docs/active/features/[ready-for-review]-auth-painel-admin"
+    "path": "docs/active/features/[ready-for-review]-2fa-layout-painel-admin"
+  },
+  {
+    "id": "login-email-senha",
+    "title": "Login via Email e Senha (Auth.js)",
+    "category": "features",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 11
+    },
+    "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Permitir que o dono do portfólio acesse `/admin` com email e senha, sem expor cadastro público nem gerenciar múltiplos usuários."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Tela de login em `/admin` (ou rota de login associada) com campos de email e senha. A credencial correta é fixa, vinda de variável de ambiente — não há tabela de usuários. Login incorreto mostra erro genérico (não revela se o e-mail existe ou não, por segurança). Login correto cria uma sessão JWT."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Configuração inicial do Auth.js (NextAuth v5) no projeto.\n- Provider Credentials configurado, validando contra `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` (hash bcrypt/argon2).\n- Script one-off para gerar o hash da senha a partir de um texto (rodado uma vez, manualmente, para configurar a variável de ambiente).\n- Tela de login em `/admin`.\n- Sessão via JWT.\n- Configuração de cookies seguros atrás do proxy Nginx (confiar em `X-Forwarded-Proto`, necessário para a sessão persistir corretamente em produção).\n- Middleware protegendo rotas sob `/admin` (redireciona para login se não houver sessão válida).\n- `NEXTAUTH_SECRET` e `NEXTAUTH_URL` configurados.\n\n### Não inclui\n- Login social (card separado).\n- 2FA (card separado, depende deste).\n- Layout completo do painel pós-login (card separado) — após login bem-sucedido nesta tarefa, uma página simples de confirmação/placeholder é suficiente para validar o fluxo.\n- \"Esqueci minha senha\" (não se aplica a usuário único fixo via env var)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (tela de login) e backend (Auth.js, callbacks, middleware).\n- **Dependências novas:** `next-auth@beta` (v5), `bcryptjs` ou `argon2`.\n- **Variáveis de ambiente novas:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` — todas configuradas na stack do Portainer, nunca commitadas.\n- **Impactos em outras partes do sistema:** nenhum impacto no site público existente."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Instalar Auth.js (v5) e configurar o provider Credentials.\n2. Criar script one-off para gerar `ADMIN_PASSWORD_HASH`.\n3. Implementar tela de login em `/admin`.\n4. Configurar cookies seguros atrás do proxy Nginx.\n5. Implementar middleware de proteção das rotas `/admin/*`.\n6. Página placeholder pós-login para validar o fluxo completo."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [ ] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [ ] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login\n- [ ] Sessão persiste em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[ready-for-review]-login-email-senha"
+  },
+  {
+    "id": "login-social-google-github",
+    "title": "Login Social (Google e GitHub) Restrito ao Dono",
+    "category": "features",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança",
+      "api"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 11
+    },
+    "summary": "Login via Google e GitHub, aceitando apenas a conta específica do dono do portfólio, sem cadastro aberto.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Oferecer uma forma mais rápida de login (sem digitar senha) para o dono do portfólio, sem abrir a porta para cadastro público — a segurança do \"usuário único\" precisa ser garantida mesmo com OAuth de terceiros no meio."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Na tela de login, dois botões adicionais: \"Entrar com Google\" e \"Entrar com GitHub\". Ao completar o fluxo OAuth, o sistema verifica se o e-mail retornado pelo provider bate exatamente com `ADMIN_EMAIL`. Se bater, sessão é criada normalmente. Se não bater, o login é rejeitado mesmo que o OAuth tenha sido tecnicamente bem-sucedido (a pessoa provou ser dona daquela conta Google/GitHub, mas essa conta não é a autorizada)."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Provider Google configurado no Auth.js.\n- Provider GitHub configurado no Auth.js.\n- App OAuth registrado no Google Cloud Console e nas GitHub Developer Settings.\n- Callback `signIn` validando o e-mail retornado contra `ADMIN_EMAIL`, para ambos os providers.\n- Botões de login social na tela de login já existente (`/admin`).\n- Mensagem de erro clara quando o e-mail não bate (ex: \"Esta conta não tem acesso a este painel\").\n\n### Não inclui\n- 2FA para login social (card separado, aplica-se a todos os métodos de uma vez).\n- Múltiplos e-mails autorizados (é sempre um único e-mail fixo)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (botões de login), backend (callbacks OAuth).\n- **Dependências:** nenhuma nova além do que o Auth.js já traz nativamente para providers OAuth.\n- **Variáveis de ambiente novas:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — configuradas na stack do Portainer, nunca commitadas.\n- **Configuração externa necessária:** registrar as URLs de callback (`https://guilhermemenezes.dev/api/auth/callback/google` e equivalente para GitHub) nos respectivos consoles de desenvolvedor."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Registrar app OAuth no Google Cloud Console, obter client ID/secret.\n2. Registrar app OAuth 2 no GitHub Developer Settings, obter client ID/secret.\n3. Configurar os dois providers no Auth.js.\n4. Implementar callback `signIn` restringindo por e-mail.\n5. Adicionar botões de login social na tela existente.\n6. Testar rejeição explícita com uma conta que não seja a autorizada."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Login via Google com a conta autorizada funciona e cria sessão\n- [ ] Login via Google com outra conta é rejeitado, com mensagem clara\n- [ ] Login via GitHub com a conta autorizada funciona e cria sessão\n- [ ] Login via GitHub com outra conta é rejeitado, com mensagem clara\n- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário (incluindo tentativa de rejeição com conta não autorizada)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-social-google-github` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[ready-for-review]-login-social-google-github"
+  },
+  {
+    "id": "sqlite-persistencia-inicial",
+    "title": "Introdução do SQLite e Persistência via Volume Docker",
+    "category": "refactoring",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "infra",
+      "banco"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 11
+    },
+    "summary": "Introduzir SQLite como primeiro banco de dados do projeto, com volume Docker persistente, como base para autenticação e futuras fases de CRUD.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O painel admin (próximos cards desta mesma fase) precisa persistir dados que não existiam até agora no projeto: o secret TOTP do 2FA, e futuramente (Fases 4+) o próprio conteúdo editável do site (Hero, Skills, Currículo, Projects, Blog). Resolver isso com um banco de dados leve agora evita retrabalho de migrar de uma solução descartável (ex: arquivo solto) para banco de verdade depois."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "O projeto não tem nenhum banco de dados. O container roda a partir de uma imagem Docker recriada do zero a cada deploy (`docker compose up -d --force-recreate`, workflow já validado na Fase 1) — qualquer dado gravado dentro do container sem um volume explícito é perdido no próximo deploy."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "SQLite configurado (via `better-sqlite3` ou Prisma com adapter SQLite — decidir durante a execução qual se integra melhor ao restante do stack) com o arquivo `.db` vivendo em um **volume Docker nomeado**, declarado no `docker-compose.yml`, sobrevivendo a recriações do container."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Se o volume não for corretamente declarado, dados parecem persistir em teste local mas se perdem no primeiro deploy real via GitHub Actions — por isso a validação desta tarefa exige testar exatamente esse cenário (derrubar/recriar o container), não só rodar local.\n- Nenhum dado real será migrado nesta tarefa (é a primeira introdução do banco) — sem risco de perda de dados existentes."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Escolher entre `better-sqlite3` direto ou Prisma + adapter SQLite (avaliar qual tem melhor suporte a migrations simples, já que futuras fases vão adicionar tabelas novas)\n2. Definir o schema inicial mínimo necessário para o 2FA (tabela para armazenar o secret TOTP e status de ativação)\n3. Declarar volume Docker nomeado no `docker-compose.yml`, apontando para o caminho onde o arquivo `.db` é criado\n4. Configurar `.gitignore` para excluir o arquivo `.db` do controle de versão (dado de runtime, não código)\n5. Testar localmente: criar um registro, derrubar o container (`docker compose down`), subir de novo (`docker compose up -d`), confirmar que o registro persiste\n6. Testar em produção: fazer um push disparando o workflow de deploy (`--force-recreate`), confirmar que dados gravados antes do push sobrevivem depois\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] SQLite configurado e biblioteca de acesso escolhida\n- [ ] Volume Docker nomeado declarado e funcionando\n- [ ] Schema inicial criado (tabela para 2FA, extensível para uso futuro)\n- [ ] `.gitignore` atualizado para excluir o arquivo `.db`\n- [ ] Teste local de persistência (derrubar/subir container) confirmado\n- [ ] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/active/refactoring/[ready-for-review]-sqlite-persistencia-inicial"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -552,6 +713,59 @@
       }
     ],
     "path": "docs/archive/bugs/[done]-resume-pdf-largura-sem-resize"
+  },
+  {
+    "id": "auth-painel-admin",
+    "title": "Autenticação + Esqueleto do Painel Admin",
+    "category": "features",
+    "status": "cancelled",
+    "area": "archive",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "backend",
+      "segurança"
+    ],
+    "progress": 17,
+    "progressFraction": {
+      "done": 2,
+      "total": 12
+    },
+    "summary": "Sistema de login único com email/senha, social e 2FA TOTP com esqueleto de navegação do painel admin.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Todo o gerenciamento de conteúdo das fases seguintes (i18n, CRUD de Hero/Skills/Currículo, Projects, Blog, Guestbook) depende da existência de uma área administrativa protegida por autenticação segura. Esta fase estabelece a fundação: autenticação robusta (com suporte a credenciais, login social e 2FA TOTP) e a estrutura de navegação do painel administrativo, mantendo as seções com conteúdo placeholder antes da introdução dos formulários de edição reais."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "O administrador acessa `/admin` e é recebido por uma interface de login com duas opções: email+senha ou login social (Google/GitHub). O acesso é restrito exclusivamente à conta do dono do portfólio (sem cadastro público). Após a validação do primeiro fator, é exigido um código TOTP de 6 dígitos (2FA via autenticador como Google Authenticator ou 1Password) antes de liberar a sessão. Uma vez autenticado, o administrador tem acesso ao layout do painel com navegação entre as 6 seções principais (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Login via email e senha com credenciais configuradas via variáveis de ambiente (sem necessidade de banco de dados para tabela de usuários).\n- Login social via Google e GitHub, com callback de verificação restringindo o acesso exclusivamente ao `ADMIN_EMAIL`.\n- Segundo fator de autenticação (2FA) via TOTP, obrigatório após o primeiro fator.\n- Gerenciamento de sessão segura via JWT.\n- Proteção de rotas sob `/admin` via Middleware do Next.js (redirecionamento automático para `/admin/login` caso não autenticado).\n- Layout base do painel administrativo (sidebar/header de navegação entre as 6 seções: Hero, Skills, Currículo, Projetos, Idioma, Guestbook), utilizando a identidade visual existente (Tailwind CSS, ShadCN UI).\n- Páginas estruturais de placeholder para cada seção com rotas navegáveis.\n\n### Não inclui\n- Formulários de edição e persistência de dados reais (escopo das Fases 3 a 9).\n- Fluxo de recuperação de senha \"Esqueci minha senha\" (usuário único configurado via ambiente).\n- Sistema de cadastro de múltiplos usuários ou controle de permissões por roles."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (telas de login, desafio 2FA e layout do painel) e backend (rotas de auth, callbacks e validação TOTP).\n- **Biblioteca de Autenticação:** Auth.js (NextAuth v5) com providers `Credentials`, `Google` e `GitHub`.\n- **Validação de Hash e 2FA:** biblioteca de hashing de senhas (`bcryptjs`/`argon2`) e validação de tokens TOTP (`otpauth`/`speakeasy`).\n- **Variáveis de Ambiente:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`.\n- **Impacto no site público:** nenhum impacto visual ou funcional nas páginas públicas existentes."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Instalar e configurar Auth.js (NextAuth v5) com os providers de Credenciais, Google e GitHub.\n2. Criar script auxiliar para geração inicial do hash de senha (`ADMIN_PASSWORD_HASH`) e secret TOTP (`ADMIN_TOTP_SECRET`).\n3. Implementar callback `signIn` validando a correspondência estrita com `ADMIN_EMAIL`.\n4. Implementar tela e fluxo de desafio 2FA com validação de token TOTP.\n5. Criar `middleware.ts` para proteção de todas as rotas sob `/admin` (exceto login).\n6. Construir o layout do painel admin com navegação responsiva e suporte a tema dark/light.\n7. Criar as páginas placeholder para as 6 seções: Hero, Skills, Currículo, Projetos, Idioma e Guestbook.\n8. Documentar instruções de setup inicial dos secrets e pareamento do 2FA."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Login via email/senha funcional com credenciais validadas via variáveis de ambiente\n- [ ] Login via Google e GitHub funcional e restrito exclusivamente ao `ADMIN_EMAIL`\n- [ ] Desafio 2FA TOTP obrigatório e validado com sucesso após o primeiro fator\n- [ ] Middleware bloqueando acessos não autenticados a `/admin/*`\n- [ ] Layout do painel administrativo navegável entre as 6 seções (Hero, Skills, Currículo, Projetos, Idioma, Guestbook)\n- [ ] Nenhuma credencial ou segredo versionado no repositório Git\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente o fluxo de autenticação e navegação\n- [ ] Nenhuma regressão identificada no site público\n- [x] **Pasta renomeada para `[cancelled]-auth-painel-admin` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[cancelled]-auth-painel-admin"
   },
   {
     "id": "badge-dmca-footer",
