@@ -1,6 +1,6 @@
 # ♻️ Introdução do SQLite e Persistência via Volume Docker
 
-**Status:** `in-progress`
+**Status:** `done`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `infra`, `banco`
@@ -44,14 +44,14 @@ SQLite configurado via `better-sqlite3` com WAL mode ativado, schema auto-inicia
 - [x] Schema inicial criado (tabela `two_factor_auth`, extensível para uso futuro)
 - [x] `.gitignore` atualizado para excluir o arquivo `.db`
 - [x] Teste local de persistência (`scripts/test-db.ts`) confirmado
-- [ ] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado
+- [x] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado
 
 ---
 
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+> Implementado com `better-sqlite3`, volume Docker nomeado persistente e testado localmente e em build de produção.
 
 ## Decisão
 - [x] Aprovado
@@ -63,6 +63,6 @@ SQLite configurado via `better-sqlite3` com WAL mode ativado, schema auto-inicia
 
 > _(preencher após execução e teste)_
 
-- [ ] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**
+- [x] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**

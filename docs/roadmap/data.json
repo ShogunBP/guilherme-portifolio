@@ -173,67 +173,6 @@
     "path": "docs/active/features/[ready-for-review]-login-social-google-github"
   },
   {
-    "id": "sqlite-persistencia-inicial",
-    "title": "Introdução do SQLite e Persistência via Volume Docker",
-    "category": "refactoring",
-    "status": "in-progress",
-    "area": "active",
-    "date": "2026-08-31",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "infra",
-      "banco"
-    ],
-    "progress": 55,
-    "progressFraction": {
-      "done": 6,
-      "total": 11
-    },
-    "summary": "Introduzir SQLite como primeiro banco de dados do projeto, com volume Docker persistente, como base para autenticação e futuras fases de CRUD.",
-    "sections": [
-      {
-        "heading": "Depende de",
-        "content": "Nenhum card anterior — esta é a base de infraestrutura para os demais."
-      },
-      {
-        "heading": "Motivação",
-        "content": "O painel admin (próximos cards desta mesma fase) precisa persistir dados que não existiam até agora no projeto: o secret TOTP do 2FA, e futuramente (Fases 4+) o próprio conteúdo editável do site (Hero, Skills, Currículo, Projects, Blog). Resolver isso com um banco de dados leve agora evita retrabalho de migrar de uma solução descartável (ex: arquivo solto) para banco de verdade depois."
-      },
-      {
-        "heading": "Situação Atual",
-        "content": "O projeto não tem nenhum banco de dados. O container roda a partir de uma imagem Docker recriada do zero a cada deploy (`docker compose up -d --force-recreate`, workflow já validado na Fase 1) — qualquer dado gravado dentro do container sem um volume explícito é perdido no próximo deploy."
-      },
-      {
-        "heading": "Situação Desejada",
-        "content": "SQLite configurado via `better-sqlite3` com WAL mode ativado, schema auto-inicializado e o arquivo `.db` vivendo em um **volume Docker nomeado** (`portfolio-data:/app/data`), declarado no `docker-compose.yml`, sobrevivendo a recriações do container."
-      },
-      {
-        "heading": "Rastreabilidade de Escolha Técnica",
-        "content": "- Tentativa anterior (substituída): Inicialmente configurado com Prisma ORM v6. Substituído por `better-sqlite3` a pedido do dono do projeto para maior leveza, execução síncrona/direta de queries sem overhead de query engine e maior simplicidade nas próximas fases de CRUD."
-      },
-      {
-        "heading": "Riscos",
-        "content": "- Se o volume não for corretamente declarado, dados parecem persistir em teste local mas se perdem no primeiro deploy real via GitHub Actions — por isso a validação desta tarefa exige testar exatamente esse cenário (derrubar/recriar o container), não só rodar local.\n- Nenhum dado real será migrado nesta tarefa (é a primeira introdução do banco) — sem risco de perda de dados existentes."
-      },
-      {
-        "heading": "Estratégia de Execução",
-        "content": "1. Instalar `better-sqlite3` e `@types/better-sqlite3`, configurando `serverExternalPackages` no `next.config.ts`.\n2. Criar singleton em `src/lib/db.ts` com schema auto-inicializável para 2FA (`two_factor_auth`).\n3. Declarar volume Docker nomeado no `docker-compose.yml` (`portfolio-data:/app/data`) e instalar build tools no `Dockerfile` (`python3 make g++`).\n4. Configurar `.gitignore` para excluir o arquivo `.db` do controle de versão (dado de runtime, não código).\n5. Testar localmente com `scripts/test-db.ts` (operações CRUD no SQLite).\n6. Testar em produção: deploy via GitHub Actions (`--force-recreate`).\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] SQLite configurado e biblioteca de acesso escolhida (`better-sqlite3`)\n- [x] Volume Docker nomeado declarado e funcionando (`portfolio-data:/app/data`)\n- [x] Schema inicial criado (tabela `two_factor_auth`, extensível para uso futuro)\n- [x] `.gitignore` atualizado para excluir o arquivo `.db`\n- [x] Teste local de persistência (`scripts/test-db.ts`) confirmado\n- [ ] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**"
-      }
-    ],
-    "path": "docs/active/refactoring/[in-progress]-sqlite-persistencia-inicial"
-  },
-  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -1359,5 +1298,66 @@
       }
     ],
     "path": "docs/archive/refactoring/[done]-remover-workflows-legados"
+  },
+  {
+    "id": "sqlite-persistencia-inicial",
+    "title": "Introdução do SQLite e Persistência via Volume Docker",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "infra",
+      "banco"
+    ],
+    "progress": 91,
+    "progressFraction": {
+      "done": 10,
+      "total": 11
+    },
+    "summary": "Introduzir SQLite como primeiro banco de dados do projeto, com volume Docker persistente, como base para autenticação e futuras fases de CRUD.",
+    "sections": [
+      {
+        "heading": "Depende de",
+        "content": "Nenhum card anterior — esta é a base de infraestrutura para os demais."
+      },
+      {
+        "heading": "Motivação",
+        "content": "O painel admin (próximos cards desta mesma fase) precisa persistir dados que não existiam até agora no projeto: o secret TOTP do 2FA, e futuramente (Fases 4+) o próprio conteúdo editável do site (Hero, Skills, Currículo, Projects, Blog). Resolver isso com um banco de dados leve agora evita retrabalho de migrar de uma solução descartável (ex: arquivo solto) para banco de verdade depois."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "O projeto não tem nenhum banco de dados. O container roda a partir de uma imagem Docker recriada do zero a cada deploy (`docker compose up -d --force-recreate`, workflow já validado na Fase 1) — qualquer dado gravado dentro do container sem um volume explícito é perdido no próximo deploy."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "SQLite configurado via `better-sqlite3` com WAL mode ativado, schema auto-inicializado e o arquivo `.db` vivendo em um **volume Docker nomeado** (`portfolio-data:/app/data`), declarado no `docker-compose.yml`, sobrevivendo a recriações do container."
+      },
+      {
+        "heading": "Rastreabilidade de Escolha Técnica",
+        "content": "- Tentativa anterior (substituída): Inicialmente configurado com Prisma ORM v6. Substituído por `better-sqlite3` a pedido do dono do projeto para maior leveza, execução síncrona/direta de queries sem overhead de query engine e maior simplicidade nas próximas fases de CRUD."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Se o volume não for corretamente declarado, dados parecem persistir em teste local mas se perdem no primeiro deploy real via GitHub Actions — por isso a validação desta tarefa exige testar exatamente esse cenário (derrubar/recriar o container), não só rodar local.\n- Nenhum dado real será migrado nesta tarefa (é a primeira introdução do banco) — sem risco de perda de dados existentes."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Instalar `better-sqlite3` e `@types/better-sqlite3`, configurando `serverExternalPackages` no `next.config.ts`.\n2. Criar singleton em `src/lib/db.ts` com schema auto-inicializável para 2FA (`two_factor_auth`).\n3. Declarar volume Docker nomeado no `docker-compose.yml` (`portfolio-data:/app/data`) e instalar build tools no `Dockerfile` (`python3 make g++`).\n4. Configurar `.gitignore` para excluir o arquivo `.db` do controle de versão (dado de runtime, não código).\n5. Testar localmente com `scripts/test-db.ts` (operações CRUD no SQLite).\n6. Testar em produção: deploy via GitHub Actions (`--force-recreate`).\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] SQLite configurado e biblioteca de acesso escolhida (`better-sqlite3`)\n- [x] Volume Docker nomeado declarado e funcionando (`portfolio-data:/app/data`)\n- [x] Schema inicial criado (tabela `two_factor_auth`, extensível para uso futuro)\n- [x] `.gitignore` atualizado para excluir o arquivo `.db`\n- [x] Teste local de persistência (`scripts/test-db.ts`) confirmado\n- [x] Teste em produção via deploy real (`--force-recreate` do GitHub Actions) confirmado\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Comportamento idêntico ao anterior (nenhuma regressão no que já funcionava)\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-sqlite-persistencia-inicial` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-sqlite-persistencia-inicial"
   }
 ]
