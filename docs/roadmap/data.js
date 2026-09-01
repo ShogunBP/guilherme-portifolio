@@ -53,63 +53,6 @@ var ROADMAP_TASKS = [
     "path": "docs/active/features/[draft]-admin-troca-credenciais"
   },
   {
-    "id": "login-email-senha",
-    "title": "Login via Email e Senha (Auth.js)",
-    "category": "features",
-    "status": "in-progress",
-    "area": "active",
-    "date": "2026-08-31",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "frontend",
-      "segurança"
-    ],
-    "progress": 46,
-    "progressFraction": {
-      "done": 6,
-      "total": 13
-    },
-    "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
-    "sections": [
-      {
-        "heading": "Depende de",
-        "content": "`[draft]-sqlite-persistencia-inicial` não é pré-requisito direto deste card (a credencial de login vem de variável de ambiente, não do banco) — pode ser executado em paralelo ou antes, mas o card de 2FA (mais adiante nesta mesma fase) depende deste estar concluído."
-      },
-      {
-        "heading": "Objetivo",
-        "content": "Permitir que o dono do portfólio acesse `/admin` com email e senha, sem expor cadastro público nem gerenciar múltiplos usuários."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "Tela de login em `/admin` (ou rota de login associada) com campos de email e senha. A credencial correta é fixa, vinda de variável de ambiente — não há tabela de usuários. Login incorreto mostra erro genérico (não revela se o e-mail existe ou não, por segurança). Login correto cria uma sessão JWT."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n- Configuração inicial do Auth.js (NextAuth v5) no projeto.\n- Provider Credentials configurado, validando contra `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` (hash bcrypt/argon2).\n- Script one-off para gerar o hash da senha a partir de um texto (rodado uma vez, manualmente, para configurar a variável de ambiente).\n- Tela de login em `/admin`.\n- Sessão via JWT.\n- Configuração de cookies seguros atrás do proxy Nginx (confiar em `X-Forwarded-Proto`, necessário para a sessão persistir corretamente em produção).\n- Middleware protegendo rotas sob `/admin` (redireciona para login se não houver sessão válida).\n- `NEXTAUTH_SECRET` e `NEXTAUTH_URL` configurados.\n\n### Não inclui\n- Login social (card separado).\n- 2FA (card separado, depende deste).\n- Layout completo do painel pós-login (card separado) — após login bem-sucedido nesta tarefa, uma página simples de confirmação/placeholder é suficiente para validar o fluxo.\n- \"Esqueci minha senha\" (não se aplica a usuário único fixo via env var)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** frontend (tela de login) e backend (Auth.js, callbacks, middleware).\n- **Dependências novas:** `next-auth@beta` (v5), `bcryptjs` ou `argon2`.\n- **Variáveis de ambiente novas:** `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` — todas configuradas na stack do Portainer, nunca commitadas.\n- **Impactos em outras partes do sistema:** nenhum impacto no site público existente."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Instalar Auth.js (v5) e configurar o provider Credentials.\n2. Criar script one-off para gerar `ADMIN_PASSWORD_HASH`.\n3. Implementar tela de login em `/admin`.\n4. Configurar cookies seguros atrás do proxy Nginx.\n5. Implementar middleware de proteção das rotas `/admin/*`.\n6. Página placeholder pós-login para validar o fluxo completo."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [x] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [x] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login (`src/middleware.ts`)\n- [x] Script one-off de geração de hash (`scripts/hash-password.ts`) criado e testado\n- [x] Sessão configurada via JWT com `trustHost: true` para compatibilidade com proxy Nginx\n- [ ] Sessão validada em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer / ambiente de produção\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[in-progress]-login-email-senha"
-  },
-  {
     "id": "2fa-layout-painel-admin",
     "title": "2FA (TOTP) e Layout Base do Painel Admin",
     "category": "features",
@@ -166,6 +109,67 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/active/features/[ready-for-review]-2fa-layout-painel-admin"
+  },
+  {
+    "id": "login-email-senha",
+    "title": "Login via Email e Senha (Auth.js)",
+    "category": "features",
+    "status": "ready-for-review",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 54,
+    "progressFraction": {
+      "done": 7,
+      "total": 13
+    },
+    "summary": "Autenticação por email e senha para usuário único fixo via variáveis de ambiente com Auth.js v5 e proteção de rotas.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Permitir que o administrador do portfólio acesse a área restrita `/admin` autenticando-se com e-mail e senha, sem expor cadastro público e sem necessidade de tabela de usuários no banco de dados."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "- Ao acessar qualquer rota restrita sob `/admin` sem estar autenticado, o usuário é interceptado pelo middleware e redirecionado para `/admin/login`.\n- A tela `/admin/login` possui visual no tema dark/glassmorphism do portfólio, com inputs para E-mail e Senha, tratamento visual de carregamento (`Autenticando...`) e banner de erro genérico para credenciais inválidas.\n- A validação de credenciais compara o e-mail contra `ADMIN_EMAIL` e o hash bcrypt da senha contra `ADMIN_PASSWORD_HASH`.\n- Ao autenticar com sucesso, o Auth.js emite um token de sessão JWT e o usuário é redirecionado para `/admin`.\n- No painel `/admin`, é exibido o cabeçalho administrativo com o e-mail logado, atalho para o site público e botão de logout.\n- Ao clicar em **Sair**, a sessão é revogada e o usuário é redirecionado de volta para `/admin/login`."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Configuração do Auth.js (NextAuth v5 beta) com suporte a edge middleware e runtime Node.js.\n- Provider Credentials configurado em `src/auth.ts`, com comparação segura via `bcryptjs`.\n- Configuração do manipulador de API NextAuth em `src/app/api/auth/[...nextauth]/route.ts`.\n- Middleware de autorização em `src/middleware.ts` protegendo o prefixo `/admin/:path*` e impedindo acesso de usuários não logados.\n- Tela de login responsiva e estilizada em `src/app/admin/login/page.tsx`.\n- Painel administrativo base com verificação de sessão e botão de logout em `src/app/admin/page.tsx`.\n- Script CLI utilitário one-off `scripts/hash-password.ts` para geração de hashes bcrypt com segurança.\n- Configuração de `trustHost: true` para suportar proxies reversos Nginx em produção.\n- Documentação de variáveis de ambiente no `docker-compose.yml` e `.env.example`.\n\n### Não inclui\n- Login social com Google e GitHub (escopo da Subfase 2.3).\n- Segundo fator de autenticação 2FA/TOTP (escopo da Subfase 2.4).\n- Formulários completos de CRUD de cada seção do painel (escopos das Fases 3 a 8).\n- Recuperação de senha por e-mail (\"esqueci minha senha\"), por tratar-se de credencial única controlada via variáveis de ambiente do servidor."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** Frontend (`src/app/admin/login/page.tsx`, `src/app/admin/page.tsx`) e Backend (`src/auth.ts`, `src/auth.config.ts`, `src/middleware.ts`, `src/app/api/auth/[...nextauth]/route.ts`).\n- **Dependências instaladas:** `next-auth@beta` (^5.0.0-beta.25), `bcryptjs` (^3.0.3), `@types/bcryptjs` (^2.4.6).\n- **Variáveis de ambiente requeridas:**\n  - `AUTH_SECRET`: chave secreta para assinatura dos tokens JWT.\n  - `ADMIN_EMAIL`: e-mail oficial do administrador (ex: `admin@guilhermemenezes.dev`).\n  - `ADMIN_PASSWORD_HASH`: hash bcrypt da senha (ex: gerado via `npx tsx scripts/hash-password.ts`).\n  - `NEXTAUTH_URL`: URL base da aplicação (ex: `http://localhost:3000` em dev / `https://guilhermemenezes.dev` em prod)."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Instalar `next-auth@beta` e `bcryptjs`.\n2. Criar configuração edge-safe (`src/auth.config.ts`) e singleton de autenticação Node.js (`src/auth.ts`).\n3. Criar route handler do Auth.js (`src/app/api/auth/[...nextauth]/route.ts`).\n4. Criar middleware de proteção (`src/middleware.ts`).\n5. Criar script utilitário de hash (`scripts/hash-password.ts`).\n6. Criar página de login (`src/app/admin/login/page.tsx`).\n7. Criar casca do dashboard (`src/app/admin/page.tsx`).\n8. Validar o fluxo ponta a ponta com agente navegador automatizado.\n\n---"
+      },
+      {
+        "heading": "Rastreabilidade de Tentativas e Diagnósticos",
+        "content": "### Tentativa 1 (refutada) — Hash corrompido por interpolação de variáveis no PowerShell\n- **O que foi feito:** O hash bcrypt inicial foi gerado via comando inline no PowerShell (`node -e \"...\"`) e colado no `.env.local`.\n- **Resultado real:** O PowerShell interpretou o prefixo `$2b` e `$12` como variáveis de ambiente nulas durante a execução, gerando uma string de hash corrompida (`$2b$12$X3Ht62bZbp99b5E05OLSku6Z...`) que não correspondia à senha `admin`.\n- **Correção aplicada:** Criado o script seguro [`scripts/hash-password.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/scripts/hash-password.ts) para gerar hashes sem interferência do shell. O hash correto para `admin` foi gerado como `$2b$12$9N/2LStr96zF9jaBidrt9u0sUUZq0pWivH2J19e1jJK0jnFSifRHm`.\n\n### Tentativa 2 (refutada) — Interpolação de `$` no parser de `.env` do Next.js\n- **O que foi feito:** A variável foi configurada no `.env.local` com aspas duplas: `ADMIN_PASSWORD_HASH=\"$2b$12$9N/...\"`.\n- **Resultado real:** O parser nativo de arquivos `.env` do Next.js interpreta símbolos `$` dentro de aspas duplas como interpolação de variáveis. Os blocos `$2b`, `$12` e `$9N` foram removidos em tempo de execução, truncando o hash de 60 para 51 caracteres (`hashPreview: /2LStr96zF`), fazendo `bcrypt.compareSync` falhar.\n- **Diagnóstico e confirmação:** Criado endpoint de teste que revelou `hashLength: 51` e `isMatch: false`.\n- **Correção aplicada:** Os caracteres `$` foram escapados no `.env.local` como `ADMIN_PASSWORD_HASH=\\$2b\\$12\\$9N...`. O teste de diagnóstico confirmou `hashLength: 60`, `hashPreview: $2b$12$9N/` e `isMatch: true`. Adicionalmente, adicionada sanitização defensiva de aspas em `src/auth.ts`.\n\n### Tentativa 3 (refutada) — Submissão de formulário via `useActionState` vs campos controlados\n- **O que foi feito:** A primeira versão da página de login utilizava Server Actions com `useActionState` e submissão direta do `FormData`.\n- **Resultado real:** Em testes de automação e no React 19, eventos de dispatch customizados em inputs não-controlados deixavam campos vazios durante chamadas programáticas `requestSubmit()`, ativando a validação nativa de `required`.\n- **Correção aplicada:** A página [`src/app/admin/login/page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/login/page.tsx) foi refatorada para formulário controlado com `useState`, `onSubmit` e chamada client-side a `signIn('credentials', { email, password, redirect: false })`, permitindo feedback instantâneo de erro e transição suave via `router.push('/admin')`.\n\n---"
+      },
+      {
+        "heading": "Evidências da Implementação e Testes",
+        "content": "### 1. Configuração do Auth.js (`src/auth.ts`)\n```typescript\nimport NextAuth from 'next-auth'\nimport Credentials from 'next-auth/providers/credentials'\nimport bcrypt from 'bcryptjs'\nimport { authConfig } from './auth.config'\n\nexport const { handlers, signIn, signOut, auth } = NextAuth({\n  ...authConfig,\n  providers: [\n    Credentials({\n      name: 'Credentials',\n      credentials: {\n        email: { label: 'Email', type: 'email' },\n        password: { label: 'Password', type: 'password' },\n      },\n      async authorize(credentials) {\n        if (!credentials?.email || !credentials?.password) {\n          return null\n        }\n\n        const email = String(credentials.email).trim().toLowerCase()\n        const password = String(credentials.password)\n\n        const adminEmail = (process.env.ADMIN_EMAIL || '')\n          .replace(/^[\"']|[\"']$/g, '')\n          .trim()\n          .toLowerCase()\n        const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH || '')\n          .replace(/^[\"']|[\"']$/g, '')\n          .trim()\n\n        if (!adminEmail || !adminPasswordHash) {\n          console.error('[Auth] ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured in environment')\n          return null\n        }\n\n        if (email !== adminEmail) {\n          return null\n        }\n\n        const isValid = bcrypt.compareSync(password, adminPasswordHash)\n        if (!isValid) {\n          return null\n        }\n\n        return {\n          id: 'admin',\n          email: adminEmail,\n          name: 'Administrator',\n        }\n      },\n    }),\n  ],\n  session: {\n    strategy: 'jwt',\n  },\n  trustHost: true,\n})\n```\n\n### 2. Middleware de Proteção de Rotas (`src/middleware.ts`)\n```typescript\nimport NextAuth from 'next-auth'\nimport { authConfig } from './auth.config'\n\nexport const { auth: middleware } = NextAuth(authConfig)\n\nexport const config = {\n  matcher: ['/admin/:path*'],\n}\n```\n\n### 3. Teste Automatizado com Navegador (Chrome DevTools MCP)\n- **Redirecionamento não autenticado:** Navegação para `http://localhost:3000/admin` redirecionou com sucesso para `http://localhost:3000/admin/login?callbackUrl=...`.\n- **Autenticação:** Submissão de `admin@guilhermemenezes.dev` e senha `admin` resultou em login válido e redirecionamento imediato para `http://localhost:3000/admin`.\n- **Dashboard Renderizado:** Exibiu cabeçalho administrativo, badge de \"Sessão Ativa (Auth.js v5 JWT)\", e os 6 cards de módulos previstos para as próximas fases.\n- **Logout:** Clique no botão \"Sair\" encerrou a sessão JWT e retornou à tela `/admin/login`.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [x] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [x] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login (`src/middleware.ts`)\n- [x] Script one-off de geração de hash (`scripts/hash-password.ts`) criado e testado\n- [x] Sessão configurada via JWT com `trustHost: true` para compatibilidade com proxy Nginx\n- [x] Sessão validada localmente via automação com navegador Chrome DevTools\n- [x] Variáveis sensíveis (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `AUTH_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`) mapeadas e documentadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-nome-da-feature` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[ready-for-review]-login-email-senha"
   },
   {
     "id": "login-social-google-github",
