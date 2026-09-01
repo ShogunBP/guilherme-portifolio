@@ -1,5 +1,58 @@
 [
   {
+    "id": "admin-troca-credenciais",
+    "title": "Gerenciamento de Credenciais do Admin pelo Painel",
+    "category": "features",
+    "status": "draft",
+    "area": "active",
+    "date": "2026-08-31",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "backend",
+      "segurança"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 10
+    },
+    "summary": "Permitir trocar senha e e-mail do admin pelo painel, sem depender de variável de ambiente + redeploy.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Permitir que o administrador do portfólio altere seu e-mail e senha de login diretamente pelo painel administrativo, eliminando a dependência atual de editar variáveis de ambiente (`ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH`) e disparar um redeploy na VPS."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Na área de configurações do painel admin, o usuário autenticado terá um formulário para:\n1. Alterar o e-mail de acesso (com validação de formato e confirmação).\n2. Alterar a senha de acesso (exigindo a confirmação da senha atual e nova senha com requisitos de segurança).\nApós a alteração bem-sucedida, as novas credenciais passam a valer imediatamente para os próximos logins, invalidando sessões anteriores se necessário."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Formulário de troca de e-mail e senha dentro do painel admin.\n- Validação de senha atual antes de autorizar a troca.\n- Persistência das credenciais alteradas no banco de dados SQLite (`portfolio.db`).\n\n### Não inclui (por ora)\n- Recuperação de senha por e-mail tipo \"Esqueci minha senha\" (fluxo complexo com tokens temporários).\n- Múltiplos perfis de usuário / RBAC."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- Camadas envolvidas: frontend (interface do painel), backend (Server Actions / API de autenticação), banco (tabela de credenciais no SQLite).\n- Dependências ou integrações necessárias: `bcryptjs` / hashing seguro, `better-sqlite3`.\n- Impactos em outras partes do sistema: a lógica de autorização no `src/auth.ts` precisará verificar se existem credenciais salvas no banco de dados antes de recorrer às variáveis de ambiente como fallback."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. _(a detalhar quando o card for priorizado para execução)_"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Formulário de troca de credenciais acessível no painel administrativo\n- [ ] Validação obrigatória da senha atual antes de aplicar alterações\n- [ ] Novas credenciais persistidas no SQLite e válidas para o próximo login\n- [ ] Fallback seguro caso o banco ainda não possua credenciais customizadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-admin-troca-credenciais` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[draft]-admin-troca-credenciais"
+  },
+  {
     "id": "login-email-senha",
     "title": "Login via Email e Senha (Auth.js)",
     "category": "features",
@@ -12,10 +65,10 @@
       "frontend",
       "segurança"
     ],
-    "progress": 9,
+    "progress": 46,
     "progressFraction": {
-      "done": 1,
-      "total": 11
+      "done": 6,
+      "total": 13
     },
     "summary": "Autenticação por email e senha para um único usuário fixo, sem cadastro público, usando Auth.js.",
     "sections": [
@@ -47,7 +100,7 @@
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [ ] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [ ] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [ ] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login\n- [ ] Sessão persiste em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer, nunca commitadas\n\n---"
+        "content": "- [x] Login com credencial correta gera sessão válida e redireciona para `/admin`\n- [x] Login com credencial incorreta mostra erro genérico, sem revelar detalhes\n- [x] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login (`src/middleware.ts`)\n- [x] Script one-off de geração de hash (`scripts/hash-password.ts`) criado e testado\n- [x] Sessão configurada via JWT com `trustHost: true` para compatibilidade com proxy Nginx\n- [ ] Sessão validada em produção (testado em `https://guilhermemenezes.dev`, não só localhost)\n- [ ] Variáveis sensíveis configuradas na stack do Portainer / ambiente de produção\n\n---"
       },
       {
         "heading": "Validação",

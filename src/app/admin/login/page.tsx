@@ -1,14 +1,42 @@
 'use client'
 
-import React, { useActionState } from 'react'
-import { authenticate, LoginState } from './actions'
+import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Lock, Mail, KeyRound, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const [state, formAction, isPending] = useActionState<LoginState | undefined, FormData>(
-    authenticate,
-    undefined
-  )
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    try {
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (res?.error) {
+        setError('Credenciais inválidas. Verifique seu e-mail e senha.')
+        setLoading(false)
+        return
+      }
+
+      router.push('/admin')
+      router.refresh()
+    } catch {
+      setError('Ocorreu um erro ao tentar entrar. Tente novamente.')
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
@@ -32,15 +60,15 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Error Banner */}
-          {state?.error && (
+          {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-start gap-3 animate-in fade-in">
               <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-              <span>{state.error}</span>
+              <span>{error}</span>
             </div>
           )}
 
           {/* Form */}
-          <form action={formAction} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label
                 htmlFor="email"
@@ -54,9 +82,10 @@ export default function AdminLoginPage() {
                 </div>
                 <input
                   id="email"
-                  name="email"
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@exemplo.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-[#120f38]/90 border border-purple-500/30 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-colors"
                 />
@@ -76,9 +105,10 @@ export default function AdminLoginPage() {
                 </div>
                 <input
                   id="password"
-                  name="password"
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   className="w-full pl-10 pr-4 py-2.5 bg-[#120f38]/90 border border-purple-500/30 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-colors"
                 />
@@ -87,10 +117,10 @@ export default function AdminLoginPage() {
 
             <button
               type="submit"
-              disabled={isPending}
+              disabled={loading}
               className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 cursor-pointer"
             >
-              {isPending ? (
+              {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Autenticando...</span>

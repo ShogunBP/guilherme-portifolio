@@ -12,9 +12,11 @@ export async function authenticate(
   formData: FormData
 ): Promise<LoginState | undefined> {
   try {
+    const email = formData.get('email')
+    const password = formData.get('password')
     await signIn('credentials', {
-      email: formData.get('email'),
-      password: formData.get('password'),
+      email,
+      password,
       redirectTo: '/admin',
     })
   } catch (error) {

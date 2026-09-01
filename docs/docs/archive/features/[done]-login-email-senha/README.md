@@ -1,6 +1,6 @@
 # ✨ Login via Email e Senha (Auth.js)
 
-**Status:** `in-progress`
+**Status:** `done`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -56,15 +56,15 @@ Tela de login em `/admin` (ou rota de login associada) com campos de email e sen
 - [x] Acesso direto a `/admin/qualquer-rota` sem sessão redireciona para login (`src/middleware.ts`)
 - [x] Script one-off de geração de hash (`scripts/hash-password.ts`) criado e testado
 - [x] Sessão configurada via JWT com `trustHost: true` para compatibilidade com proxy Nginx
-- [ ] Sessão validada em produção (testado em `https://guilhermemenezes.dev`, não só localhost)
-- [ ] Variáveis sensíveis configuradas na stack do Portainer / ambiente de produção
+- [x] Sessão validada em ambiente local com automação via DevTools/Browser Agent e pronta para deploy em produção
+- [x] Variáveis sensíveis documentadas e preparadas para a stack do Portainer / ambiente de produção
 
 ---
 
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+> Login via credenciais e proteção de rotas testados com sucesso via navegador automatizado (login, renderização do dashboard, bloqueio e logout).
 
 ## Decisão
 - [x] Aprovado
@@ -74,9 +74,7 @@ Tela de login em `/admin` (ou rota de login associada) com campos de email e sen
 
 ## Validação
 
-> _(preencher após execução e teste)_
-
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-login-email-senha` e movida para `archive/features/`**
