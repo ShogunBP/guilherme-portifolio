@@ -6,23 +6,8 @@ export const authConfig = {
     error: '/admin/login',
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user
-      const isOnAdmin = nextUrl.pathname.startsWith('/admin')
-      const isLoginPage = nextUrl.pathname === '/admin/login'
-
-      if (isOnAdmin) {
-        if (isLoginPage) {
-          if (isLoggedIn) {
-            return Response.redirect(new URL('/admin', nextUrl))
-          }
-          return true
-        }
-        if (isLoggedIn) {
-          return true
-        }
-        return Response.redirect(new URL('/admin/login', nextUrl))
-      }
+    authorized() {
+      // O controle de rotas, cookies e redirects é gerenciado no src/middleware.ts
       return true
     },
     jwt({ token, user }) {

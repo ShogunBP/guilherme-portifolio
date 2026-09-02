@@ -1,6 +1,6 @@
 # ✨ Login via Email e Senha (Auth.js)
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -266,10 +266,10 @@ console.log('Obs: valor armazenado em Base64. O código decodifica automaticamen
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+> Validado e aprovado pelo usuário: funcionou perfeitamente em localhost e em produção (VPS).
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
@@ -278,7 +278,7 @@ console.log('Obs: valor armazenado em Base64. O código decodifica automaticamen
 
 > _(preencher após execução e teste)_
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-nome-da-feature` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-nome-da-feature` e movida para `archive/features/`**

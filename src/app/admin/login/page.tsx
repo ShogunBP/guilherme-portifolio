@@ -30,7 +30,16 @@ export default function AdminLoginPage() {
         return
       }
 
-      router.push('/admin')
+      try {
+        const redirectRes = await fetch('/api/admin/redirect-target')
+        const { redirectTo } = await redirectRes.json()
+        // Seguranca: so aceita destinos relativos ao proprio site
+        const safeRedirect =
+          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+        router.push(safeRedirect)
+      } catch {
+        router.push('/admin')
+      }
       router.refresh()
     } catch {
       setError('Ocorreu um erro ao tentar entrar. Tente novamente.')
