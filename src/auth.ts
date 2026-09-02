@@ -24,23 +24,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .replace(/^["']|["']$/g, '')
           .trim()
           .toLowerCase()
-        const adminPasswordHash = (process.env.ADMIN_PASSWORD_HASH || '')
+        const adminPasswordHashRaw = (process.env.ADMIN_PASSWORD_HASH || '')
           .replace(/^["']|["']$/g, '')
           .trim()
+
+        // Decodifica Base64 para recuperar o hash bcrypt ($2b$12$...)
+        const adminPasswordHash = adminPasswordHashRaw
+          ? Buffer.from(adminPasswordHashRaw, 'base64').toString('utf8')
+          : ''
 
         if (!adminEmail || !adminPasswordHash) {
           console.error('[Auth] ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured in environment')
           return null
         }
-
-        console.log('[Auth Debug]', {
-          receivedEmail: email,
-          adminEmail,
-          hasHash: !!adminPasswordHash,
-          emailMatch: email === adminEmail,
-          passwordLength: password.length,
-          passwordMatch: adminPasswordHash ? bcrypt.compareSync(password, adminPasswordHash) : false,
-        })
 
         if (email !== adminEmail) {
           return null
