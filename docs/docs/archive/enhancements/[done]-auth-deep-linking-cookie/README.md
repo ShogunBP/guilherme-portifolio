@@ -1,6 +1,6 @@
 # 🔧 Deep-linking com Cookie na Autenticação (URL Limpa + Redirecionamento Correto)
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-09-02
 **Prioridade:** `alta`
 **Tags:** `frontend`, `backend`, `ui-ux`
@@ -152,19 +152,17 @@ export async function GET() {
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+Aprovado pelo usuário após validação dos testes automatizados e limpeza de runtime pós-incidente (`dev/cleanup-auth-runtime.md`).
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
 
 ## Validação
 
-> _(preencher após execução e teste)_
-
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-nome-da-melhoria` e movida para `archive/enhancements/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-nome-da-melhoria` e movida para `archive/enhancements/`**

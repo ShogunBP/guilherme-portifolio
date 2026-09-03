@@ -169,67 +169,6 @@
     "path": "docs/active/features/[ready-for-review]-login-social-google-github"
   },
   {
-    "id": "auth-deep-linking-cookie",
-    "title": "Deep-linking com Cookie na Autenticação (URL Limpa + Redirecionamento Correto)",
-    "category": "enhancements",
-    "status": "ready-for-review",
-    "area": "active",
-    "date": "2026-09-02",
-    "priority": "alta",
-    "tags": [
-      "frontend",
-      "backend",
-      "ui-ux"
-    ],
-    "progress": 54,
-    "progressFraction": {
-      "done": 7,
-      "total": 13
-    },
-    "summary": "Preservação da rota destino via cookie HttpOnly temporário para deep-linking pós-login sem poluição de query string na URL.",
-    "sections": [
-      {
-        "heading": "Contexto",
-        "content": "Na Subfase 2.2 (`login-email-senha`), implementou-se o fluxo de autenticação via e-mail e senha com Auth.js v5. Para manter a interface limpa e elegante, o redirecionamento padrão do Auth.js que anexava `?callbackUrl=...` na barra de endereços do navegador foi suprimido. Como resultado, o usuário vê sempre `/admin/login`."
-      },
-      {
-        "heading": "Problema Atual",
-        "content": "Ao suprimir o `?callbackUrl` da URL e manter `router.push('/admin')` fixo após a autenticação, o destino original que o usuário tentou acessar antes de ser barrado é perdido. Quando o painel tiver múltiplas seções e rotas internas (ex: `/admin/projetos`, `/admin/skills`), qualquer link direto ou bookmark levaria o administrador para a raiz `/admin`, exigindo que ele navegasse manualmente até a página desejada após logar."
-      },
-      {
-        "heading": "Melhoria Proposta",
-        "content": "Armazenar a rota original que o usuário tentou acessar em um cookie temporário HttpOnly (`admin_redirect`) no momento do bloqueio pelo middleware. \nApós o login com sucesso:\n1. O cliente consulta uma rota utilitária interna (`/api/admin/redirect-target`) que lê o valor do cookie e o apaga do navegador.\n2. O formulário de login redireciona com segurança para o destino recuperado (com fallback defensivo para `/admin`).\n3. A URL de login permanece perfeitamente limpa (`/admin/login`), sem expor query parameters."
-      },
-      {
-        "heading": "Impacto Esperado",
-        "content": "- **Experiência do Administrador (UX):** Links diretos para páginas internas do painel continuam funcionando mesmo quando a sessão expira, preservando o contexto de navegação.\n- **Segurança:** O cookie é `HttpOnly` e `SameSite=Lax`, inacessível por scripts client-side de terceiros. A rota de destino é validada contra links externos maliciosos (`startsWith('/')`)."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Ajustar o middleware em `src/middleware.ts` e `src/auth.config.ts` para gravar o cookie `admin_redirect` com `nextUrl.pathname + nextUrl.search` ao interceptar acesso não autorizado a `/admin/*`.\n2. Criar a API Route `src/app/api/admin/redirect-target/route.ts` para leitura e remoção do cookie `admin_redirect`.\n3. Atualizar o manipulador de submissão `handleSubmit` em `src/app/admin/login/page.tsx` para redirecionar dinamicamente ao destino retornado pela API.\n4. Tratar o edge case em que usuário já logado acessa `/admin/login`, limpando o cookie residual se existir.\n5. Validar o fluxo completo via automação de browser (Chrome DevTools MCP), inspecionando cookies e navegação.\n\n---"
-      },
-      {
-        "heading": "Evidências da Implementação e Testes",
-        "content": "### 1. Middleware com Cookie de Redirecionamento (`src/middleware.ts`)\n```typescript\nimport NextAuth from 'next-auth'\nimport { authConfig } from './auth.config'\nimport { NextResponse } from 'next/server'\n\nconst { auth } = NextAuth(authConfig)\n\nexport default auth((req) => {\n  const { nextUrl } = req\n  const isLoggedIn = !!req.auth?.user\n  const isOnAdmin = nextUrl.pathname.startsWith('/admin')\n  const isLoginPage = nextUrl.pathname === '/admin/login'\n\n  if (isOnAdmin) {\n    if (isLoginPage) {\n      if (isLoggedIn) {\n        const response = NextResponse.redirect(new URL('/admin', nextUrl))\n        response.cookies.delete('admin_redirect')\n        return response\n      }\n      return NextResponse.next()\n    }\n\n    if (isLoggedIn) {\n      return NextResponse.next()\n    }\n\n    // Usuário deslogado tentando acessar /admin ou subrota protegida\n    const loginUrl = new URL('/admin/login', nextUrl)\n    const response = NextResponse.redirect(loginUrl)\n    response.cookies.set('admin_redirect', nextUrl.pathname + nextUrl.search, {\n      httpOnly: true,\n      sameSite: 'lax',\n      path: '/',\n    })\n    return response\n  }\n\n  return NextResponse.next()\n})\n\nexport const config = {\n  matcher: ['/admin/:path*'],\n}\n```\n\n### 2. Endpoint de Consumo e Limpeza do Cookie (`src/app/api/admin/redirect-target/route.ts`)\n```typescript\nimport { NextResponse } from 'next/server'\nimport { cookies } from 'next/headers'\n\nexport async function GET() {\n  const cookieStore = await cookies()\n  const redirectCookie = cookieStore.get('admin_redirect')\n  const redirectTo = redirectCookie?.value ?? '/admin'\n\n  // Limpa o cookie após ler\n  const response = NextResponse.json({ redirectTo })\n  response.cookies.delete('admin_redirect')\n  return response\n}\n```\n\n### 3. Redirecionamento Dinâmico Seguro na Página de Login (`src/app/admin/login/page.tsx`)\n```typescript\n      try {\n        const redirectRes = await fetch('/api/admin/redirect-target')\n        const { redirectTo } = await redirectRes.json()\n        // Segurança: só aceita destinos relativos ao próprio site\n        const safeRedirect =\n          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'\n        router.push(safeRedirect)\n      } catch {\n        router.push('/admin')\n      }\n      router.refresh()\n```\n\n### 4. Validação com Agente Navegador (Chrome DevTools MCP / Browser Subagent)\n- **Deep link para subrota:** Navegação deslogada para `http://localhost:3000/admin/projetos` redirecionou para `http://localhost:3000/admin/login` com URL limpa.\n- **Armazenamento e leitura:** O cookie `admin_redirect` foi armazenado com `HttpOnly` e `SameSite=Lax`.\n- **Login e Redirecionamento:** Submissão das credenciais redirecionou com sucesso de volta para `http://localhost:3000/admin/projetos`, exibindo a confirmação `\"✓ Deep-linking via cookie executado com sucesso!\"`.\n- **Navegação de volta ao Dashboard:** Clique em \"← Voltar ao Painel Geral\" carregou `/admin` com sessão ativa.\n- **Logout:** Botão \"Sair\" encerrou a sessão e redirecionou para `/admin/login`.\n- **Acesso direto à raiz:** Navegação direta para `/admin` redirecionou para `/admin/login` e, após login, retornou para `/admin`.\n- **Limpeza do Cookie:** O cookie `admin_redirect` é consumido e apagado imediatamente após o redirecionamento.\n- **Teste de Regressão:** Credenciais incorretas continuam exibindo o banner vermelho normalmente sem expor rotas de erro.\n- **Gravação do Teste:** Sessão gravada em `auth_deep_link_test_1788399816388.webp`.\n\n---"
-      },
-      {
-        "heading": "Decisões e Aprendizados",
-        "content": "- **Causa raiz real do `MissingSecret`:** O Edge Runtime em Docker Standalone (Next.js `output: 'standalone'`) não propaga `process.env` dinamicamente para os bundles isolados de middleware/proxy sem a declaração explícita de `secret:` no objeto de configuração.\n- **Correção legítima:** Declarar `secret: process.env.AUTH_SECRET` diretamente em `src/auth.config.ts`.\n- **O que NÃO é necessário (removido pós-incidente):**\n  - `NEXTAUTH_SECRET`: alias legado da v4 redundante; com `secret: process.env.AUTH_SECRET` no `auth.config.ts`, a leitura é direta e elimina risco de divergência.\n  - `AUTH_TRUST_HOST=true`: desnecessário no `docker-compose.yml` pois `trustHost: true` já é declarado canonicamente em código no `src/auth.config.ts`.\n  - `authorized() { return true }`: no-op obsoleto que foi removido do `auth.config.ts`, mantendo `src/middleware.ts` como a única e explícita fonte da verdade para autorização e redirecionamentos.\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Acesso deslogado a uma sub-rota (ex: `/admin/projetos` ou `/admin`) redireciona para `/admin/login` com URL limpa (sem `?callbackUrl`)\n- [x] Cookie `admin_redirect` é gravado como `HttpOnly`, `SameSite=Lax`, `Path=/` contendo o caminho original\n- [x] Rota `GET /api/admin/redirect-target` lê o cookie e o apaga da resposta\n- [x] Após login com sucesso, o usuário é redirecionado para a sub-rota original solicitada\n- [x] Validação de segurança garante que apenas caminhos relativos iniciados com `/` são aceitos\n- [x] Cookie `admin_redirect` não permanece ativo no navegador após o login\n- [x] Teste de login incorreto não é afetado (sem regressão no banner de erro)\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-nome-da-melhoria` e movida para `archive/enhancements/`**"
-      }
-    ],
-    "path": "docs/active/enhancements/[ready-for-review]-auth-deep-linking-cookie"
-  },
-  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -843,6 +782,67 @@
       }
     ],
     "path": "docs/archive/features/[done]-login-email-senha"
+  },
+  {
+    "id": "auth-deep-linking-cookie",
+    "title": "Deep-linking com Cookie na Autenticação (URL Limpa + Redirecionamento Correto)",
+    "category": "enhancements",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-02",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "backend",
+      "ui-ux"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 12,
+      "total": 13
+    },
+    "summary": "Preservação da rota destino via cookie HttpOnly temporário para deep-linking pós-login sem poluição de query string na URL.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "Na Subfase 2.2 (`login-email-senha`), implementou-se o fluxo de autenticação via e-mail e senha com Auth.js v5. Para manter a interface limpa e elegante, o redirecionamento padrão do Auth.js que anexava `?callbackUrl=...` na barra de endereços do navegador foi suprimido. Como resultado, o usuário vê sempre `/admin/login`."
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "Ao suprimir o `?callbackUrl` da URL e manter `router.push('/admin')` fixo após a autenticação, o destino original que o usuário tentou acessar antes de ser barrado é perdido. Quando o painel tiver múltiplas seções e rotas internas (ex: `/admin/projetos`, `/admin/skills`), qualquer link direto ou bookmark levaria o administrador para a raiz `/admin`, exigindo que ele navegasse manualmente até a página desejada após logar."
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "Armazenar a rota original que o usuário tentou acessar em um cookie temporário HttpOnly (`admin_redirect`) no momento do bloqueio pelo middleware. \nApós o login com sucesso:\n1. O cliente consulta uma rota utilitária interna (`/api/admin/redirect-target`) que lê o valor do cookie e o apaga do navegador.\n2. O formulário de login redireciona com segurança para o destino recuperado (com fallback defensivo para `/admin`).\n3. A URL de login permanece perfeitamente limpa (`/admin/login`), sem expor query parameters."
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- **Experiência do Administrador (UX):** Links diretos para páginas internas do painel continuam funcionando mesmo quando a sessão expira, preservando o contexto de navegação.\n- **Segurança:** O cookie é `HttpOnly` e `SameSite=Lax`, inacessível por scripts client-side de terceiros. A rota de destino é validada contra links externos maliciosos (`startsWith('/')`)."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Ajustar o middleware em `src/middleware.ts` e `src/auth.config.ts` para gravar o cookie `admin_redirect` com `nextUrl.pathname + nextUrl.search` ao interceptar acesso não autorizado a `/admin/*`.\n2. Criar a API Route `src/app/api/admin/redirect-target/route.ts` para leitura e remoção do cookie `admin_redirect`.\n3. Atualizar o manipulador de submissão `handleSubmit` em `src/app/admin/login/page.tsx` para redirecionar dinamicamente ao destino retornado pela API.\n4. Tratar o edge case em que usuário já logado acessa `/admin/login`, limpando o cookie residual se existir.\n5. Validar o fluxo completo via automação de browser (Chrome DevTools MCP), inspecionando cookies e navegação.\n\n---"
+      },
+      {
+        "heading": "Evidências da Implementação e Testes",
+        "content": "### 1. Middleware com Cookie de Redirecionamento (`src/middleware.ts`)\n```typescript\nimport NextAuth from 'next-auth'\nimport { authConfig } from './auth.config'\nimport { NextResponse } from 'next/server'\n\nconst { auth } = NextAuth(authConfig)\n\nexport default auth((req) => {\n  const { nextUrl } = req\n  const isLoggedIn = !!req.auth?.user\n  const isOnAdmin = nextUrl.pathname.startsWith('/admin')\n  const isLoginPage = nextUrl.pathname === '/admin/login'\n\n  if (isOnAdmin) {\n    if (isLoginPage) {\n      if (isLoggedIn) {\n        const response = NextResponse.redirect(new URL('/admin', nextUrl))\n        response.cookies.delete('admin_redirect')\n        return response\n      }\n      return NextResponse.next()\n    }\n\n    if (isLoggedIn) {\n      return NextResponse.next()\n    }\n\n    // Usuário deslogado tentando acessar /admin ou subrota protegida\n    const loginUrl = new URL('/admin/login', nextUrl)\n    const response = NextResponse.redirect(loginUrl)\n    response.cookies.set('admin_redirect', nextUrl.pathname + nextUrl.search, {\n      httpOnly: true,\n      sameSite: 'lax',\n      path: '/',\n    })\n    return response\n  }\n\n  return NextResponse.next()\n})\n\nexport const config = {\n  matcher: ['/admin/:path*'],\n}\n```\n\n### 2. Endpoint de Consumo e Limpeza do Cookie (`src/app/api/admin/redirect-target/route.ts`)\n```typescript\nimport { NextResponse } from 'next/server'\nimport { cookies } from 'next/headers'\n\nexport async function GET() {\n  const cookieStore = await cookies()\n  const redirectCookie = cookieStore.get('admin_redirect')\n  const redirectTo = redirectCookie?.value ?? '/admin'\n\n  // Limpa o cookie após ler\n  const response = NextResponse.json({ redirectTo })\n  response.cookies.delete('admin_redirect')\n  return response\n}\n```\n\n### 3. Redirecionamento Dinâmico Seguro na Página de Login (`src/app/admin/login/page.tsx`)\n```typescript\n      try {\n        const redirectRes = await fetch('/api/admin/redirect-target')\n        const { redirectTo } = await redirectRes.json()\n        // Segurança: só aceita destinos relativos ao próprio site\n        const safeRedirect =\n          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'\n        router.push(safeRedirect)\n      } catch {\n        router.push('/admin')\n      }\n      router.refresh()\n```\n\n### 4. Validação com Agente Navegador (Chrome DevTools MCP / Browser Subagent)\n- **Deep link para subrota:** Navegação deslogada para `http://localhost:3000/admin/projetos` redirecionou para `http://localhost:3000/admin/login` com URL limpa.\n- **Armazenamento e leitura:** O cookie `admin_redirect` foi armazenado com `HttpOnly` e `SameSite=Lax`.\n- **Login e Redirecionamento:** Submissão das credenciais redirecionou com sucesso de volta para `http://localhost:3000/admin/projetos`, exibindo a confirmação `\"✓ Deep-linking via cookie executado com sucesso!\"`.\n- **Navegação de volta ao Dashboard:** Clique em \"← Voltar ao Painel Geral\" carregou `/admin` com sessão ativa.\n- **Logout:** Botão \"Sair\" encerrou a sessão e redirecionou para `/admin/login`.\n- **Acesso direto à raiz:** Navegação direta para `/admin` redirecionou para `/admin/login` e, após login, retornou para `/admin`.\n- **Limpeza do Cookie:** O cookie `admin_redirect` é consumido e apagado imediatamente após o redirecionamento.\n- **Teste de Regressão:** Credenciais incorretas continuam exibindo o banner vermelho normalmente sem expor rotas de erro.\n- **Gravação do Teste:** Sessão gravada em `auth_deep_link_test_1788399816388.webp`.\n\n---"
+      },
+      {
+        "heading": "Decisões e Aprendizados",
+        "content": "- **Causa raiz real do `MissingSecret`:** O Edge Runtime em Docker Standalone (Next.js `output: 'standalone'`) não propaga `process.env` dinamicamente para os bundles isolados de middleware/proxy sem a declaração explícita de `secret:` no objeto de configuração.\n- **Correção legítima:** Declarar `secret: process.env.AUTH_SECRET` diretamente em `src/auth.config.ts`.\n- **O que NÃO é necessário (removido pós-incidente):**\n  - `NEXTAUTH_SECRET`: alias legado da v4 redundante; com `secret: process.env.AUTH_SECRET` no `auth.config.ts`, a leitura é direta e elimina risco de divergência.\n  - `AUTH_TRUST_HOST=true`: desnecessário no `docker-compose.yml` pois `trustHost: true` já é declarado canonicamente em código no `src/auth.config.ts`.\n  - `authorized() { return true }`: no-op obsoleto que foi removido do `auth.config.ts`, mantendo `src/middleware.ts` como a única e explícita fonte da verdade para autorização e redirecionamentos.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Acesso deslogado a uma sub-rota (ex: `/admin/projetos` ou `/admin`) redireciona para `/admin/login` com URL limpa (sem `?callbackUrl`)\n- [x] Cookie `admin_redirect` é gravado como `HttpOnly`, `SameSite=Lax`, `Path=/` contendo o caminho original\n- [x] Rota `GET /api/admin/redirect-target` lê o cookie e o apaga da resposta\n- [x] Após login com sucesso, o usuário é redirecionado para a sub-rota original solicitada\n- [x] Validação de segurança garante que apenas caminhos relativos iniciados com `/` são aceitos\n- [x] Cookie `admin_redirect` não permanece ativo no navegador após o login\n- [x] Teste de login incorreto não é afetado (sem regressão no banner de erro)\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-nome-da-melhoria` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/archive/enhancements/[done]-auth-deep-linking-cookie"
   },
   {
     "id": "badge-dmca-footer",
