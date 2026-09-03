@@ -1,6 +1,6 @@
 # ✨ Login Social (Google e GitHub) Restrito ao Dono
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-08-31
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`, `api`
@@ -122,27 +122,25 @@ export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
 - [x] Banner de `AccessDenied` implementado na tela de login
 - [x] `docker-compose.yml` e `.env.example` atualizados com as variáveis opcionais
 - [x] Compilação `npm run build` validada com sucesso
-- [ ] Login via Google em produção testado com a conta autorizada
-- [ ] Login via GitHub em produção testado com a conta autorizada
+- [x] Login via Google testado e validado com sucesso
+- [x] Login via GitHub testado e validado com sucesso
 
 ---
 
 ## Review
 
 ## Feedback
-> _(preencher durante o review após configurar chaves no Portainer e testar em prod)_
+> Validado pelo usuário em 2026-09-03: "Deu tudo certo". Autenticação OAuth via Google e GitHub funcionou perfeitamente e criou sessão no painel admin.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
 
 ## Validação
 
-> _(preencher após execução e teste)_
-
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário (incluindo tentativa de rejeição com conta não autorizada)
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-login-social-google-github` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário (incluindo tentativa de rejeição com conta não autorizada)
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-login-social-google-github` e movida para `archive/features/`**

@@ -111,58 +111,57 @@ var ROADMAP_TASKS = [
     "path": "docs/active/features/[ready-for-review]-2fa-layout-painel-admin"
   },
   {
-    "id": "login-social-google-github",
-    "title": "Login Social (Google e GitHub) Restrito ao Dono",
-    "category": "features",
+    "id": "login-social-popup",
+    "title": "Login Social via Janela Popup com Loading Visual",
+    "category": "enhancements",
     "status": "ready-for-review",
     "area": "active",
-    "date": "2026-08-31",
-    "priority": "alta",
+    "date": "2026-09-03",
+    "priority": "média",
     "tags": [
-      "backend",
       "frontend",
-      "segurança",
-      "api"
+      "ui-ux",
+      "segurança"
     ],
-    "progress": 43,
+    "progress": 58,
     "progressFraction": {
-      "done": 6,
-      "total": 14
+      "done": 7,
+      "total": 12
     },
-    "summary": "Login via Google e GitHub condicional e restrito ao dono do portfólio, com ativação dinâmica e proteção de rota.",
+    "summary": "Login social via janela popup sem redirecionar a tela principal, com feedback visual de carregamento contínuo.",
     "sections": [
       {
-        "heading": "Depende de",
-        "content": "`[done]-login-email-senha` — este card estende a mesma configuração do Auth.js já feita ali (middleware, sessão JWT, cookies seguros)."
+        "heading": "Contexto",
+        "content": "O login social via Google e GitHub foi implementado e validado. Atualmente, ao clicar nos botões sociais, o navegador executa um redirecionamento de página inteira (`window.location.href`) para o provedor OAuth (Google/GitHub) e retorna para o painel administrativo."
       },
       {
-        "heading": "Objetivo",
-        "content": "Oferecer uma forma mais rápida de login (sem digitar senha) para o dono do portfólio, sem abrir a porta para cadastro público — a segurança do \"usuário único\" é garantida com whitelist rígida por provedor."
+        "heading": "Problema Atual",
+        "content": "O redirecionamento de página inteira remove o usuário do contexto da tela de login (`/admin/login`), provocando recarregamento de página e quebrando a fluidez da experiência administrativa. Além disso, caso o usuário demore ou queira cancelar, a página anterior precisa ser recarregada."
       },
       {
-        "heading": "Descrição Funcional",
-        "content": "Na tela de login, os botões \"Entrar com Google\" e \"Entrar com GitHub\" são renderizados **condicionalmente** apenas se as respectivas credenciais de API estiverem configuradas no ambiente.\nAo autenticar via OAuth:\n1. **Google:** O e-mail retornado é validado contra `ADMIN_GOOGLE_EMAIL` ou `ADMIN_EMAIL`.\n2. **GitHub:** O username retornado (`login`) é validado contra `ADMIN_GITHUB_USERNAME` ou o e-mail contra `ADMIN_EMAIL`.\nSe a conta for não autorizada, o callback `signIn` rejeita o login (`return false`), redirecionando para `/admin/login?error=AccessDenied`. A tela de login exibe um banner vermelho explicativo: *\"Acesso Negado: Esta conta social não possui permissão de administrador.\"*"
+        "heading": "Melhoria Proposta",
+        "content": "1. Implementar fluxo de autenticação OAuth em janela popup dedicada (`window.open` centralizado).\n2. Criar uma rota de apoio `/auth/popup` que dispara o `signIn(provider, { callbackUrl: '/auth/popup?status=success' })` dentro do popup.\n3. Ao concluir a autenticação com sucesso:\n   - A página do popup transmite uma mensagem segura (`postMessage`) para a janela mãe (`window.opener`): `{ type: 'AUTH_POPUP_SUCCESS' }` e se fecha automaticamente (`window.close()`).\n   - A janela mãe detecta o sucesso, busca o destino de deep-linking (`/api/admin/redirect-target`) e redireciona suavemente para `/admin` ou para a rota previamente acessada.\n4. Ao ocorrer erro de autorização (`AccessDenied`, etc.):\n   - O popup transmite `{ type: 'AUTH_POPUP_ERROR', error }` e se fecha automaticamente.\n   - A janela mãe exibe o banner de erro correspondente.\n5. Feedback visual de carregamento:\n   - Enquanto o popup estiver aberto, o botão social clicado exibe um estado de carregamento contínuo (`Loader2` animado) e os botões permanecem desabilitados para evitar múltiplos cliques.\n   - Caso o usuário feche o popup manualmente antes de completar o login, a janela mãe detecta o fechamento (`popup.closed`), encerra o estado de carregamento e restaura os botões ao estado normal."
       },
       {
-        "heading": "Escopo",
-        "content": "### Inclui\n- Provedores Google e GitHub configurados dinamicamente no Auth.js (`src/auth.ts`).\n- Callback `signIn` com whitelist explícita e logs de advertência para tentativas rejeitadas.\n- Separação da tela de login em Server Component (`src/app/admin/login/page.tsx`) e Client Component (`src/app/admin/login/LoginForm.tsx`).\n- Botões de login social estilizados com SVG vetoriais, efeitos hover e estados de carregamento.\n- Tratamento e banner amigável para `AccessDenied`.\n- Mapeamento das variáveis opcionais no `docker-compose.yml` e `.env.example`.\n\n### Não inclui\n- 2FA para login social (card separado no roadmap).\n- Cadastro público de múltiplos usuários (acesso exclusivo do administrador).\n\n---"
+        "heading": "Impacto Esperado",
+        "content": "- Melhoria direta na experiência do usuário (UX): o administrador nunca sai da tela principal do portfólio.\n- Feedback visual claro durante todo o ciclo de autenticação externa."
       },
       {
-        "heading": "Evidências da Implementação",
-        "content": "### 1. Provedores Dinâmicos e Whitelist (`src/auth.ts`)\n```typescript\n// Ativa Google apenas se as credenciais existirem\nif (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {\n  providers.push(\n    Google({\n      clientId: process.env.GOOGLE_CLIENT_ID,\n      clientSecret: process.env.GOOGLE_CLIENT_SECRET,\n    })\n  )\n}\n\n// Ativa GitHub apenas se as credenciais existirem\nif (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {\n  providers.push(\n    GitHub({\n      clientId: process.env.GITHUB_CLIENT_ID,\n      clientSecret: process.env.GITHUB_CLIENT_SECRET,\n    })\n  )\n}\n```\n\n### 2. Validação Rígida no `signIn` Callback (`src/auth.ts`)\n```typescript\n    async signIn({ user, account, profile }) {\n      if (account?.provider === 'credentials') return true\n\n      const adminEmail = (process.env.ADMIN_EMAIL || '').replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n\n      if (account?.provider === 'google') {\n        const allowedGoogleEmail = (process.env.ADMIN_GOOGLE_EMAIL || adminEmail).replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n        const userEmail = (user.email || profile?.email || '').trim().toLowerCase()\n        if (userEmail && (userEmail === allowedGoogleEmail || userEmail === adminEmail)) return true\n        console.warn(`[Auth] Tentativa de login Google rejeitada para: ${userEmail}`)\n        return false\n      }\n\n      if (account?.provider === 'github') {\n        const adminGithubUsername = (process.env.ADMIN_GITHUB_USERNAME || '').replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n        const userEmail = (user.email || profile?.email || '').trim().toLowerCase()\n        const githubLogin = String((profile as unknown as GitHubProfile)?.login || '').trim().toLowerCase()\n\n        if ((userEmail && userEmail === adminEmail) || (adminGithubUsername && githubLogin === adminGithubUsername)) return true\n        console.warn(`[Auth] Tentativa de login GitHub rejeitada: login=${githubLogin}, email=${userEmail}`)\n        return false\n      }\n\n      return false\n    }\n```\n\n### 3. Server Component (`src/app/admin/login/page.tsx`)\n```typescript\nexport default async function AdminLoginPage({ searchParams }: LoginPageProps) {\n  const resolvedParams = await searchParams\n  const errorParam = typeof resolvedParams?.error === 'string' ? resolvedParams.error : undefined\n\n  const availableProviders = {\n    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),\n    github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),\n  }\n\n  return <LoginForm availableProviders={availableProviders} initialError={errorParam} />\n}\n```\n\n### 4. Validações e Testes Locais\n- **`npm run build`:** Compilou com código de saída 0 e tipagem 100% estrita no Next.js 16 (Turbopack).\n- **Sem chaves configuradas:** A página `/admin/login` permaneceu idêntica, sem divisória e sem botões quebrados.\n- **Com chaves configuradas:** A página renderizou a divisória \"ou continue com\", o botão \"Entrar com Google\" e o botão \"Entrar com GitHub\" com ícones estilizados e estados de loading.\n- **Erro `AccessDenied`:** Acessar `/admin/login?error=AccessDenied` exibiu o banner `\"Acesso Negado: Esta conta social não possui permissão de administrador.\"`.\n\n---"
+        "heading": "Plano de Implementação",
+        "content": "1. Criar a rota de apoio `/auth/popup/page.tsx` (isenta do middleware de proteção do admin).\n2. Atualizar `src/app/admin/login/LoginForm.tsx` com o utilitário de abertura de popup centralizado, monitoramento de fechamento (`popup.closed`), escuta de mensagens `postMessage` e estado de loading ininterrupto.\n3. Garantir compatibilidade com o redirecionamento de deep-linking via cookie já existente.\n4. Validar funcionamento em desenvolvimento e build de produção (`npm run build`)."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [x] Login social implementado condicionalmente (zero quebra quando chaves não existem)\n- [x] Provider Google configurado com validação por whitelist de e-mail\n- [x] Provider GitHub configurado com validação por username ou e-mail\n- [x] Banner de `AccessDenied` implementado na tela de login\n- [x] `docker-compose.yml` e `.env.example` atualizados com as variáveis opcionais\n- [x] Compilação `npm run build` validada com sucesso\n- [ ] Login via Google em produção testado com a conta autorizada\n- [ ] Login via GitHub em produção testado com a conta autorizada\n\n---"
+        "content": "- [x] Clicar em \"Entrar com Google\" abre popup centralizado sem sair da tela de login\n- [x] Clicar em \"Entrar com GitHub\" abre popup centralizado sem sair da tela de login\n- [x] Botão clicado permanece em estado de carregamento (`Loader2`) enquanto o popup estiver aberto\n- [x] Se o popup for fechado pelo usuário, o loading é cancelado automaticamente\n- [x] Ao concluir o login no popup, o popup se fecha e a página mãe redireciona para o admin\n- [x] Se a conta for rejeitada (não autorizada), o popup fecha e o banner de erro é exibido na tela mãe\n- [x] `npm run build` executa sem erros\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário (incluindo tentativa de rejeição com conta não autorizada)\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-social-google-github` e movida para `archive/features/`**"
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Melhoria perceptível e funcional\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-login-social-popup` e movida para `archive/enhancements/`**"
       }
     ],
-    "path": "docs/active/features/[ready-for-review]-login-social-google-github"
+    "path": "docs/active/enhancements/[ready-for-review]-login-social-popup"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -778,6 +777,60 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/archive/features/[done]-login-email-senha"
+  },
+  {
+    "id": "login-social-google-github",
+    "title": "Login Social (Google e GitHub) Restrito ao Dono",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-31",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança",
+      "api"
+    ],
+    "progress": 93,
+    "progressFraction": {
+      "done": 13,
+      "total": 14
+    },
+    "summary": "Login via Google e GitHub condicional e restrito ao dono do portfólio, com ativação dinâmica e proteção de rota.",
+    "sections": [
+      {
+        "heading": "Depende de",
+        "content": "`[done]-login-email-senha` — este card estende a mesma configuração do Auth.js já feita ali (middleware, sessão JWT, cookies seguros)."
+      },
+      {
+        "heading": "Objetivo",
+        "content": "Oferecer uma forma mais rápida de login (sem digitar senha) para o dono do portfólio, sem abrir a porta para cadastro público — a segurança do \"usuário único\" é garantida com whitelist rígida por provedor."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Na tela de login, os botões \"Entrar com Google\" e \"Entrar com GitHub\" são renderizados **condicionalmente** apenas se as respectivas credenciais de API estiverem configuradas no ambiente.\nAo autenticar via OAuth:\n1. **Google:** O e-mail retornado é validado contra `ADMIN_GOOGLE_EMAIL` ou `ADMIN_EMAIL`.\n2. **GitHub:** O username retornado (`login`) é validado contra `ADMIN_GITHUB_USERNAME` ou o e-mail contra `ADMIN_EMAIL`.\nSe a conta for não autorizada, o callback `signIn` rejeita o login (`return false`), redirecionando para `/admin/login?error=AccessDenied`. A tela de login exibe um banner vermelho explicativo: *\"Acesso Negado: Esta conta social não possui permissão de administrador.\"*"
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Provedores Google e GitHub configurados dinamicamente no Auth.js (`src/auth.ts`).\n- Callback `signIn` com whitelist explícita e logs de advertência para tentativas rejeitadas.\n- Separação da tela de login em Server Component (`src/app/admin/login/page.tsx`) e Client Component (`src/app/admin/login/LoginForm.tsx`).\n- Botões de login social estilizados com SVG vetoriais, efeitos hover e estados de carregamento.\n- Tratamento e banner amigável para `AccessDenied`.\n- Mapeamento das variáveis opcionais no `docker-compose.yml` e `.env.example`.\n\n### Não inclui\n- 2FA para login social (card separado no roadmap).\n- Cadastro público de múltiplos usuários (acesso exclusivo do administrador).\n\n---"
+      },
+      {
+        "heading": "Evidências da Implementação",
+        "content": "### 1. Provedores Dinâmicos e Whitelist (`src/auth.ts`)\n```typescript\n// Ativa Google apenas se as credenciais existirem\nif (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {\n  providers.push(\n    Google({\n      clientId: process.env.GOOGLE_CLIENT_ID,\n      clientSecret: process.env.GOOGLE_CLIENT_SECRET,\n    })\n  )\n}\n\n// Ativa GitHub apenas se as credenciais existirem\nif (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {\n  providers.push(\n    GitHub({\n      clientId: process.env.GITHUB_CLIENT_ID,\n      clientSecret: process.env.GITHUB_CLIENT_SECRET,\n    })\n  )\n}\n```\n\n### 2. Validação Rígida no `signIn` Callback (`src/auth.ts`)\n```typescript\n    async signIn({ user, account, profile }) {\n      if (account?.provider === 'credentials') return true\n\n      const adminEmail = (process.env.ADMIN_EMAIL || '').replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n\n      if (account?.provider === 'google') {\n        const allowedGoogleEmail = (process.env.ADMIN_GOOGLE_EMAIL || adminEmail).replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n        const userEmail = (user.email || profile?.email || '').trim().toLowerCase()\n        if (userEmail && (userEmail === allowedGoogleEmail || userEmail === adminEmail)) return true\n        console.warn(`[Auth] Tentativa de login Google rejeitada para: ${userEmail}`)\n        return false\n      }\n\n      if (account?.provider === 'github') {\n        const adminGithubUsername = (process.env.ADMIN_GITHUB_USERNAME || '').replace(/^[\"']|[\"']$/g, '').trim().toLowerCase()\n        const userEmail = (user.email || profile?.email || '').trim().toLowerCase()\n        const githubLogin = String((profile as unknown as GitHubProfile)?.login || '').trim().toLowerCase()\n\n        if ((userEmail && userEmail === adminEmail) || (adminGithubUsername && githubLogin === adminGithubUsername)) return true\n        console.warn(`[Auth] Tentativa de login GitHub rejeitada: login=${githubLogin}, email=${userEmail}`)\n        return false\n      }\n\n      return false\n    }\n```\n\n### 3. Server Component (`src/app/admin/login/page.tsx`)\n```typescript\nexport default async function AdminLoginPage({ searchParams }: LoginPageProps) {\n  const resolvedParams = await searchParams\n  const errorParam = typeof resolvedParams?.error === 'string' ? resolvedParams.error : undefined\n\n  const availableProviders = {\n    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),\n    github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),\n  }\n\n  return <LoginForm availableProviders={availableProviders} initialError={errorParam} />\n}\n```\n\n### 4. Validações e Testes Locais\n- **`npm run build`:** Compilou com código de saída 0 e tipagem 100% estrita no Next.js 16 (Turbopack).\n- **Sem chaves configuradas:** A página `/admin/login` permaneceu idêntica, sem divisória e sem botões quebrados.\n- **Com chaves configuradas:** A página renderizou a divisória \"ou continue com\", o botão \"Entrar com Google\" e o botão \"Entrar com GitHub\" com ícones estilizados e estados de loading.\n- **Erro `AccessDenied`:** Acessar `/admin/login?error=AccessDenied` exibiu o banner `\"Acesso Negado: Esta conta social não possui permissão de administrador.\"`.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Login social implementado condicionalmente (zero quebra quando chaves não existem)\n- [x] Provider Google configurado com validação por whitelist de e-mail\n- [x] Provider GitHub configurado com validação por username ou e-mail\n- [x] Banner de `AccessDenied` implementado na tela de login\n- [x] `docker-compose.yml` e `.env.example` atualizados com as variáveis opcionais\n- [x] Compilação `npm run build` validada com sucesso\n- [x] Login via Google testado e validado com sucesso\n- [x] Login via GitHub testado e validado com sucesso\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário (incluindo tentativa de rejeição com conta não autorizada)\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-login-social-google-github` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-login-social-google-github"
   },
   {
     "id": "auth-deep-linking-cookie",

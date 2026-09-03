@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Lock, Mail, KeyRound, AlertCircle, Loader2 } from 'lucide-react'
@@ -48,12 +48,19 @@ function GitHubIcon({ className = 'w-4 h-4' }: { className?: string }) {
   )
 }
 
-export default function LoginForm({ availableProviders, initialError }: LoginFormProps) {
+export default function LoginForm({
+  availableProviders,
+  initialError,
+}: LoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null)
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(
+    null
+  )
+
+  const popupTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   function getErrorMessage(err: string | null | undefined): string | null {
     if (!err) return null
@@ -63,10 +70,76 @@ export default function LoginForm({ availableProviders, initialError }: LoginFor
     if (err === 'Configuration') {
       return 'Erro de configuração no servidor de autenticação.'
     }
+    if (err === 'OAuthCallbackError') {
+      return 'Ocorreu um erro durante a autenticação social.'
+    }
     return err
   }
 
-  const [error, setError] = useState<string | null>(getErrorMessage(initialError))
+  const [error, setError] = useState<string | null>(
+    getErrorMessage(initialError)
+  )
+
+  // Caso esta tela tenha sido renderizada dentro de um popup após redirecionamento de erro:
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.opener &&
+      window.name === 'oauth_popup'
+    ) {
+      const err =
+        initialError ||
+        new URLSearchParams(window.location.search).get('error')
+      if (err) {
+        try {
+          window.opener.postMessage(
+            { type: 'AUTH_POPUP_ERROR', error: err },
+            window.location.origin
+          )
+        } catch {}
+        window.close()
+      }
+    }
+  }, [initialError])
+
+  // Limpa o timer de monitoramento ao desmontar o componente
+  useEffect(() => {
+    return () => {
+      if (popupTimerRef.current) {
+        clearInterval(popupTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Escuta mensagens do popup de autenticação
+  useEffect(() => {
+    async function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return
+      if (!event.data || typeof event.data !== 'object') return
+
+      if (event.data.type === 'AUTH_POPUP_SUCCESS') {
+        if (popupTimerRef.current) clearInterval(popupTimerRef.current)
+
+        try {
+          const redirectRes = await fetch('/api/admin/redirect-target')
+          const { redirectTo } = await redirectRes.json()
+          const safeRedirect =
+            redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+          router.push(safeRedirect)
+        } catch {
+          router.push('/admin')
+        }
+        router.refresh()
+      } else if (event.data.type === 'AUTH_POPUP_ERROR') {
+        if (popupTimerRef.current) clearInterval(popupTimerRef.current)
+        setOauthLoading(null)
+        setError(getErrorMessage(event.data.error))
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -105,10 +178,46 @@ export default function LoginForm({ availableProviders, initialError }: LoginFor
   function handleSocialLogin(provider: 'google' | 'github') {
     setError(null)
     setOauthLoading(provider)
-    signIn(provider, { callbackUrl: '/admin' })
+
+    const width = 500
+    const height = 650
+    const left = Math.max(
+      0,
+      Math.round(window.screenX + (window.outerWidth - width) / 2)
+    )
+    const top = Math.max(
+      0,
+      Math.round(window.screenY + (window.outerHeight - height) / 2)
+    )
+
+    const popup = window.open(
+      `/auth/popup?provider=${provider}`,
+      'oauth_popup',
+      `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,status=no,toolbar=no,menubar=no`
+    )
+
+    if (!popup) {
+      setOauthLoading(null)
+      setError(
+        'O navegador bloqueou a janela de autenticação. Permita popups para este site e tente novamente.'
+      )
+      return
+    }
+
+    popup.focus?.()
+
+    // Monitora periodicamente se o usuário fechou o popup manualmente
+    if (popupTimerRef.current) clearInterval(popupTimerRef.current)
+    popupTimerRef.current = setInterval(() => {
+      if (!popup || popup.closed) {
+        if (popupTimerRef.current) clearInterval(popupTimerRef.current)
+        setOauthLoading(null)
+      }
+    }, 400)
   }
 
-  const hasSocialProviders = availableProviders.google || availableProviders.github
+  const hasSocialProviders =
+    availableProviders.google || availableProviders.github
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
@@ -226,11 +335,18 @@ export default function LoginForm({ availableProviders, initialError }: LoginFor
                     className="w-full py-2.5 px-4 bg-[#120f38]/90 hover:bg-[#19154a] border border-purple-500/30 hover:border-purple-400/50 text-white font-medium rounded-xl text-sm transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-purple-950/30"
                   >
                     {oauthLoading === 'google' ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                        <span className="text-gray-300">
+                          Autenticando com Google...
+                        </span>
+                      </>
                     ) : (
-                      <GoogleIcon className="w-4 h-4" />
+                      <>
+                        <GoogleIcon className="w-4 h-4" />
+                        <span>Entrar com Google</span>
+                      </>
                     )}
-                    <span>Entrar com Google</span>
                   </button>
                 )}
 
@@ -242,11 +358,18 @@ export default function LoginForm({ availableProviders, initialError }: LoginFor
                     className="w-full py-2.5 px-4 bg-[#120f38]/90 hover:bg-[#19154a] border border-purple-500/30 hover:border-purple-400/50 text-white font-medium rounded-xl text-sm transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-purple-950/30"
                   >
                     {oauthLoading === 'github' ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                        <span className="text-gray-300">
+                          Autenticando com GitHub...
+                        </span>
+                      </>
                     ) : (
-                      <GitHubIcon className="w-4 h-4" />
+                      <>
+                        <GitHubIcon className="w-4 h-4" />
+                        <span>Entrar com GitHub</span>
+                      </>
                     )}
-                    <span>Entrar com GitHub</span>
                   </button>
                 )}
               </div>
