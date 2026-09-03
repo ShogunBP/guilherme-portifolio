@@ -35,7 +35,8 @@ O redirecionamento de página inteira remove o usuário do contexto da tela de l
 1. Criar a rota de apoio `/auth/popup/page.tsx` (isenta do middleware de proteção do admin).
 2. Atualizar `src/app/admin/login/LoginForm.tsx` com o utilitário de abertura de popup centralizado, monitoramento de fechamento (`popup.closed`), escuta de mensagens `postMessage` e estado de loading ininterrupto.
 3. Garantir compatibilidade com o redirecionamento de deep-linking via cookie já existente.
-4. Validar funcionamento em desenvolvimento e build de produção (`npm run build`).
+4. Adicionar `/auth/popup` ao matcher do `src/middleware.ts` para garantir injeção de `authConfig` e `secret` no Edge Runtime, passando direto pelo middleware sem bloqueio (`isOnAdmin = false`).
+5. Validar funcionamento em desenvolvimento e build de produção (`npm run build`).
 
 ## Critérios de Conclusão
 - [x] Clicar em "Entrar com Google" abre popup centralizado sem sair da tela de login

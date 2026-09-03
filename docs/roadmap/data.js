@@ -148,7 +148,7 @@ var ROADMAP_TASKS = [
       },
       {
         "heading": "Plano de Implementação",
-        "content": "1. Criar a rota de apoio `/auth/popup/page.tsx` (isenta do middleware de proteção do admin).\n2. Atualizar `src/app/admin/login/LoginForm.tsx` com o utilitário de abertura de popup centralizado, monitoramento de fechamento (`popup.closed`), escuta de mensagens `postMessage` e estado de loading ininterrupto.\n3. Garantir compatibilidade com o redirecionamento de deep-linking via cookie já existente.\n4. Validar funcionamento em desenvolvimento e build de produção (`npm run build`)."
+        "content": "1. Criar a rota de apoio `/auth/popup/page.tsx` (isenta do middleware de proteção do admin).\n2. Atualizar `src/app/admin/login/LoginForm.tsx` com o utilitário de abertura de popup centralizado, monitoramento de fechamento (`popup.closed`), escuta de mensagens `postMessage` e estado de loading ininterrupto.\n3. Garantir compatibilidade com o redirecionamento de deep-linking via cookie já existente.\n4. Adicionar `/auth/popup` ao matcher do `src/middleware.ts` para garantir injeção de `authConfig` e `secret` no Edge Runtime, passando direto pelo middleware sem bloqueio (`isOnAdmin = false`).\n5. Validar funcionamento em desenvolvimento e build de produção (`npm run build`)."
       }
     ],
     "criteriaSections": [

@@ -39,5 +39,7 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  // /admin/:path* — painel administrativo (proteção de rota + deep-linking)
+  // /auth/popup   — rota de callback OAuth do popup (precisa do authConfig com secret no Edge Runtime)
+  matcher: ['/admin/:path*', '/auth/popup'],
 }
