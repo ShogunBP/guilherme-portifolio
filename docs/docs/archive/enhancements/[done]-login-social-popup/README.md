@@ -1,6 +1,6 @@
 # 🔧 Login Social via Janela Popup com Loading Visual
 
-**Status:** `ready-for-review`
+**Status:** `done`
 **Data:** 2026-09-03
 **Prioridade:** `média`
 **Tags:** `frontend`, `ui-ux`, `segurança`
@@ -52,18 +52,16 @@ O redirecionamento de página inteira remove o usuário do contexto da tela de l
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+> Validado e aprovado pelo usuário em 2026-09-03: "Pode marcar como [done], ta testado em prod e local". Popup de autenticação, loading contínuo e sincronização pós-login funcionando perfeitamente em desenvolvimento e na VPS.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---
 
 ## Validação
 
-> _(preencher após execução e teste)_
-
-- [ ] Melhoria perceptível e funcional
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-login-social-popup` e movida para `archive/enhancements/`**
+- [x] Melhoria perceptível e funcional
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-login-social-popup` e movida para `archive/enhancements/`**
