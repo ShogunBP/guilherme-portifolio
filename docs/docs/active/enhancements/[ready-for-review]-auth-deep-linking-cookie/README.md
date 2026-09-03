@@ -115,12 +115,16 @@ export async function GET() {
       router.refresh()
 ```
 
-### 4. Validação com Agente Navegador (Chrome DevTools MCP)
+### 4. Validação com Agente Navegador (Chrome DevTools MCP / Browser Subagent)
 - **Deep link para subrota:** Navegação deslogada para `http://localhost:3000/admin/projetos` redirecionou para `http://localhost:3000/admin/login` com URL limpa.
 - **Armazenamento e leitura:** O cookie `admin_redirect` foi armazenado com `HttpOnly` e `SameSite=Lax`.
-- **Login e Redirecionamento:** Submissão das credenciais redirecionou com sucesso de volta para `http://localhost:3000/admin/projetos`.
-- **Limpeza do Cookie:** Consulta imediata confirmou que o cookie foi consumido e deletado, retornando ao fallback `/admin` nas próximas consultas.
+- **Login e Redirecionamento:** Submissão das credenciais redirecionou com sucesso de volta para `http://localhost:3000/admin/projetos`, exibindo a confirmação `"✓ Deep-linking via cookie executado com sucesso!"`.
+- **Navegação de volta ao Dashboard:** Clique em "← Voltar ao Painel Geral" carregou `/admin` com sessão ativa.
+- **Logout:** Botão "Sair" encerrou a sessão e redirecionou para `/admin/login`.
+- **Acesso direto à raiz:** Navegação direta para `/admin` redirecionou para `/admin/login` e, após login, retornou para `/admin`.
+- **Limpeza do Cookie:** O cookie `admin_redirect` é consumido e apagado imediatamente após o redirecionamento.
 - **Teste de Regressão:** Credenciais incorretas continuam exibindo o banner vermelho normalmente sem expor rotas de erro.
+- **Gravação do Teste:** Sessão gravada em `auth_deep_link_test_1788399816388.webp`.
 
 ---
 
