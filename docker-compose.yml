@@ -16,6 +16,12 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://guilhermemenezes.dev}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - ADMIN_GOOGLE_EMAIL=${ADMIN_GOOGLE_EMAIL:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+      - ADMIN_GITHUB_USERNAME=${ADMIN_GITHUB_USERNAME:-}
     healthcheck:
       test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.status < 400 ? 0 : 1)).catch(() => process.exit(1))\"" ]
       interval: 15s
