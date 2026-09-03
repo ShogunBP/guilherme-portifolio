@@ -12,6 +12,7 @@ services:
       - DATABASE_PATH=/app/data/portfolio.db
       - RESEND_API_KEY=${RESEND_API_KEY}
       - AUTH_SECRET=${AUTH_SECRET}
+      - NEXTAUTH_SECRET=${AUTH_SECRET}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://guilhermemenezes.dev}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}

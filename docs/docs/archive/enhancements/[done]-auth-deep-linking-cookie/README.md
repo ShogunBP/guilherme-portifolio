@@ -129,12 +129,15 @@ export async function GET() {
 ---
 
 ## Decisões e Aprendizados
-- **Causa raiz real do `MissingSecret`:** O Edge Runtime em Docker Standalone (Next.js `output: 'standalone'`) não propaga `process.env` dinamicamente para os bundles isolados de middleware/proxy sem a declaração explícita de `secret:` no objeto de configuração.
-- **Correção legítima:** Declarar `secret: process.env.AUTH_SECRET` diretamente em `src/auth.config.ts`.
-- **O que NÃO é necessário (removido pós-incidente):**
-  - `NEXTAUTH_SECRET`: alias legado da v4 redundante; com `secret: process.env.AUTH_SECRET` no `auth.config.ts`, a leitura é direta e elimina risco de divergência.
-  - `AUTH_TRUST_HOST=true`: desnecessário no `docker-compose.yml` pois `trustHost: true` já é declarado canonicamente em código no `src/auth.config.ts`.
-  - `authorized() { return true }`: no-op obsoleto que foi removido do `auth.config.ts`, mantendo `src/middleware.ts` como a única e explícita fonte da verdade para autorização e redirecionamentos.
+- **Causa raiz real do `MissingSecret`:** O Edge Runtime em Docker Standalone (Next.js `output: 'standalone'`) isola o bundle do middleware/proxy e, no `next-auth@5.0.0-beta.32`, determinados codepaths do `@auth/core` buscam especificamente a variável de ambiente `NEXTAUTH_SECRET` no processo do container, ignorando `secret:` do objeto de configuração se `NEXTAUTH_SECRET` não estiver presente no ambiente.
+- **Tentativa anterior de limpeza (refutada em prod):** Tentativa de remover `- NEXTAUTH_SECRET=${AUTH_SECRET}` do `docker-compose.yml` baseando-se apenas na documentação teórica da v5 — testado em produção, resultado: reincidência imediata do erro `MissingSecret`. A variável foi restaurada no `docker-compose.yml` para compatibilidade com o `beta.32`.
+- **Correções legítimas mantidas:**
+  - `secret: process.env.AUTH_SECRET` em `src/auth.config.ts`.
+  - `- NEXTAUTH_SECRET=${AUTH_SECRET}` em `docker-compose.yml` (obrigatório enquanto estiver no `next-auth@^5.0.0-beta.32`).
+- **Placebos eliminados com sucesso (sem regressão):**
+  - `AUTH_TRUST_HOST=true` no `docker-compose.yml`: desnecessário pois `trustHost: true` já está em código.
+  - `authorized() { return true }` em `src/auth.config.ts`: no-op removido, com autorização centralizada em `src/middleware.ts`.
+  - `|| process.env.NEXTAUTH_SECRET` no campo `secret:` do TS: desnecessário no arquivo TS.
 
 ---
 
