@@ -128,6 +128,16 @@ export async function GET() {
 
 ---
 
+## Decisões e Aprendizados
+- **Causa raiz real do `MissingSecret`:** O Edge Runtime em Docker Standalone (Next.js `output: 'standalone'`) não propaga `process.env` dinamicamente para os bundles isolados de middleware/proxy sem a declaração explícita de `secret:` no objeto de configuração.
+- **Correção legítima:** Declarar `secret: process.env.AUTH_SECRET` diretamente em `src/auth.config.ts`.
+- **O que NÃO é necessário (removido pós-incidente):**
+  - `NEXTAUTH_SECRET`: alias legado da v4 redundante; com `secret: process.env.AUTH_SECRET` no `auth.config.ts`, a leitura é direta e elimina risco de divergência.
+  - `AUTH_TRUST_HOST=true`: desnecessário no `docker-compose.yml` pois `trustHost: true` já é declarado canonicamente em código no `src/auth.config.ts`.
+  - `authorized() { return true }`: no-op obsoleto que foi removido do `auth.config.ts`, mantendo `src/middleware.ts` como a única e explícita fonte da verdade para autorização e redirecionamentos.
+
+---
+
 ## Critérios de Conclusão
 - [x] Acesso deslogado a uma sub-rota (ex: `/admin/projetos` ou `/admin`) redireciona para `/admin/login` com URL limpa (sem `?callbackUrl`)
 - [x] Cookie `admin_redirect` é gravado como `HttpOnly`, `SameSite=Lax`, `Path=/` contendo o caminho original
