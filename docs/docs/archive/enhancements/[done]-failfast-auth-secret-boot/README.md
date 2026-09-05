@@ -1,6 +1,6 @@
 # 🔧 Fail-Fast no Boot se AUTH_SECRET Estiver Vazio
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-05
 **Prioridade:** `alta`
 **Tags:** `infra`, `segurança`
@@ -36,7 +36,7 @@ Implementar uma verificação de ambiente *fail-fast* executada antes da subida 
 - [x] `Dockerfile` copia `scripts/check-env.js` e executa a verificação antes do `server.js`
 - [x] Teste local confirma encerramento imediato com código de saída 1 e mensagem fatal quando `AUTH_SECRET` está ausente
 - [x] Teste local confirma inicialização bem-sucedida quando `AUTH_SECRET` está configurado
-- [ ] Container em produção sobe normalmente após deploy com a verificação ativa
+- [x] Container em produção sobe normalmente após deploy com a verificação ativa
 
 ---
 
@@ -53,8 +53,6 @@ Plano e arquitetura validados. Usuário aprovou o início da implementação em 
 
 ## Validação
 
-> _(preencher após execução e teste)_
-
-- [ ] Melhoria perceptível e funcional
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-failfast-auth-secret-boot` e movida para `archive/enhancements/`**
+- [x] Melhoria perceptível e funcional
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-failfast-auth-secret-boot` e movida para `archive/enhancements/`**
