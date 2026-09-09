@@ -6,6 +6,7 @@ import type { GitHubProfile } from 'next-auth/providers/github'
 import type { Provider } from 'next-auth/providers'
 import bcrypt from 'bcryptjs'
 import { authConfig } from './auth.config'
+import { isTwoFactorEnabled } from './lib/totp'
 
 const providers: Provider[] = [
   Credentials({
@@ -51,10 +52,12 @@ const providers: Provider[] = [
         return null
       }
 
+      const is2FA = isTwoFactorEnabled()
       return {
         id: 'admin',
         email: adminEmail,
         name: 'Administrator',
+        twoFactorEnabled: is2FA,
       }
     },
   }),
@@ -84,16 +87,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers,
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
         token.email = user.email
+        if ('twoFactorEnabled' in user) {
+          token.twoFactorEnabled = (user as { twoFactorEnabled?: boolean }).twoFactorEnabled
+        }
+      }
+      if (trigger === 'update' && session && typeof session === 'object' && 'twoFactorEnabled' in session) {
+        token.twoFactorEnabled = (session as { twoFactorEnabled?: boolean }).twoFactorEnabled
       }
       return token
     },
     session({ session, token }) {
       if (token && session.user) {
         session.user.email = token.email as string
+        ;(session as unknown as { twoFactorEnabled?: boolean }).twoFactorEnabled = Boolean(
+          token.twoFactorEnabled
+        )
       }
       return session
     },
@@ -124,6 +136,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           userEmail &&
           (userEmail === allowedGoogleEmail || userEmail === adminEmail)
         ) {
+          ;(user as { twoFactorEnabled?: boolean }).twoFactorEnabled = isTwoFactorEnabled()
           return true
         }
         console.warn(
@@ -153,6 +166,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           !!adminGithubUsername && githubLogin === adminGithubUsername
 
         if (isEmailMatch || isUsernameMatch) {
+          ;(user as { twoFactorEnabled?: boolean }).twoFactorEnabled = isTwoFactorEnabled()
           return true
         }
 
@@ -167,6 +181,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: 'jwt',
+    maxAge: 7 * 24 * 60 * 60, // 7 dias (604800 segundos) sincronizado com cookie 2FA
+  },
+  jwt: {
+    maxAge: 7 * 24 * 60 * 60, // 7 dias (604800 segundos) sincronizado com cookie 2FA
   },
   trustHost: true,
 })

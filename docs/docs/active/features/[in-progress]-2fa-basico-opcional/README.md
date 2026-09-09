@@ -1,6 +1,6 @@
 # ✨ 2FA Básico Opcional (TOTP + Toggle)
 
-**Status:** ready-for-review
+**Status:** in-progress
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -65,12 +65,12 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 
 ## Critérios de Conclusão
 
-- [ ] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA
-- [ ] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos
-- [ ] Login com 2FA ativo exige código TOTP em todos os métodos (Email/Senha, Google, GitHub)
-- [ ] Código TOTP incorreto rejeita o acesso
-- [ ] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código
-- [ ] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)
+- [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA
+- [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos
+- [x] Login com 2FA ativo exige código TOTP em todos os métodos (Email/Senha, Google, GitHub)
+- [x] Código TOTP incorreto rejeita o acesso
+- [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código
+- [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)
 - [ ] Validado e testado em ambiente local e em produção na VPS
 
 ---
@@ -78,10 +78,10 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+Aprovado pelo usuário em 09/09/2026 para início imediato da execução do card 1 (`in-progress`).
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---

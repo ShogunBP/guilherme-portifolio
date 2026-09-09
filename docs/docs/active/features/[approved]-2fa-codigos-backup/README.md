@@ -1,6 +1,6 @@
 # ✨ Códigos de Backup do 2FA
 
-**Status:** draft
+**Status:** approved
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `backend`, `segurança`
@@ -68,10 +68,10 @@ Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de i
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+Aprovado pelo usuário em 09/09/2026. Pronto para execução assim que o Card 1 for concluído.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---

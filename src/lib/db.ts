@@ -6,7 +6,8 @@ function getDatabasePath(): string {
   const envPath = process.env.DATABASE_PATH || process.env.DATABASE_URL || './data/portfolio.db'
   // Remove 'file:' prefix if present
   const cleanPath = envPath.replace(/^file:/, '')
-  return path.isAbsolute(cleanPath) ? cleanPath : path.resolve(process.cwd(), cleanPath)
+  if (path.isAbsolute(cleanPath)) return cleanPath
+  return path.join(/*turbopackIgnore: true*/ process.cwd(), cleanPath)
 }
 
 function initDatabase(dbPath: string): Database.Database {

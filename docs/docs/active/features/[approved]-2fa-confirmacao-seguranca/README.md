@@ -1,6 +1,6 @@
 # ✨ Confirmação de Segurança para Desativar e Redefinir 2FA
 
-**Status:** draft
+**Status:** approved
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -68,10 +68,10 @@ Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-bac
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+Aprovado pelo usuário em 09/09/2026. Depende da conclusão prévia dos Cards 1 e 2.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---

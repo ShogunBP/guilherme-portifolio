@@ -1,7 +1,11 @@
 import React from 'react'
+import Link from 'next/link'
 import { auth, signOut } from '@/auth'
+import { isTwoFactorEnabled } from '@/lib/totp'
 import {
   ShieldCheck,
+  ShieldAlert,
+  Shield,
   LogOut,
   Sparkles,
   Layers,
@@ -14,43 +18,58 @@ import {
 
 export default async function AdminDashboardPage() {
   const session = await auth()
+  const twoFactorActive = isTwoFactorEnabled()
 
   const sections = [
+    {
+      title: 'Segurança & 2FA',
+      description: 'Gerenciamento de autenticação de dois fatores (TOTP) e sessões sincronizadas.',
+      icon: twoFactorActive ? ShieldCheck : Shield,
+      tag: 'Fase 2.4',
+      href: '/admin/seguranca',
+      status: twoFactorActive ? '2FA Ativo' : '2FA Desativado',
+    },
     {
       title: 'Hero & Bio',
       description: 'Gerenciamento dos textos, links sociais e apresentação inicial.',
       icon: Sparkles,
       tag: 'Fase 4',
+      href: '/admin/hero',
     },
     {
       title: 'Skills & Habilidades',
       description: 'Edição das categorias de tecnologias e nível de proficiência.',
       icon: Layers,
       tag: 'Fase 5',
+      href: '/admin/skills',
     },
     {
       title: 'Experiência & Currículo',
       description: 'Linha do tempo profissional, formação acadêmica e download de PDF.',
       icon: FileText,
       tag: 'Fase 6',
+      href: '/admin/curriculo',
     },
     {
       title: 'Projetos & Portfólio',
       description: 'Catálogo de projetos em destaque, tags e links de deploy/código.',
       icon: FolderGit2,
       tag: 'Fase 7',
+      href: '/admin/projetos',
     },
     {
       title: 'Idioma & Traduções',
       description: 'Gerenciamento de chaves i18n em Português e Inglês.',
       icon: Globe2,
       tag: 'Fase 3',
+      href: '/admin/idioma',
     },
     {
       title: 'Guestbook & Mensagens',
       description: 'Moderação de depoimentos e visualização de contatos recebidos.',
       icon: BookMarked,
       tag: 'Fase 8',
+      href: '/admin/guestbook',
     },
   ]
 
@@ -74,6 +93,19 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/seguranca"
+              className="text-xs text-gray-300 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5 text-purple-400" />
+              <span>Segurança</span>
+              {twoFactorActive ? (
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+              )}
+            </Link>
+
             <a
               href="/"
               target="_blank"
@@ -126,10 +158,13 @@ export default async function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {sections.map((section) => {
             const Icon = section.icon
-            return (
+            const isClickable = Boolean(section.href)
+
+            const CardInner = (
               <div
-                key={section.title}
-                className="group relative bg-[#0b0826]/70 border border-purple-500/20 rounded-2xl p-6 hover:border-purple-500/40 transition-all hover:shadow-xl hover:shadow-purple-950/40"
+                className={`h-full group relative bg-[#0b0826]/70 border border-purple-500/20 rounded-2xl p-6 transition-all hover:shadow-xl hover:shadow-purple-950/40 ${
+                  isClickable ? 'hover:border-purple-500/50 cursor-pointer' : 'hover:border-purple-500/30'
+                }`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-10 h-10 rounded-xl bg-purple-600/15 border border-purple-500/25 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform">
@@ -148,11 +183,29 @@ export default async function AdminDashboardPage() {
                 </p>
 
                 <div className="mt-5 pt-4 border-t border-purple-500/10 flex items-center justify-between text-xs text-gray-500">
-                  <span>Conteúdo placeholder</span>
-                  <span className="text-purple-400/60 font-mono">Em breve →</span>
+                  <span>
+                    {'status' in section && section.status ? (
+                      <span className="text-emerald-400 font-medium">{section.status}</span>
+                    ) : (
+                      'Conteúdo placeholder'
+                    )}
+                  </span>
+                  <span className="text-purple-400/80 font-mono group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    {section.href === '/admin/seguranca' ? 'Configurar →' : 'Em breve →'}
+                  </span>
                 </div>
               </div>
             )
+
+            if (section.href === '/admin/seguranca') {
+              return (
+                <Link key={section.title} href={section.href} className="block h-full">
+                  {CardInner}
+                </Link>
+              )
+            }
+
+            return <div key={section.title}>{CardInner}</div>
           })}
         </div>
       </main>
