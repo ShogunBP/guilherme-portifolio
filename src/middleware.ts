@@ -53,7 +53,8 @@ export default auth(async (req) => {
       if (is2FaEnabled && !is2FaVerified) {
         return NextResponse.redirect(new URL('/admin/verify-2fa', nextUrl))
       }
-      const dest = req.cookies.get('admin_redirect')?.value || '/admin'
+      const rawDest = req.cookies.get('admin_redirect')?.value || '/admin'
+      const dest = rawDest.startsWith('/') && !rawDest.startsWith('//') ? rawDest : '/admin'
       const response = NextResponse.redirect(new URL(dest, nextUrl))
       response.cookies.delete('admin_redirect')
       return response
@@ -63,7 +64,8 @@ export default auth(async (req) => {
     if (isVerify2FaPage) {
       // Se 2FA não está habilitado ou já está verificado, redireciona para /admin
       if (!is2FaEnabled || is2FaVerified) {
-        const dest = req.cookies.get('admin_redirect')?.value || '/admin'
+        const rawDest = req.cookies.get('admin_redirect')?.value || '/admin'
+        const dest = rawDest.startsWith('/') && !rawDest.startsWith('//') ? rawDest : '/admin'
         const response = NextResponse.redirect(new URL(dest, nextUrl))
         response.cookies.delete('admin_redirect')
         return response
