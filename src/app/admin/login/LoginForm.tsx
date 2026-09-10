@@ -124,7 +124,7 @@ export default function LoginForm({
           const redirectRes = await fetch('/api/admin/redirect-target')
           const { redirectTo } = await redirectRes.json()
           const safeRedirect =
-            redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+            redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/admin'
           router.push(safeRedirect)
         } catch {
           router.push('/admin')
@@ -163,7 +163,7 @@ export default function LoginForm({
         const redirectRes = await fetch('/api/admin/redirect-target')
         const { redirectTo } = await redirectRes.json()
         const safeRedirect =
-          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+          redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/admin'
         router.push(safeRedirect)
       } catch {
         router.push('/admin')
