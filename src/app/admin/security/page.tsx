@@ -16,7 +16,7 @@ import {
   Clock,
 } from 'lucide-react'
 
-function SegurancaContent() {
+function SecurityContent() {
   const searchParams = useSearchParams()
   const justActivated = searchParams.get('activated') === '1'
 
@@ -263,7 +263,7 @@ function SegurancaContent() {
   )
 }
 
-export default function AdminSegurancaPage() {
+export default function AdminSecurityPage() {
   return (
     <Suspense
       fallback={
@@ -273,7 +273,7 @@ export default function AdminSegurancaPage() {
         </div>
       }
     >
-      <SegurancaContent />
+      <SecurityContent />
     </Suspense>
   )
 }

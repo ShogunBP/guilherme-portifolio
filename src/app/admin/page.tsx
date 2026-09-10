@@ -26,7 +26,7 @@ export default async function AdminDashboardPage() {
       description: 'Gerenciamento de autenticação de dois fatores (TOTP) e sessões sincronizadas.',
       icon: twoFactorActive ? ShieldCheck : Shield,
       tag: 'Fase 2.4',
-      href: '/admin/seguranca',
+      href: '/admin/security',
       status: twoFactorActive ? '2FA Ativo' : '2FA Desativado',
     },
     {
@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/admin/seguranca"
+              href="/admin/security"
               className="text-xs text-gray-300 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-colors"
             >
               <Shield className="w-3.5 h-3.5 text-purple-400" />
@@ -195,13 +195,13 @@ export default async function AdminDashboardPage() {
                     )}
                   </span>
                   <span className="text-purple-400/80 font-mono group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                    {section.href === '/admin/seguranca' ? 'Configurar →' : 'Em breve →'}
+                    {section.href === '/admin/security' ? 'Configurar →' : 'Em breve →'}
                   </span>
                 </div>
               </div>
             )
 
-            if (section.href === '/admin/seguranca') {
+            if (section.href === '/admin/security') {
               return (
                 <Link key={section.title} href={section.href} className="block h-full">
                   {CardInner}

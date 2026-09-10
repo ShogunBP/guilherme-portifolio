@@ -15,7 +15,7 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 ## Descrição Funcional
 
 1. **Login Sem 2FA:** Se o 2FA nunca foi ativado (`enabled = false`), o login com senha ou OAuth direciona o usuário imediatamente para o painel (`/admin`), sem qualquer tela de 2FA.
-2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/seguranca`) e clicar em "Ativar 2FA", abrindo a tela `/admin/setup-2fa`.
+2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/security`) e clicar em "Ativar 2FA", abrindo a tela `/admin/setup-2fa`.
 3. **Ativação:** A tela de setup gera um segredo TOTP, exibe o QR Code escaneável e código alfanumérico para digitação manual, exigindo a confirmação do primeiro código de 6 dígitos para marcar `enabled = true`.
 4. **Desafio de Login:** Uma vez ativado, todo login subsequente (qualquer método) exige o código TOTP na tela `/admin/verify-2fa` antes de liberar o acesso.
 5. **Toggle Simples:** Nesta versão básica, o usuário pode desativar o 2FA com um simples toggle no painel logado (a exigência de confirmação de segundo fator para desativação será implementada no Card 3).
@@ -37,7 +37,7 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 - Tela `/admin/setup-2fa` para geração de secret, exibição do QR Code e confirmação do primeiro código.
 - Tela `/admin/verify-2fa` para desafio de 6 dígitos no login, preservando deep-linking (`admin_redirect`).
 - Middleware condicional em `src/middleware.ts` que só exige 2FA se `enabled = true`.
-- Página de segurança mínima (`/admin/seguranca`) com status do 2FA e botão para ativar/desativar.
+- Página de segurança mínima (`/admin/security`) com status do 2FA e botão para ativar/desativar.
 
 ### Não inclui (por ora)
 
@@ -61,8 +61,9 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 5. Criar tela de setup `/admin/setup-2fa` e rota de confirmação de primeiro código.
 6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.
 7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.
-8. Criar rota/página `/admin/seguranca` com toggle simples de ativar/desativar.
+8. Criar rota/página `/admin/security` com toggle simples de ativar/desativar.
 9. **Correção de Logout:** Garantir que o logout (signOut) limpe os cookies de 2FA (`admin_2fa_verified` e `admin_2fa_status`), evitando que um novo login reaproveite a verificação anterior.
+10. **Renomeação de Rota:** Migrar rota `/admin/seguranca` para `/admin/security` conforme solicitação do usuário.
 
 ## Critérios de Conclusão
 
@@ -79,7 +80,9 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 ## Review
 
 ## Feedback
-Reaberto pelo usuário em 10/09/2026: ao fazer logout, o cookie `admin_2fa_verified` permanecia no navegador do usuário, permitindo que um login subsequente entrasse diretamente em `/admin` sem exigir novamente o código de 6 dígitos TOTP.
+Reaberto pelo usuário em 10/09/2026:
+1. Ao fazer logout, o cookie `admin_2fa_verified` permanecia no navegador do usuário, permitindo que um login subsequente entrasse diretamente em `/admin` sem exigir novamente o código de 6 dígitos TOTP.
+2. Solicitação de renomear a rota `/admin/seguranca` para `/admin/security`.
 
 ## Decisão
 - [ ] Aprovado

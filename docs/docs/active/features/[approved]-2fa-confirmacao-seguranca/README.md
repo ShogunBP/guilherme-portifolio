@@ -14,7 +14,7 @@ Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão
 
 ## Descrição Funcional
 
-1. **Ações Sensíveis Bloqueadas:** Na página `/admin/seguranca`, os botões "Desativar 2FA" e "Redefinir 2FA" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.
+1. **Ações Sensíveis Bloqueadas:** Na página `/admin/security`, os botões "Desativar 2FA" e "Redefinir 2FA" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.
 2. **Métodos de Confirmação:** O usuário pode confirmar fornecendo:
    - O código TOTP atual de 6 dígitos.
    - Um código de backup válido e não utilizado.
@@ -31,7 +31,7 @@ Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-bac
 ### Inclui
 
 - Rota/Server Action dedicada `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` que valida a prova de segundo fator antes de autorizar a ação.
-- Modal de confirmação na página `/admin/seguranca` acionado pelos botões "Desativar 2FA" e "Redefinir 2FA".
+- Modal de confirmação na página `/admin/security` acionado pelos botões "Desativar 2FA" e "Redefinir 2FA".
 - Suporte a validação por código TOTP de 6 dígitos ou código de backup `XXXX-XXXX`.
 - Opção visual de confirmação por e-mail com aviso de pendência futura.
 - Descarte e invalidação atômica de credenciais antigas ao redefinir.
@@ -50,7 +50,7 @@ Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-bac
 1. Criar rota `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` aceitando `{ action, code, type }`.
 2. Implementar verificação se o código é TOTP ou backup code não usado.
 3. Decisão de consumo: códigos de backup usados em confirmações sensíveis são marcados como consumidos para evitar reuso.
-4. Implementar modal no componente de segurança em `/admin/seguranca`.
+4. Implementar modal no componente de segurança em `/admin/security`.
 5. Implementar botão "Confirmar por e-mail" com mensagem clara e comentário `// TODO: Resend integration`.
 6. Conectar a confirmação bem-sucedida à desativação (`enabled = 0`) ou redefinição (novo setup).
 

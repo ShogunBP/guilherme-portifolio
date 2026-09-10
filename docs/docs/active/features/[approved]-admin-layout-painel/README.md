@@ -26,7 +26,7 @@ Entregar a estrutura base de navegação e o layout responsivo do painel adminis
    - `/admin/projetos` — Projetos & Portfólio (Fase 7)
    - `/admin/idioma` — Idioma & Traduções (Fase 3)
    - `/admin/guestbook` — Guestbook & Mensagens (Fase 8)
-   - `/admin/seguranca` — Segurança & 2FA (Cards 1 a 4)
+   - `/admin/security` — Segurança & 2FA (Cards 1 a 4)
 
 ## Depende de
 
@@ -62,7 +62,7 @@ Independente dos cards 1 a 4 de 2FA (pode ser executado em paralelo). Depende ap
    - `src/app/admin/(dashboard)/projetos/page.tsx`
    - `src/app/admin/(dashboard)/idioma/page.tsx`
    - `src/app/admin/(dashboard)/guestbook/page.tsx`
-4. Deixar preparada a rota e navegação para `src/app/admin/(dashboard)/seguranca/page.tsx`.
+4. Deixar preparada a rota e navegação para `src/app/admin/(dashboard)/security/page.tsx`.
 5. Validar navegação, breadcrumbs e logout em desktop e mobile.
 
 ## Critérios de Conclusão

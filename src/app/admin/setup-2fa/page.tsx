@@ -103,7 +103,7 @@ export default function Setup2FaPage() {
         setSubmitting(false)
       } else {
         // Fallback
-        router.push('/admin/seguranca?activated=1')
+        router.push('/admin/security?activated=1')
         router.refresh()
       }
     } catch {
@@ -114,7 +114,7 @@ export default function Setup2FaPage() {
 
   function handleFinishSetup() {
     if (!savedConfirmed) return
-    router.push('/admin/seguranca?activated=1')
+    router.push('/admin/security?activated=1')
     router.refresh()
   }
 
@@ -248,7 +248,7 @@ export default function Setup2FaPage() {
               </div>
             </div>
             <Link
-              href="/admin/seguranca"
+              href="/admin/security"
               className="text-xs text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -348,7 +348,7 @@ export default function Setup2FaPage() {
 
                 <div className="flex items-center gap-3">
                   <Link
-                    href="/admin/seguranca"
+                    href="/admin/security"
                     className="flex-1 text-center py-2.5 px-4 rounded-xl border border-purple-500/20 hover:border-purple-500/40 text-gray-300 hover:text-white text-xs font-medium transition-colors"
                   >
                     Cancelar
