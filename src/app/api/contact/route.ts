@@ -11,6 +11,15 @@ const requestCounts: { [ip: string]: { count: number; timestamp: number } } = {}
 const RATE_LIMIT = 5
 const RATE_LIMIT_WINDOW = 60 * 1000
 
+function escapeHtml(unsafe: string) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -57,9 +66,9 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400 })
   }
 
-  const sanitizedName = name.replace(/[<>]/g, '')
-  const sanitizedSubject = subject.replace(/[<>]/g, '')
-  const sanitizedMessage = message.replace(/[<>]/g, '')
+  const sanitizedName = escapeHtml(name)
+  const sanitizedSubject = escapeHtml(subject)
+  const sanitizedMessage = escapeHtml(message)
 
   try {
     const { error } = await resend.emails.send({
