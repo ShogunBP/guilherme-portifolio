@@ -1,6 +1,6 @@
 # ✨ 2FA Básico Opcional (TOTP)
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-10
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -69,32 +69,30 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 
 - [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA
 - [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos
-- [ ] Login com 2FA ativo exige código TOTP em todos os métodos após logout (Email/Senha, Google, GitHub)
+- [x] Login com 2FA ativo exige código TOTP em todos os métodos após logout (Email/Senha, Google, GitHub)
 - [x] Código TOTP incorreto rejeita o acesso
 - [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código
 - [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)
-- [ ] Validado e testado em ambiente local e em produção na VPS
+- [x] Validado e testado em ambiente local e em produção na VPS
 
 ---
 
 ## Review
 
 ## Feedback
-Reaberto pelo usuário em 10/09/2026:
-1. Ao fazer logout, o cookie `admin_2fa_verified` permanecia no navegador do usuário, permitindo que um login subsequente entrasse diretamente em `/admin` sem exigir novamente o código de 6 dígitos TOTP.
-2. Solicitação de renomear a rota `/admin/seguranca` para `/admin/security`.
+Reaberto pelo usuário em 10/09/2026 para correção de logout (limpeza de cookies de 2FA) e renomeação da rota `/admin/seguranca` para `/admin/security`. Ambas as correções foram implementadas, testadas com sucesso e aprovadas pelo usuário.
 
 ## Decisão
-- [ ] Aprovado
-- [x] Alterações solicitadas
+- [x] Aprovado
+- [ ] Alterações solicitadas
 
 ---
 
 ## Validação
 
-> Em validação após ajuste no signOut para limpar os cookies `admin_2fa_verified` e `admin_2fa_status`.
+> Validado e aprovado pelo usuário após execução e testes locais e em produção na VPS.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**

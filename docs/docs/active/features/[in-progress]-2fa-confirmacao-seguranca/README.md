@@ -1,6 +1,6 @@
 # ✨ Confirmação de Segurança para Desativar e Redefinir 2FA
 
-**Status:** approved
+**Status:** in-progress
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -24,7 +24,7 @@ Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão
 
 ## Depende de
 
-Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-backup`) devem estar `[done]`.
+Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão concluídos ✅.
 
 ## Escopo
 

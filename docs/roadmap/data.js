@@ -1,118 +1,5 @@
 var ROADMAP_TASKS = [
   {
-    "id": "esgotamento-disco-build-docker-vps",
-    "title": "Esgotamento de Disco na VPS por Acúmulo de Cache Docker e Risco de Perda de Dados via Prune de Volumes",
-    "category": "bugs",
-    "status": "in-progress",
-    "area": "active",
-    "date": "2026-09-10",
-    "priority": "alta",
-    "tags": [
-      "infra",
-      "banco"
-    ],
-    "progress": 20,
-    "progressFraction": {
-      "done": 1,
-      "total": 5
-    },
-    "summary": "Build Docker falhou com ResourceExhausted por disco 100% cheio e identificado risco crítico de perda do SQLite ao usar prune com flag --volumes.",
-    "sections": [
-      {
-        "heading": "Descrição",
-        "content": "Durante o deploy automático via GitHub Actions do commit `57e7bc3` na VPS, a etapa de build Docker falhou com `ResourceExhausted` e saída com status 17. O sistema operacional da VPS atingiu 100% de uso de disco na partição de arquivos do Docker (`/var/lib/docker/overlay2`), impedindo a criação de novos diretórios e extração de pacotes pelo gerenciador `apk`.\n\nAdicionalmente, identificou-se que o procedimento emergencial realizado anteriormente para liberar espaço (`docker system prune -af --volumes`) trazia um risco crítico: se executado com os containers parados ou após uma falha de deploy, o Docker interpreta o volume nomeado `portfolio-data` como órfão e o remove sumariamente, apagando de forma permanente o banco de dados `portfolio.db` (onde residem as credenciais, usuários, segredos TOTP e códigos de backup)."
-      },
-      {
-        "heading": "Como Reproduzir",
-        "content": "1. Realizar múltiplos deploys sucessivos com a instrução `docker compose build --no-cache` configurada no `.github/workflows/deploy.yml` sem rotina de limpeza intermediária.\n2. Cada execução acumula gigabytes de camadas e cache do BuildKit em `/var/lib/docker/overlay2`.\n3. Ao esgotar o disco livre, qualquer tentativa de compilação ou instalação de dependências no Dockerfile (`apk add --no-cache libc6-compat python3 make g++`) falha imediatamente com `No space left on device`.\n4. Executar `docker system prune -af --volumes` com a stack parada remove o volume persistente `portfolio-data`."
-      },
-      {
-        "heading": "Comportamento Esperado",
-        "content": "1. O workflow de CI/CD deve realizar a limpeza prévia de caches do BuildKit (`docker builder prune -af`) e imagens descartáveis (`docker image prune -af`) antes de cada compilação, garantindo espaço livre suficiente em disco.\n2. Volumes persistentes contendo o banco de dados SQLite (`portfolio-data`) **nunca** devem ser apagados por rotinas de limpeza de cache ou comandos acidentais com `--volumes`.\n3. Os logs de containers devem ter limites de tamanho e retenção definidos no `docker-compose.yml` para não consumirem disco indefinidamente."
-      },
-      {
-        "heading": "Comportamento Atual",
-        "content": "1. Builds executados com `docker compose build --no-cache` acumulavam cache sem descarte automático, culminando em `no space left on device` (código de saída 17).\n2. O procedimento de limpeza manual utilizado continha a flag `--volumes`, expondo o banco de dados em produção a perda irreversível caso o container estivesse inativo no momento da execução.\n3. Não havia limite de tamanho configurado para logs no `docker-compose.yml`."
-      },
-      {
-        "heading": "Contexto Técnico",
-        "content": "- **Camada afetada:** `infra` (pipeline CI/CD, configuração Docker e integridade do banco SQLite).\n- **Arquivo(s) suspeito(s) e modificados:**\n  - `.github/workflows/deploy.yml`: comandos de execução SSH durante o deploy.\n  - `docker-compose.yml`: configuração do serviço `portfolio` e volume `portfolio-data`.\n  - `.dockerignore`: inclusão de arquivos e pastas desnecessários no build context.\n- **Logs de erro reais:**\n  ```text\n  #6 [portfolio deps 2/5] RUN apk add --no-cache libc6-compat python3 make g++\n  #6 0.704 ( 1/33) Installing libstdc++-dev (15.2.0-r5)\n  #6 0.723 ERROR: libstdc++-dev-15.2.0-r5: failed to extract usr/include/c++/15.2.0/bits/gslice.h: No space left on device\n  #6 0.724 ERROR: libstdc++-dev-15.2.0-r5: No space left on device\n  ...\n  failed to solve: ResourceExhausted: failed to prepare 16m8sanhwk44e9j0giirsbk5w as xtv0dvojj6u81cw93o8vje4tx: mkdir /var/lib/docker/overlay2/xtv0dvojj6u81cw93o8vje4tx/diff: no space left on device\n  2026/09/10 05:00:51 Process exited with status 17\n  ```"
-      },
-      {
-        "heading": "Hipótese de Causa",
-        "content": "1. **Tentativa anterior e prática identificada (refutada/arriscada):** Uso manual de `docker system prune -af --volumes` quando o disco enchia. Testado e constatado o risco: a flag `--volumes` exclui qualquer volume que não esteja montado em um container atualmente em estado `running`. Caso o container falhe ou seja pausado, os dados do SQLite são destruídos.\n2. **Causa raiz confirmada:**\n   - O comando `docker compose build --no-cache` gera árvores inteiras de imagens e cache no BuildKit a cada commit. Na ausência de `prune` automatizado no CI/CD, o disco de partição raiz da VPS atingiu 100% de capacidade.\n   - Ausência de rotação de logs (`json-file` com `max-size`) permitia crescimento passivo de espaço ocupado."
-      },
-      {
-        "heading": "Plano de Correção",
-        "content": "1. Atualizar `.github/workflows/deploy.yml` para executar rotina cirúrgica antes do build:\n   - `docker builder prune -af || true`: descarta todo o cache acumulado do BuildKit.\n   - `docker image prune -af || true`: descarta imagens intermediárias sem uso, preservando containers em execução.\n   - `df -h /`: imprime no console do CI o espaço livre em disco para monitoramento contínuo.\n   - `docker image prune -f || true`: descarta imagens anteriores após a recriação do container com sucesso.\n2. Atualizar `docker-compose.yml` adicionando limites de log (`max-size: 10m`, `max-file: 3`).\n3. Adicionar `scratch/` no `.dockerignore` para não poluir o contexto de build.\n4. Formalizar instrução de operação segura: nunca utilizar a flag `--volumes` para limpeza de rotina em servidores de produção que usem SQLite em volumes Docker.\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-esgotamento-disco-build-docker-vps` e movida para `archive/bugs/`**"
-      }
-    ],
-    "path": "docs/active/bugs/[in-progress]-esgotamento-disco-build-docker-vps"
-  },
-  {
-    "id": "2fa-confirmacao-seguranca",
-    "title": "Confirmação de Segurança para Desativar e Redefinir 2FA",
-    "category": "features",
-    "status": "approved",
-    "area": "active",
-    "date": "2026-09-09",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "frontend",
-      "segurança"
-    ],
-    "progress": 8,
-    "progressFraction": {
-      "done": 1,
-      "total": 12
-    },
-    "summary": "Exigência de confirmação via TOTP ou código de backup para desativar ou redefinir 2FA, fechando a brecha do toggle simples.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão HTTP ativa poderia desativar a segurança), passando a exigir obrigatoriamente a comprovação de posse do segundo fator (TOTP atual ou código de backup) antes de permitir que o 2FA seja desativado ou redefinido."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Ações Sensíveis Bloqueadas:** Na página `/admin/security`, os botões \"Desativar 2FA\" e \"Redefinir 2FA\" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.\n2. **Métodos de Confirmação:** O usuário pode confirmar fornecendo:\n   - O código TOTP atual de 6 dígitos.\n   - Um código de backup válido e não utilizado.\n3. **Opção de E-mail (Mockada com Aviso):** O modal exibe também a opção \"Confirmar por e-mail\", mas não envia e-mails reais nesta fase — exibe um aviso claro de que a funcionalidade está em integração futura, com comentário `// TODO:` para integração futura via Resend.\n4. **Lógica de Desativação:** Após confirmação válida, marca `enabled = false`, desativa os códigos de backup e limpa o cookie `admin_2fa_verified`.\n5. **Lógica de Redefinição:** Descarta o secret atual e invalida todos os códigos de backup antigos, encaminhando imediatamente para novo setup com geração de novos códigos."
-      },
-      {
-        "heading": "Depende de",
-        "content": "Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-backup`) devem estar `[done]`."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Rota/Server Action dedicada `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` que valida a prova de segundo fator antes de autorizar a ação.\n- Modal de confirmação na página `/admin/security` acionado pelos botões \"Desativar 2FA\" e \"Redefinir 2FA\".\n- Suporte a validação por código TOTP de 6 dígitos ou código de backup `XXXX-XXXX`.\n- Opção visual de confirmação por e-mail com aviso de pendência futura.\n- Descarte e invalidação atômica de credenciais antigas ao redefinir.\n\n### Não inclui (por ora)\n\n- Envio real de mensagens por e-mail via Resend (interface presente com aviso transparente de pendência)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (rota de validação e desativação/redefinição no SQLite), frontend (modal de confirmação responsivo com tratamento de erros).\n- **Segurança:** nenhuma ação de desativação ou redefinição é executada sem a validação do token do segundo fator."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Criar rota `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` aceitando `{ action, code, type }`.\n2. Implementar verificação se o código é TOTP ou backup code não usado.\n3. Decisão de consumo: códigos de backup usados em confirmações sensíveis são marcados como consumidos para evitar reuso.\n4. Implementar modal no componente de segurança em `/admin/security`.\n5. Implementar botão \"Confirmar por e-mail\" com mensagem clara e comentário `// TODO: Resend integration`.\n6. Conectar a confirmação bem-sucedida à desativação (`enabled = 0`) ou redefinição (novo setup)."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [ ] Desativação de 2FA funciona com código TOTP atual válido\n- [ ] Desativação de 2FA funciona com código de backup válido\n- [ ] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [ ] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[approved]-2fa-confirmacao-seguranca"
-  },
-  {
     "id": "2fa-script-emergencia",
     "title": "Script de Emergência via SSH para 2FA",
     "category": "features",
@@ -340,117 +227,61 @@ var ROADMAP_TASKS = [
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
   },
   {
-    "id": "2fa-basico-opcional",
-    "title": "2FA Básico Opcional (TOTP)",
+    "id": "2fa-confirmacao-seguranca",
+    "title": "Confirmação de Segurança para Desativar e Redefinir 2FA",
     "category": "features",
     "status": "in-progress",
     "area": "active",
-    "date": "2026-09-10",
+    "date": "2026-09-09",
     "priority": "alta",
     "tags": [
       "backend",
       "frontend",
       "segurança"
     ],
-    "progress": 46,
+    "progress": 8,
     "progressFraction": {
-      "done": 6,
-      "total": 13
-    },
-    "summary": "Implementação base de 2FA via TOTP totalmente opcional, sincronizada em 7 dias, com setup por QR Code e toggle simples no painel.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238), sendo **totalmente opcional** — nunca forçado em nenhum login. O usuário ativa quando desejar pelo painel administrativo, mantendo o login funcionando apenas com o primeiro fator (senha ou social) enquanto estiver desativado."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Login Sem 2FA:** Se o 2FA nunca foi ativado (`enabled = false`), o login com senha ou OAuth direciona o usuário imediatamente para o painel (`/admin`), sem qualquer tela de 2FA.\n2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/security`) e clicar em \"Ativar 2FA\", abrindo a tela `/admin/setup-2fa`.\n3. **Ativação:** A tela de setup gera um segredo TOTP, exibe o QR Code escaneável e código alfanumérico para digitação manual, exigindo a confirmação do primeiro código de 6 dígitos para marcar `enabled = true`.\n4. **Desafio de Login:** Uma vez ativado, todo login subsequente (qualquer método) exige o código TOTP na tela `/admin/verify-2fa` antes de liberar o acesso.\n5. **Toggle Simples:** Nesta versão básica, o usuário pode desativar o 2FA com um simples toggle no painel logado (a exigência de confirmação de segundo fator para desativação será implementada no Card 3).\n6. **Duração de 7 dias:** A sessão JWT do NextAuth e o cookie de 2FA (`admin_2fa_verified`) possuem validade sincronizada de 7 dias (`604800` segundos)."
-      },
-      {
-        "heading": "Depende de",
-        "content": "`[done]-sqlite-persistencia-inicial`, `[done]-login-email-senha`, `[done]-login-social-google-github`. Este é o card 1 de 5 da Subfase 2.4 — os cards 2, 3 e 4 dependem deste."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Tabela `two_factor_auth` no SQLite (`id`, `secret`, `enabled`, `created_at`, `updated_at`).\n- Utilitários de geração e validação TOTP em `src/lib/totp.ts` utilizando a biblioteca `otpauth`.\n- Geração de imagem do QR Code em Data URL via biblioteca `qrcode`.\n- Cookie de sessão 2FA `admin_2fa_verified` assinado via HMAC-SHA256 (Web Crypto API em `src/lib/totp-token.ts`) com duração de 7 dias.\n- Configuração de `maxAge: 7 * 24 * 60 * 60` na sessão JWT do NextAuth em `src/auth.config.ts`.\n- Tela `/admin/setup-2fa` para geração de secret, exibição do QR Code e confirmação do primeiro código.\n- Tela `/admin/verify-2fa` para desafio de 6 dígitos no login, preservando deep-linking (`admin_redirect`).\n- Middleware condicional em `src/middleware.ts` que só exige 2FA se `enabled = true`.\n- Página de segurança mínima (`/admin/security`) com status do 2FA e botão para ativar/desativar.\n\n### Não inclui (por ora)\n\n- Códigos de backup descartáveis (escopo do Card 2).\n- Confirmação com segundo fator para desativar ou redefinir (escopo do Card 3).\n- Script de emergência via SSH (escopo do Card 4).\n- Layout completo do painel com as 6 seções (escopo do Card 5)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (NextAuth, rotas de validação TOTP, SQLite), frontend (telas de setup, verificação e página simples de segurança) e middleware (Edge Runtime).\n- **Dependências:** `otpauth` (RFC 6238) e `qrcode` (`@types/qrcode`).\n- **Impactos:** login sem 2FA permanece transparente; sessões ativas são sincronizadas para 7 dias."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Garantir que `otpauth`, `qrcode` e `@types/qrcode` estejam presentes no `package.json`.\n2. Implementar `src/lib/totp.ts` (geração de secret, URI, QR code e validação com tolerância de 30s).\n3. Implementar `src/lib/totp-token.ts` (assinatura/validação HMAC-SHA256 com `AUTH_SECRET` e validade de 7 dias).\n4. Configurar `session.maxAge: 604800` e `jwt.maxAge: 604800` em `src/auth.config.ts` e `src/auth.ts`.\n5. Criar tela de setup `/admin/setup-2fa` e rota de confirmação de primeiro código.\n6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.\n7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.\n8. Criar rota/página `/admin/security` com toggle simples de ativar/desativar.\n9. **Correção de Logout:** Garantir que o logout (signOut) limpe os cookies de 2FA (`admin_2fa_verified` e `admin_2fa_status`), evitando que um novo login reaproveite a verificação anterior.\n10. **Renomeação de Rota:** Migrar rota `/admin/seguranca` para `/admin/security` conforme solicitação do usuário."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA\n- [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos\n- [ ] Login com 2FA ativo exige código TOTP em todos os métodos após logout (Email/Senha, Google, GitHub)\n- [x] Código TOTP incorreto rejeita o acesso\n- [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código\n- [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> Em validação após ajuste no signOut para limpar os cookies `admin_2fa_verified` e `admin_2fa_status`.\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[in-progress]-2fa-basico-opcional"
-  },
-  {
-    "id": "2fa-codigos-backup",
-    "title": "Códigos de Backup do 2FA",
-    "category": "features",
-    "status": "in-progress",
-    "area": "active",
-    "date": "2026-09-10",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "segurança"
-    ],
-    "progress": 50,
-    "progressFraction": {
-      "done": 6,
+      "done": 1,
       "total": 12
     },
-    "summary": "Geração de 10 códigos de backup de uso único hasheados no SQLite com exibição única no setup e uso alternativo no login.",
+    "summary": "Exigência de confirmação via TOTP ou código de backup para desativar ou redefinir 2FA, fechando a brecha do toggle simples.",
     "sections": [
       {
         "heading": "Objetivo",
-        "content": "Implementar um mecanismo de recuperação de acesso caso o dispositivo do usuário com o app autenticador seja perdido ou fique inacessível, fornecendo 10 códigos de backup descartáveis gerados no momento da ativação do 2FA."
+        "content": "Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão HTTP ativa poderia desativar a segurança), passando a exigir obrigatoriamente a comprovação de posse do segundo fator (TOTP atual ou código de backup) antes de permitir que o 2FA seja desativado ou redefinido."
       },
       {
         "heading": "Descrição Funcional",
-        "content": "1. **Geração no Setup:** Ao confirmar o primeiro código TOTP com sucesso no setup do 2FA (Card 1), o sistema gera 10 códigos de backup aleatórios no formato `XXXX-XXXX`.\n2. **Exibição Única:** Os 10 códigos são exibidos em texto claro uma única vez em tela dedicada (`/admin/setup-2fa/backup-codes`), com aviso destacado, botão de cópia de todos os códigos e uma trava por checkbox obrigatório (\"Já salvei meus códigos de backup com segurança\") antes de prosseguir.\n3. **Uso no Login:** Na tela de verificação `/admin/verify-2fa`, é exibida a opção alternativa \"Usar código de backup\". O usuário digita um dos códigos em vez do TOTP de 6 dígitos.\n4. **Descarte Imediato:** Ao validar o hash com sucesso, o código é marcado como usado (`used = 1`) no banco de dados e nunca mais pode ser reutilizado."
+        "content": "1. **Ações Sensíveis Bloqueadas:** Na página `/admin/security`, os botões \"Desativar 2FA\" e \"Redefinir 2FA\" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.\n2. **Métodos de Confirmação:** O usuário pode confirmar fornecendo:\n   - O código TOTP atual de 6 dígitos.\n   - Um código de backup válido e não utilizado.\n3. **Opção de E-mail (Mockada com Aviso):** O modal exibe também a opção \"Confirmar por e-mail\", mas não envia e-mails reais nesta fase — exibe um aviso claro de que a funcionalidade está em integração futura, com comentário `// TODO:` para integração futura via Resend.\n4. **Lógica de Desativação:** Após confirmação válida, marca `enabled = false`, desativa os códigos de backup e limpa o cookie `admin_2fa_verified`.\n5. **Lógica de Redefinição:** Descarta o secret atual e invalida todos os códigos de backup antigos, encaminhando imediatamente para novo setup com geração de novos códigos."
       },
       {
         "heading": "Depende de",
-        "content": "Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de iniciar este. Os cards 3 e 4 dependem da estrutura criada aqui."
+        "content": "Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão concluídos ✅."
       },
       {
         "heading": "Escopo",
-        "content": "### Inclui\n\n- Tabela `two_factor_backup_codes` no SQLite (`id`, `user_id`, `code_hash`, `used`, `used_at`, `created_at`).\n- Geração criptograficamente segura de 10 códigos no formato `XXXX-XXXX`.\n- Armazenamento dos códigos sempre em formato hasheado (`bcryptjs`), nunca em texto puro.\n- Tela de exibição dos códigos pós-setup com botão de copiar e checkbox de confirmação.\n- Opção alternativa na tela `/admin/verify-2fa` para validar código de backup e emitir o cookie de sessão `admin_2fa_verified`.\n- Rejeição estrita de códigos já utilizados.\n\n### Não inclui (por ora)\n\n- Regeneração avulsa de códigos de backup fora do fluxo de redefinição completa (melhoria futura).\n- Exigência de código de backup para confirmar desativação ou redefinição de segurança (escopo do Card 3)."
+        "content": "### Inclui\n\n- Rota/Server Action dedicada `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` que valida a prova de segundo fator antes de autorizar a ação.\n- Modal de confirmação na página `/admin/security` acionado pelos botões \"Desativar 2FA\" e \"Redefinir 2FA\".\n- Suporte a validação por código TOTP de 6 dígitos ou código de backup `XXXX-XXXX`.\n- Opção visual de confirmação por e-mail com aviso de pendência futura.\n- Descarte e invalidação atômica de credenciais antigas ao redefinir.\n\n### Não inclui (por ora)\n\n- Envio real de mensagens por e-mail via Resend (interface presente com aviso transparente de pendência)."
       },
       {
         "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (geração segura, hashing com bcrypt, persistência SQLite), frontend (etapa de exibição no setup e alternância de input na verificação).\n- **Dependências:** `bcryptjs` (já presente no projeto) e módulo nativo `crypto`.\n- **Segurança:** códigos são armazenados exclusivamente como hashes; após uso, a flag `used` é ativada imediatamente."
+        "content": "- **Camadas envolvidas:** backend (rota de validação e desativação/redefinição no SQLite), frontend (modal de confirmação responsivo com tratamento de erros).\n- **Segurança:** nenhuma ação de desativação ou redefinição é executada sem a validação do token do segundo fator."
       },
       {
         "heading": "Plano de Implementação",
-        "content": "1. Criar a tabela `two_factor_backup_codes` em `src/lib/db.ts`.\n2. Implementar em `src/lib/totp.ts` funções para gerar 10 códigos `XXXX-XXXX`, hashear e persistir no SQLite.\n3. Criar função de validação de código de backup que compara o hash, valida se `used === 0` e atualiza para `used = 1` com timestamp.\n4. Adicionar etapa no fluxo de setup (`/admin/setup-2fa`) para exibir os 10 códigos em texto claro com botão de cópia e trava por checkbox.\n5. Adicionar alternância na tela `/admin/verify-2fa` para alternar entre código TOTP e código de backup.\n6. Validar a rejeição de códigos já consumidos."
+        "content": "1. Criar rota `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` aceitando `{ action, code, type }`.\n2. Implementar verificação se o código é TOTP ou backup code não usado.\n3. Decisão de consumo: códigos de backup usados em confirmações sensíveis são marcados como consumidos para evitar reuso.\n4. Implementar modal no componente de segurança em `/admin/security`.\n5. Implementar botão \"Confirmar por e-mail\" com mensagem clara e comentário `// TODO: Resend integration`.\n6. Conectar a confirmação bem-sucedida à desativação (`enabled = 0`) ou redefinição (novo setup)."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [x] 10 códigos de backup no formato `XXXX-XXXX` são gerados na ativação do 2FA\n- [x] Códigos são armazenados hasheados no SQLite (nunca em texto puro)\n- [x] Códigos são exibidos em texto claro exatamente uma vez, com botão de copiar e trava de confirmação antes de prosseguir\n- [x] Opção \"Usar código de backup\" na tela de verificação permite login bem-sucedido\n- [x] Código de backup usado é marcado como consumido e rejeitado em tentativas posteriores\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
+        "content": "- [ ] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [ ] Desativação de 2FA funciona com código TOTP atual válido\n- [ ] Desativação de 2FA funciona com código de backup válido\n- [ ] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [ ] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**"
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**"
       }
     ],
-    "path": "docs/active/features/[in-progress]-2fa-codigos-backup"
+    "path": "docs/active/features/[in-progress]-2fa-confirmacao-seguranca"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -507,6 +338,62 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/archive/bugs/[done]-dropdown-remove-scroll-pagina"
+  },
+  {
+    "id": "esgotamento-disco-build-docker-vps",
+    "title": "Esgotamento de Disco na VPS por Acúmulo de Cache Docker e Risco de Perda de Dados via Prune de Volumes",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-10",
+    "priority": "alta",
+    "tags": [
+      "infra",
+      "banco"
+    ],
+    "progress": 80,
+    "progressFraction": {
+      "done": 4,
+      "total": 5
+    },
+    "summary": "Build Docker falhou com ResourceExhausted por disco 100% cheio e identificado risco crítico de perda do SQLite ao usar prune com flag --volumes.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "Durante o deploy automático via GitHub Actions do commit `57e7bc3` na VPS, a etapa de build Docker falhou com `ResourceExhausted` e saída com status 17. O sistema operacional da VPS atingiu 100% de uso de disco na partição de arquivos do Docker (`/var/lib/docker/overlay2`), impedindo a criação de novos diretórios e extração de pacotes pelo gerenciador `apk`.\n\nAdicionalmente, identificou-se que o procedimento emergencial realizado anteriormente para liberar espaço (`docker system prune -af --volumes`) trazia um risco crítico: se executado com os containers parados ou após uma falha de deploy, o Docker interpreta o volume nomeado `portfolio-data` como órfão e o remove sumariamente, apagando de forma permanente o banco de dados `portfolio.db` (onde residem as credenciais, usuários, segredos TOTP e códigos de backup)."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Realizar múltiplos deploys sucessivos com a instrução `docker compose build --no-cache` configurada no `.github/workflows/deploy.yml` sem rotina de limpeza intermediária.\n2. Cada execução acumula gigabytes de camadas e cache do BuildKit em `/var/lib/docker/overlay2`.\n3. Ao esgotar o disco livre, qualquer tentativa de compilação ou instalação de dependências no Dockerfile (`apk add --no-cache libc6-compat python3 make g++`) falha imediatamente com `No space left on device`.\n4. Executar `docker system prune -af --volumes` com a stack parada remove o volume persistente `portfolio-data`."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "1. O workflow de CI/CD deve realizar a limpeza prévia de caches do BuildKit (`docker builder prune -af`) e imagens descartáveis (`docker image prune -af`) antes de cada compilação, garantindo espaço livre suficiente em disco.\n2. Volumes persistentes contendo o banco de dados SQLite (`portfolio-data`) **nunca** devem ser apagados por rotinas de limpeza de cache ou comandos acidentais com `--volumes`.\n3. Os logs de containers devem ter limites de tamanho e retenção definidos no `docker-compose.yml` para não consumirem disco indefinidamente."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "1. Builds executados com `docker compose build --no-cache` acumulavam cache sem descarte automático, culminando em `no space left on device` (código de saída 17).\n2. O procedimento de limpeza manual utilizado continha a flag `--volumes`, expondo o banco de dados em produção a perda irreversível caso o container estivesse inativo no momento da execução.\n3. Não havia limite de tamanho configurado para logs no `docker-compose.yml`."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- **Camada afetada:** `infra` (pipeline CI/CD, configuração Docker e integridade do banco SQLite).\n- **Arquivo(s) suspeito(s) e modificados:**\n  - `.github/workflows/deploy.yml`: comandos de execução SSH durante o deploy.\n  - `docker-compose.yml`: configuração do serviço `portfolio` e volume `portfolio-data`.\n  - `.dockerignore`: inclusão de arquivos e pastas desnecessários no build context.\n- **Logs de erro reais:**\n  ```text\n  #6 [portfolio deps 2/5] RUN apk add --no-cache libc6-compat python3 make g++\n  #6 0.704 ( 1/33) Installing libstdc++-dev (15.2.0-r5)\n  #6 0.723 ERROR: libstdc++-dev-15.2.0-r5: failed to extract usr/include/c++/15.2.0/bits/gslice.h: No space left on device\n  #6 0.724 ERROR: libstdc++-dev-15.2.0-r5: No space left on device\n  ...\n  failed to solve: ResourceExhausted: failed to prepare 16m8sanhwk44e9j0giirsbk5w as xtv0dvojj6u81cw93o8vje4tx: mkdir /var/lib/docker/overlay2/xtv0dvojj6u81cw93o8vje4tx/diff: no space left on device\n  2026/09/10 05:00:51 Process exited with status 17\n  ```"
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "1. **Tentativa anterior e prática identificada (refutada/arriscada):** Uso manual de `docker system prune -af --volumes` quando o disco enchia. Testado e constatado o risco: a flag `--volumes` exclui qualquer volume que não esteja montado em um container atualmente em estado `running`. Caso o container falhe ou seja pausado, os dados do SQLite são destruídos.\n2. **Causa raiz confirmada:**\n   - O comando `docker compose build --no-cache` gera árvores inteiras de imagens e cache no BuildKit a cada commit. Na ausência de `prune` automatizado no CI/CD, o disco de partição raiz da VPS atingiu 100% de capacidade.\n   - Ausência de rotação de logs (`json-file` com `max-size`) permitia crescimento passivo de espaço ocupado."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Atualizar `.github/workflows/deploy.yml` para executar rotina cirúrgica antes do build:\n   - `docker builder prune -af || true`: descarta todo o cache acumulado do BuildKit.\n   - `docker image prune -af || true`: descarta imagens intermediárias sem uso, preservando containers em execução.\n   - `df -h /`: imprime no console do CI o espaço livre em disco para monitoramento contínuo.\n   - `docker image prune -f || true`: descarta imagens anteriores após a recriação do container com sucesso.\n2. Atualizar `docker-compose.yml` adicionando limites de log (`max-size: 10m`, `max-file: 3`).\n3. Adicionar `scratch/` no `.dockerignore` para não poluir o contexto de build.\n4. Formalizar instrução de operação segura: nunca utilizar a flag `--volumes` para limpeza de rotina em servidores de produção que usem SQLite em volumes Docker.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Validado com sucesso após execução do deploy no GitHub Actions com auto-prune de builder e imagens, mantendo integridade do volume persistente do SQLite.\n\n- [x] Bug não reproduz mais\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-esgotamento-disco-build-docker-vps` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-esgotamento-disco-build-docker-vps"
   },
   {
     "id": "falha-silenciosa-build-docker-vps-sigsegv",
@@ -1119,6 +1006,119 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/archive/features/[cancelled]-auth-painel-admin"
+  },
+  {
+    "id": "2fa-basico-opcional",
+    "title": "2FA Básico Opcional (TOTP)",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-10",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 12,
+      "total": 13
+    },
+    "summary": "Implementação base de 2FA via TOTP totalmente opcional, sincronizada em 7 dias, com setup por QR Code e toggle simples no painel.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238), sendo **totalmente opcional** — nunca forçado em nenhum login. O usuário ativa quando desejar pelo painel administrativo, mantendo o login funcionando apenas com o primeiro fator (senha ou social) enquanto estiver desativado."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Login Sem 2FA:** Se o 2FA nunca foi ativado (`enabled = false`), o login com senha ou OAuth direciona o usuário imediatamente para o painel (`/admin`), sem qualquer tela de 2FA.\n2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/security`) e clicar em \"Ativar 2FA\", abrindo a tela `/admin/setup-2fa`.\n3. **Ativação:** A tela de setup gera um segredo TOTP, exibe o QR Code escaneável e código alfanumérico para digitação manual, exigindo a confirmação do primeiro código de 6 dígitos para marcar `enabled = true`.\n4. **Desafio de Login:** Uma vez ativado, todo login subsequente (qualquer método) exige o código TOTP na tela `/admin/verify-2fa` antes de liberar o acesso.\n5. **Toggle Simples:** Nesta versão básica, o usuário pode desativar o 2FA com um simples toggle no painel logado (a exigência de confirmação de segundo fator para desativação será implementada no Card 3).\n6. **Duração de 7 dias:** A sessão JWT do NextAuth e o cookie de 2FA (`admin_2fa_verified`) possuem validade sincronizada de 7 dias (`604800` segundos)."
+      },
+      {
+        "heading": "Depende de",
+        "content": "`[done]-sqlite-persistencia-inicial`, `[done]-login-email-senha`, `[done]-login-social-google-github`. Este é o card 1 de 5 da Subfase 2.4 — os cards 2, 3 e 4 dependem deste."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Tabela `two_factor_auth` no SQLite (`id`, `secret`, `enabled`, `created_at`, `updated_at`).\n- Utilitários de geração e validação TOTP em `src/lib/totp.ts` utilizando a biblioteca `otpauth`.\n- Geração de imagem do QR Code em Data URL via biblioteca `qrcode`.\n- Cookie de sessão 2FA `admin_2fa_verified` assinado via HMAC-SHA256 (Web Crypto API em `src/lib/totp-token.ts`) com duração de 7 dias.\n- Configuração de `maxAge: 7 * 24 * 60 * 60` na sessão JWT do NextAuth em `src/auth.config.ts`.\n- Tela `/admin/setup-2fa` para geração de secret, exibição do QR Code e confirmação do primeiro código.\n- Tela `/admin/verify-2fa` para desafio de 6 dígitos no login, preservando deep-linking (`admin_redirect`).\n- Middleware condicional em `src/middleware.ts` que só exige 2FA se `enabled = true`.\n- Página de segurança mínima (`/admin/security`) com status do 2FA e botão para ativar/desativar.\n\n### Não inclui (por ora)\n\n- Códigos de backup descartáveis (escopo do Card 2).\n- Confirmação com segundo fator para desativar ou redefinir (escopo do Card 3).\n- Script de emergência via SSH (escopo do Card 4).\n- Layout completo do painel com as 6 seções (escopo do Card 5)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** backend (NextAuth, rotas de validação TOTP, SQLite), frontend (telas de setup, verificação e página simples de segurança) e middleware (Edge Runtime).\n- **Dependências:** `otpauth` (RFC 6238) e `qrcode` (`@types/qrcode`).\n- **Impactos:** login sem 2FA permanece transparente; sessões ativas são sincronizadas para 7 dias."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Garantir que `otpauth`, `qrcode` e `@types/qrcode` estejam presentes no `package.json`.\n2. Implementar `src/lib/totp.ts` (geração de secret, URI, QR code e validação com tolerância de 30s).\n3. Implementar `src/lib/totp-token.ts` (assinatura/validação HMAC-SHA256 com `AUTH_SECRET` e validade de 7 dias).\n4. Configurar `session.maxAge: 604800` e `jwt.maxAge: 604800` em `src/auth.config.ts` e `src/auth.ts`.\n5. Criar tela de setup `/admin/setup-2fa` e rota de confirmação de primeiro código.\n6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.\n7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.\n8. Criar rota/página `/admin/security` com toggle simples de ativar/desativar.\n9. **Correção de Logout:** Garantir que o logout (signOut) limpe os cookies de 2FA (`admin_2fa_verified` e `admin_2fa_status`), evitando que um novo login reaproveite a verificação anterior.\n10. **Renomeação de Rota:** Migrar rota `/admin/seguranca` para `/admin/security` conforme solicitação do usuário."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA\n- [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos\n- [x] Login com 2FA ativo exige código TOTP em todos os métodos após logout (Email/Senha, Google, GitHub)\n- [x] Código TOTP incorreto rejeita o acesso\n- [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código\n- [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)\n- [x] Validado e testado em ambiente local e em produção na VPS\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Validado e aprovado pelo usuário após execução e testes locais e em produção na VPS.\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-2fa-basico-opcional"
+  },
+  {
+    "id": "2fa-codigos-backup",
+    "title": "Códigos de Backup do 2FA",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-10",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "segurança"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 11,
+      "total": 12
+    },
+    "summary": "Geração de 10 códigos de backup de uso único hasheados no SQLite com exibição única no setup e uso alternativo no login.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Implementar um mecanismo de recuperação de acesso caso o dispositivo do usuário com o app autenticador seja perdido ou fique inacessível, fornecendo 10 códigos de backup descartáveis gerados no momento da ativação do 2FA."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Geração no Setup:** Ao confirmar o primeiro código TOTP com sucesso no setup do 2FA (Card 1), o sistema gera 10 códigos de backup aleatórios no formato `XXXX-XXXX`.\n2. **Exibição Única:** Os 10 códigos são exibidos em texto claro uma única vez em tela dedicada (`/admin/setup-2fa/backup-codes`), com aviso destacado, botão de cópia de todos os códigos e uma trava por checkbox obrigatório (\"Já salvei meus códigos de backup com segurança\") antes de prosseguir.\n3. **Uso no Login:** Na tela de verificação `/admin/verify-2fa`, é exibida a opção alternativa \"Usar código de backup\". O usuário digita um dos códigos em vez do TOTP de 6 dígitos.\n4. **Descarte Imediato:** Ao validar o hash com sucesso, o código é marcado como usado (`used = 1`) no banco de dados e nunca mais pode ser reutilizado."
+      },
+      {
+        "heading": "Depende de",
+        "content": "Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de iniciar este. Os cards 3 e 4 dependem da estrutura criada aqui."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Tabela `two_factor_backup_codes` no SQLite (`id`, `user_id`, `code_hash`, `used`, `used_at`, `created_at`).\n- Geração criptograficamente segura de 10 códigos no formato `XXXX-XXXX`.\n- Armazenamento dos códigos sempre em formato hasheado (`bcryptjs`), nunca em texto puro.\n- Tela de exibição dos códigos pós-setup com botão de copiar e checkbox de confirmação.\n- Opção alternativa na tela `/admin/verify-2fa` para validar código de backup e emitir o cookie de sessão `admin_2fa_verified`.\n- Rejeição estrita de códigos já utilizados.\n\n### Não inclui (por ora)\n\n- Regeneração avulsa de códigos de backup fora do fluxo de redefinição completa (melhoria futura).\n- Exigência de código de backup para confirmar desativação ou redefinição de segurança (escopo do Card 3)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** backend (geração segura, hashing com bcrypt, persistência SQLite), frontend (etapa de exibição no setup e alternância de input na verificação).\n- **Dependências:** `bcryptjs` (já presente no projeto) e módulo nativo `crypto`.\n- **Segurança:** códigos são armazenados exclusivamente como hashes; após uso, a flag `used` é ativada imediatamente."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar a tabela `two_factor_backup_codes` em `src/lib/db.ts`.\n2. Implementar em `src/lib/totp.ts` funções para gerar 10 códigos `XXXX-XXXX`, hashear e persistir no SQLite.\n3. Criar função de validação de código de backup que compara o hash, valida se `used === 0` e atualiza para `used = 1` com timestamp.\n4. Adicionar etapa no fluxo de setup (`/admin/setup-2fa`) para exibir os 10 códigos em texto claro com botão de cópia e trava por checkbox.\n5. Adicionar alternância na tela `/admin/verify-2fa` para alternar entre código TOTP e código de backup.\n6. Validar a rejeição de códigos já consumidos."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] 10 códigos de backup no formato `XXXX-XXXX` são gerados na ativação do 2FA\n- [x] Códigos são armazenados hasheados no SQLite (nunca em texto puro)\n- [x] Códigos são exibidos em texto claro exatamente uma vez, com botão de copiar e trava de confirmação antes de prosseguir\n- [x] Opção \"Usar código de backup\" na tela de verificação permite login bem-sucedido\n- [x] Código de backup usado é marcado como consumido e rejeitado em tentativas posteriores\n- [x] Validado e testado em ambiente local e em produção na VPS\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Validado e aprovado pelo usuário com geração de 10 códigos de backup, exibição com trava, login com consumo de código de backup e rejeição de reuso.\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-2fa-codigos-backup"
   },
   {
     "id": "login-email-senha",

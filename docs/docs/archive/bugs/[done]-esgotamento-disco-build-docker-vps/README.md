@@ -1,6 +1,6 @@
 # 🐛 Esgotamento de Disco na VPS por Acúmulo de Cache Docker e Risco de Perda de Dados via Prune de Volumes
 
-**Status:** in-progress
+**Status:** `done`
 **Data:** 2026-09-10
 **Prioridade:** `alta`
 **Tags:** `infra`, `banco`
@@ -84,8 +84,8 @@ Solução implementada no commit `1ba01a9`. A rotina de deploy agora executa lim
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> Validado com sucesso após execução do deploy no GitHub Actions com auto-prune de builder e imagens, mantendo integridade do volume persistente do SQLite.
 
-- [ ] Bug não reproduz mais
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-esgotamento-disco-build-docker-vps` e movida para `archive/bugs/`**
+- [x] Bug não reproduz mais
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-esgotamento-disco-build-docker-vps` e movida para `archive/bugs/`**

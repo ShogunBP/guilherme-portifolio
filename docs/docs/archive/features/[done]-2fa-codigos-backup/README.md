@@ -1,6 +1,6 @@
 # ✨ Códigos de Backup do 2FA
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-10
 **Prioridade:** `alta`
 **Tags:** `backend`, `segurança`
@@ -61,14 +61,14 @@ Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de i
 - [x] Códigos são exibidos em texto claro exatamente uma vez, com botão de copiar e trava de confirmação antes de prosseguir
 - [x] Opção "Usar código de backup" na tela de verificação permite login bem-sucedido
 - [x] Código de backup usado é marcado como consumido e rejeitado em tentativas posteriores
-- [ ] Validado e testado em ambiente local e em produção na VPS
+- [x] Validado e testado em ambiente local e em produção na VPS
 
 ---
 
 ## Review
 
 ## Feedback
-Aprovado pelo usuário em 09/09/2026. Pronto para execução assim que o Card 1 for concluído.
+Aprovado pelo usuário em 09/09/2026. Implementação executada no commit `d3c827c`, testada integralmente e aprovada em 10/09/2026.
 
 ## Decisão
 - [x] Aprovado
@@ -78,9 +78,9 @@ Aprovado pelo usuário em 09/09/2026. Pronto para execução assim que o Card 1 
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> Validado e aprovado pelo usuário com geração de 10 códigos de backup, exibição com trava, login com consumo de código de backup e rejeição de reuso.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**
