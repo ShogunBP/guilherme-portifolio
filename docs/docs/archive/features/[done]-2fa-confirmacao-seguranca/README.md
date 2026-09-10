@@ -1,6 +1,6 @@
 # ✨ Confirmação de Segurança para Desativar e Redefinir 2FA
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
@@ -61,14 +61,14 @@ Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão 
 - [x] Desativação de 2FA funciona com código de backup válido
 - [x] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup
 - [x] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio
-- [ ] Validado e testado em ambiente local e em produção na VPS
+- [x] Validado e testado em ambiente local e em produção na VPS
 
 ---
 
 ## Review
 
 ## Feedback
-Aprovado pelo usuário em 09/09/2026. Depende da conclusão prévia dos Cards 1 e 2.
+Implementação validada e aprovada pelo usuário em 10/09/2026 após testes de confirmação para desativação e redefinição com TOTP e backup codes.
 
 ## Decisão
 - [x] Aprovado
@@ -78,9 +78,9 @@ Aprovado pelo usuário em 09/09/2026. Depende da conclusão prévia dos Cards 1 
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> Validado e aprovado em produção na VPS pelo usuário em 10/09/2026. Todas as ações sensíveis exigem segundo fator antes de serem executadas.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**

@@ -227,63 +227,6 @@
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
   },
   {
-    "id": "2fa-confirmacao-seguranca",
-    "title": "Confirmação de Segurança para Desativar e Redefinir 2FA",
-    "category": "features",
-    "status": "in-progress",
-    "area": "active",
-    "date": "2026-09-09",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "frontend",
-      "segurança"
-    ],
-    "progress": 50,
-    "progressFraction": {
-      "done": 6,
-      "total": 12
-    },
-    "summary": "Exigência de confirmação via TOTP ou código de backup para desativar ou redefinir 2FA, fechando a brecha do toggle simples.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão HTTP ativa poderia desativar a segurança), passando a exigir obrigatoriamente a comprovação de posse do segundo fator (TOTP atual ou código de backup) antes de permitir que o 2FA seja desativado ou redefinido."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Ações Sensíveis Bloqueadas:** Na página `/admin/security`, os botões \"Desativar 2FA\" e \"Redefinir 2FA\" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.\n2. **Métodos de Confirmação:** O usuário pode confirmar fornecendo:\n   - O código TOTP atual de 6 dígitos.\n   - Um código de backup válido e não utilizado.\n3. **Opção de E-mail (Mockada com Aviso):** O modal exibe também a opção \"Confirmar por e-mail\", mas não envia e-mails reais nesta fase — exibe um aviso claro de que a funcionalidade está em integração futura, com comentário `// TODO:` para integração futura via Resend.\n4. **Lógica de Desativação:** Após confirmação válida, marca `enabled = false`, desativa os códigos de backup e limpa o cookie `admin_2fa_verified`.\n5. **Lógica de Redefinição:** Descarta o secret atual e invalida todos os códigos de backup antigos, encaminhando imediatamente para novo setup com geração de novos códigos."
-      },
-      {
-        "heading": "Depende de",
-        "content": "Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão concluídos ✅."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Rota/Server Action dedicada `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` que valida a prova de segundo fator antes de autorizar a ação.\n- Modal de confirmação na página `/admin/security` acionado pelos botões \"Desativar 2FA\" e \"Redefinir 2FA\".\n- Suporte a validação por código TOTP de 6 dígitos ou código de backup `XXXX-XXXX`.\n- Opção visual de confirmação por e-mail com aviso de pendência futura.\n- Descarte e invalidação atômica de credenciais antigas ao redefinir.\n\n### Não inclui (por ora)\n\n- Envio real de mensagens por e-mail via Resend (interface presente com aviso transparente de pendência)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (rota de validação e desativação/redefinição no SQLite), frontend (modal de confirmação responsivo com tratamento de erros).\n- **Segurança:** nenhuma ação de desativação ou redefinição é executada sem a validação do token do segundo fator."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Criar rota `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` aceitando `{ action, code, type }`.\n2. Implementar verificação se o código é TOTP ou backup code não usado.\n3. Decisão de consumo: códigos de backup usados em confirmações sensíveis são marcados como consumidos para evitar reuso.\n4. Implementar modal no componente de segurança em `/admin/security`.\n5. Implementar botão \"Confirmar por e-mail\" com mensagem clara e comentário `// TODO: Resend integration`.\n6. Conectar a confirmação bem-sucedida à desativação (`enabled = 0`) ou redefinição (novo setup)."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [x] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [x] Desativação de 2FA funciona com código TOTP atual válido\n- [x] Desativação de 2FA funciona com código de backup válido\n- [x] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [x] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[in-progress]-2fa-confirmacao-seguranca"
-  },
-  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -1119,6 +1062,63 @@
       }
     ],
     "path": "docs/archive/features/[done]-2fa-codigos-backup"
+  },
+  {
+    "id": "2fa-confirmacao-seguranca",
+    "title": "Confirmação de Segurança para Desativar e Redefinir 2FA",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-09",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 11,
+      "total": 12
+    },
+    "summary": "Exigência de confirmação via TOTP ou código de backup para desativar ou redefinir 2FA, fechando a brecha do toggle simples.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Eliminar a vulnerabilidade do toggle simples (onde qualquer pessoa com a sessão HTTP ativa poderia desativar a segurança), passando a exigir obrigatoriamente a comprovação de posse do segundo fator (TOTP atual ou código de backup) antes de permitir que o 2FA seja desativado ou redefinido."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Ações Sensíveis Bloqueadas:** Na página `/admin/security`, os botões \"Desativar 2FA\" e \"Redefinir 2FA\" deixam de executar a ação imediatamente e passam a abrir um modal de confirmação de segurança.\n2. **Métodos de Confirmação:** O usuário pode confirmar fornecendo:\n   - O código TOTP atual de 6 dígitos.\n   - Um código de backup válido e não utilizado.\n3. **Opção de E-mail (Mockada com Aviso):** O modal exibe também a opção \"Confirmar por e-mail\", mas não envia e-mails reais nesta fase — exibe um aviso claro de que a funcionalidade está em integração futura, com comentário `// TODO:` para integração futura via Resend.\n4. **Lógica de Desativação:** Após confirmação válida, marca `enabled = false`, desativa os códigos de backup e limpa o cookie `admin_2fa_verified`.\n5. **Lógica de Redefinição:** Descarta o secret atual e invalida todos os códigos de backup antigos, encaminhando imediatamente para novo setup com geração de novos códigos."
+      },
+      {
+        "heading": "Depende de",
+        "content": "Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão concluídos ✅."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Rota/Server Action dedicada `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` que valida a prova de segundo fator antes de autorizar a ação.\n- Modal de confirmação na página `/admin/security` acionado pelos botões \"Desativar 2FA\" e \"Redefinir 2FA\".\n- Suporte a validação por código TOTP de 6 dígitos ou código de backup `XXXX-XXXX`.\n- Opção visual de confirmação por e-mail com aviso de pendência futura.\n- Descarte e invalidação atômica de credenciais antigas ao redefinir.\n\n### Não inclui (por ora)\n\n- Envio real de mensagens por e-mail via Resend (interface presente com aviso transparente de pendência)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** backend (rota de validação e desativação/redefinição no SQLite), frontend (modal de confirmação responsivo com tratamento de erros).\n- **Segurança:** nenhuma ação de desativação ou redefinição é executada sem a validação do token do segundo fator."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar rota `src/app/api/admin/2fa/confirm-sensitive-action/route.ts` aceitando `{ action, code, type }`.\n2. Implementar verificação se o código é TOTP ou backup code não usado.\n3. Decisão de consumo: códigos de backup usados em confirmações sensíveis são marcados como consumidos para evitar reuso.\n4. Implementar modal no componente de segurança em `/admin/security`.\n5. Implementar botão \"Confirmar por e-mail\" com mensagem clara e comentário `// TODO: Resend integration`.\n6. Conectar a confirmação bem-sucedida à desativação (`enabled = 0`) ou redefinição (novo setup)."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [x] Desativação de 2FA funciona com código TOTP atual válido\n- [x] Desativação de 2FA funciona com código de backup válido\n- [x] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [x] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [x] Validado e testado em ambiente local e em produção na VPS\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Validado e aprovado em produção na VPS pelo usuário em 10/09/2026. Todas as ações sensíveis exigem segundo fator antes de serem executadas.\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-2fa-confirmacao-seguranca` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-2fa-confirmacao-seguranca"
   },
   {
     "id": "login-email-senha",
