@@ -56,11 +56,11 @@ Cards 1 (`[done]-2fa-basico-opcional`) e 2 (`[done]-2fa-codigos-backup`) estão 
 
 ## Critérios de Conclusão
 
-- [ ] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada
-- [ ] Desativação de 2FA funciona com código TOTP atual válido
-- [ ] Desativação de 2FA funciona com código de backup válido
-- [ ] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup
-- [ ] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio
+- [x] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada
+- [x] Desativação de 2FA funciona com código TOTP atual válido
+- [x] Desativação de 2FA funciona com código de backup válido
+- [x] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup
+- [x] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio
 - [ ] Validado e testado em ambiente local e em produção na VPS
 
 ---

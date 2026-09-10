@@ -139,6 +139,58 @@ export function disableTwoFactorAuth(): void {
 }
 
 /**
+ * Desativa o 2FA e invalida todos os códigos de backup não utilizados.
+ */
+export function disableTwoFactorAndInvalidateBackups(userId = 'default'): void {
+  const tx = db.transaction(() => {
+    db.prepare(`
+      UPDATE two_factor_auth
+      SET enabled = 0, updated_at = datetime('now')
+      WHERE id = 'default'
+    `).run()
+
+    db.prepare(`
+      UPDATE two_factor_backup_codes
+      SET used = 1, used_at = datetime('now')
+      WHERE user_id = ? AND used = 0
+    `).run(userId)
+  })
+
+  tx()
+}
+
+/**
+ * Redefine o segredo de 2FA (limpando o secret e desativando) e exclui todos os códigos de backup antigos.
+ */
+export function resetTwoFactorSecret(userId = 'default'): void {
+  const tx = db.transaction(() => {
+    db.prepare(`
+      UPDATE two_factor_auth
+      SET secret = '', enabled = 0, updated_at = datetime('now')
+      WHERE id = 'default'
+    `).run()
+
+    db.prepare(`
+      DELETE FROM two_factor_backup_codes
+      WHERE user_id = ?
+    `).run(userId)
+  })
+
+  tx()
+}
+
+/**
+ * Invalida todos os códigos de backup não utilizados de um usuário.
+ */
+export function invalidateAllBackupCodes(userId = 'default'): void {
+  db.prepare(`
+    UPDATE two_factor_backup_codes
+    SET used = 1, used_at = datetime('now')
+    WHERE user_id = ? AND used = 0
+  `).run(userId)
+}
+
+/**
  * Interface do registro de código de backup no SQLite.
  */
 export interface BackupCodeRecord {

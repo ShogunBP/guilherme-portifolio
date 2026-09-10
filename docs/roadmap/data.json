@@ -239,9 +239,9 @@
       "frontend",
       "segurança"
     ],
-    "progress": 8,
+    "progress": 50,
     "progressFraction": {
-      "done": 1,
+      "done": 6,
       "total": 12
     },
     "summary": "Exigência de confirmação via TOTP ou código de backup para desativar ou redefinir 2FA, fechando a brecha do toggle simples.",
@@ -274,7 +274,7 @@
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [ ] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [ ] Desativação de 2FA funciona com código TOTP atual válido\n- [ ] Desativação de 2FA funciona com código de backup válido\n- [ ] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [ ] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
+        "content": "- [x] Tentativa de desativar ou redefinir 2FA sem fornecer código de confirmação é estritamente rejeitada\n- [x] Desativação de 2FA funciona com código TOTP atual válido\n- [x] Desativação de 2FA funciona com código de backup válido\n- [x] Redefinição invalida segredo e códigos de backup anteriores, encaminhando para novo setup\n- [x] Opção de confirmação por e-mail exibe mensagem de pendência sem simular envio\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
       },
       {
         "heading": "Validação",

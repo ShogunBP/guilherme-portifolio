@@ -49,33 +49,85 @@ function SecurityContent() {
     checkStatus()
   }, [])
 
-  async function handleDisable() {
-    if (!confirm('Deseja realmente desativar o 2FA? Sua conta passará a exigir apenas a senha principal.')) {
-      return
-    }
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean
+    action: 'disable' | 'reset' | null
+    codeType: 'totp' | 'backup' | 'email'
+    code: string
+    loading: boolean
+    error: string | null
+  }>({
+    open: false,
+    action: null,
+    codeType: 'totp',
+    code: '',
+    loading: false,
+    error: null,
+  })
 
-    setActionLoading(true)
+  function openConfirmModal(action: 'disable' | 'reset') {
     setError(null)
     setMessage(null)
+    setConfirmModal({
+      open: true,
+      action,
+      codeType: 'totp',
+      code: '',
+      loading: false,
+      error: null,
+    })
+  }
+
+  async function handleConfirmAction() {
+    if (!confirmModal.action || confirmModal.codeType === 'email') return
+    setConfirmModal((m) => ({ ...m, loading: true, error: null }))
 
     try {
-      const res = await fetch('/api/admin/2fa/toggle', {
+      const res = await fetch('/api/admin/2fa/confirm-sensitive-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disable' }),
+        body: JSON.stringify({
+          action: confirmModal.action,
+          code: confirmModal.code,
+          type: confirmModal.codeType,
+        }),
       })
 
       const data = await res.json()
+
       if (!res.ok || data.error) {
-        setError(data.error || 'Falha ao desativar 2FA.')
-      } else {
+        setConfirmModal((m) => ({
+          ...m,
+          loading: false,
+          error:
+            data.message ||
+            (data.error === 'invalid_code'
+              ? 'Código incorreto. Verifique seu autenticador ou use um código de backup válido.'
+              : 'Falha ao confirmar ação. Tente novamente.'),
+        }))
+        return
+      }
+
+      const executedAction = confirmModal.action
+      setConfirmModal({ open: false, action: null, codeType: 'totp', code: '', loading: false, error: null })
+
+      if (executedAction === 'disable') {
+        document.cookie = 'admin_2fa_verified=; path=/; max-age=0'
+        document.cookie = 'admin_2fa_status=; path=/; max-age=0'
         setEnabled(false)
+        setBackupCodesCount(null)
         setMessage('2FA desativado com sucesso. O próximo login exigirá apenas a senha principal.')
+      } else if (executedAction === 'reset') {
+        document.cookie = 'admin_2fa_verified=; path=/; max-age=0'
+        document.cookie = 'admin_2fa_status=; path=/; max-age=0'
+        window.location.href = '/admin/setup-2fa'
       }
     } catch {
-      setError('Erro de comunicação com o servidor ao desativar 2FA.')
-    } finally {
-      setActionLoading(false)
+      setConfirmModal((m) => ({
+        ...m,
+        loading: false,
+        error: 'Erro de comunicação ao validar a confirmação de segurança. Tente novamente.',
+      }))
     }
   }
 
@@ -235,29 +287,157 @@ function SecurityContent() {
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={handleDisable}
-                  disabled={actionLoading}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-300 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                  onClick={() => openConfirmModal('disable')}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-300 text-xs font-semibold transition-colors cursor-pointer"
                 >
-                  {actionLoading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <PowerOff className="w-3.5 h-3.5" />
-                  )}
+                  <PowerOff className="w-3.5 h-3.5" />
                   <span>Desativar 2FA</span>
                 </button>
 
-                <Link
-                  href="/admin/setup-2fa"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-200 text-xs font-semibold transition-colors"
+                <button
+                  type="button"
+                  onClick={() => openConfirmModal('reset')}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-200 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Reconfigurar Chave</span>
-                </Link>
+                </button>
               </div>
             )}
           </div>
         </div>
+
+        {/* Modal de Confirmação de Segundo Fator */}
+        {confirmModal.open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-[#0b0826]/95 border border-purple-500/30 rounded-2xl shadow-2xl shadow-purple-950/60 p-6 w-full max-w-md relative z-10">
+              <h3 className="text-lg font-bold text-white mb-1">
+                {confirmModal.action === 'disable' ? 'Desativar 2FA' : 'Reconfigurar 2FA'}
+              </h3>
+              <p className="text-sm text-gray-400 mb-5">
+                {confirmModal.action === 'disable'
+                  ? 'Para desativar, prove a posse do seu segundo fator.'
+                  : 'Para reconfigurar, prove a posse do seu segundo fator atual. O segredo e os códigos de backup antigos serão invalidados.'}
+              </p>
+
+              {/* Seletor de método de confirmação */}
+              <div className="flex gap-2 mb-4 text-xs">
+                {(['totp', 'backup', 'email'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() =>
+                      setConfirmModal((m) => ({
+                        ...m,
+                        codeType: t,
+                        code: '',
+                        error: null,
+                      }))
+                    }
+                    className={`flex-1 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
+                      confirmModal.codeType === t
+                        ? 'bg-purple-600/30 border-purple-500/50 text-purple-200'
+                        : 'bg-transparent border-purple-500/20 text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    {t === 'totp' ? 'Código TOTP' : t === 'backup' ? 'Código de Backup' : 'E-mail'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input por tipo */}
+              {confirmModal.codeType === 'totp' && (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={confirmModal.code}
+                  onChange={(e) =>
+                    setConfirmModal((m) => ({ ...m, code: e.target.value.replace(/\D/g, '').slice(0, 6), error: null }))
+                  }
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-center text-2xl font-mono tracking-[0.4em] text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/60 mb-4"
+                  autoFocus
+                />
+              )}
+
+              {confirmModal.codeType === 'backup' && (
+                <input
+                  type="text"
+                  placeholder="XXXX-XXXX"
+                  maxLength={9}
+                  value={confirmModal.code}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^A-Z0-9a-z]/g, '').toUpperCase().slice(0, 8)
+                    const formatted = raw.length > 4 ? `${raw.slice(0, 4)}-${raw.slice(4)}` : raw
+                    setConfirmModal((m) => ({ ...m, code: formatted, error: null }))
+                  }}
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/60 mb-4"
+                  autoFocus
+                />
+              )}
+
+              {confirmModal.codeType === 'email' && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs mb-4 flex items-start gap-2">
+                  {/* TODO: Resend integration — envio real de e-mail não implementado nesta fase */}
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    A confirmação por e-mail será disponibilizada em uma versão futura do sistema.
+                    Por enquanto, use o código TOTP do seu aplicativo autenticador ou um código de backup.
+                  </span>
+                </div>
+              )}
+
+              {/* Erro */}
+              {confirmModal.error && (
+                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>{confirmModal.error}</span>
+                </div>
+              )}
+
+              {/* Ações do modal */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setConfirmModal({ open: false, action: null, codeType: 'totp', code: '', loading: false, error: null })
+                  }
+                  disabled={confirmModal.loading}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-700 text-gray-400 text-sm hover:text-gray-300 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmAction}
+                  disabled={
+                    confirmModal.loading ||
+                    confirmModal.codeType === 'email' ||
+                    (confirmModal.codeType === 'totp' && confirmModal.code.length < 6) ||
+                    (confirmModal.codeType === 'backup' && confirmModal.code.length < 9)
+                  }
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+                    confirmModal.action === 'disable'
+                      ? 'bg-red-600 hover:bg-red-500 text-white border border-red-500/30'
+                      : 'bg-purple-600 hover:bg-purple-500 text-white border border-purple-500/30'
+                  }`}
+                >
+                  {confirmModal.loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Verificando...
+                    </span>
+                  ) : confirmModal.action === 'disable' ? (
+                    'Confirmar Desativação'
+                  ) : (
+                    'Confirmar Reconfiguração'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
