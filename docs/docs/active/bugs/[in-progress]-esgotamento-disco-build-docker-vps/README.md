@@ -1,6 +1,6 @@
 # 🐛 Esgotamento de Disco na VPS por Acúmulo de Cache Docker e Risco de Perda de Dados via Prune de Volumes
 
-**Status:** `ready-for-review`
+**Status:** in-progress
 **Data:** 2026-09-10
 **Prioridade:** `alta`
 **Tags:** `infra`, `banco`
@@ -77,7 +77,7 @@ Adicionalmente, identificou-se que o procedimento emergencial realizado anterior
 Solução implementada no commit `1ba01a9`. A rotina de deploy agora executa limpeza segura de cache e imagens preservando estritamente os volumes do banco de dados, reportando o espaço livre em disco no log do GitHub Actions.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
 
 ---

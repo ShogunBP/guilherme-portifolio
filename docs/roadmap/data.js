@@ -3,7 +3,7 @@ var ROADMAP_TASKS = [
     "id": "esgotamento-disco-build-docker-vps",
     "title": "Esgotamento de Disco na VPS por Acúmulo de Cache Docker e Risco de Perda de Dados via Prune de Volumes",
     "category": "bugs",
-    "status": "ready-for-review",
+    "status": "in-progress",
     "area": "active",
     "date": "2026-09-10",
     "priority": "alta",
@@ -11,9 +11,9 @@ var ROADMAP_TASKS = [
       "infra",
       "banco"
     ],
-    "progress": 0,
+    "progress": 20,
     "progressFraction": {
-      "done": 0,
+      "done": 1,
       "total": 5
     },
     "summary": "Build Docker falhou com ResourceExhausted por disco 100% cheio e identificado risco crítico de perda do SQLite ao usar prune com flag --volumes.",
@@ -53,7 +53,7 @@ var ROADMAP_TASKS = [
         "content": "> _(preencher após execução e teste)_\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-esgotamento-disco-build-docker-vps` e movida para `archive/bugs/`**"
       }
     ],
-    "path": "docs/active/bugs/[ready-for-review]-esgotamento-disco-build-docker-vps"
+    "path": "docs/active/bugs/[in-progress]-esgotamento-disco-build-docker-vps"
   },
   {
     "id": "2fa-confirmacao-seguranca",
