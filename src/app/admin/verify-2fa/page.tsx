@@ -78,7 +78,7 @@ export default function Verify2FaPage() {
       }
 
       // Sucesso! Redireciona para o destino ou /admin
-      const redirectUrl = data.redirect && data.redirect.startsWith('/') ? data.redirect : '/admin'
+      const redirectUrl = data.redirect && data.redirect.startsWith('/') && !data.redirect.startsWith('//') ? data.redirect : '/admin'
       router.push(redirectUrl)
       router.refresh()
     } catch {

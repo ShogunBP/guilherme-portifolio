@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (!record || record.enabled !== 1) {
       const redirectCookie = req.cookies.get('admin_redirect')?.value
       const safeRedirect =
-        redirectCookie && redirectCookie.startsWith('/') ? redirectCookie : '/admin'
+        redirectCookie && redirectCookie.startsWith('/') && !redirectCookie.startsWith('//') ? redirectCookie : '/admin'
 
       const response = NextResponse.json({
         success: true,
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     const redirectCookie = req.cookies.get('admin_redirect')?.value
     const safeRedirect =
-      redirectCookie && redirectCookie.startsWith('/') ? redirectCookie : '/admin'
+      redirectCookie && redirectCookie.startsWith('/') && !redirectCookie.startsWith('//') ? redirectCookie : '/admin'
 
     const response = NextResponse.json({
       success: true,
