@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import {
   getTwoFactorRecord,
   verifyTotpCode,
+  verifyAndConsumeBackupCode,
 } from '@/lib/totp'
 import {
   create2FaVerifiedToken,
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { code } = body
+    const { code, type } = body
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json(
@@ -43,12 +44,37 @@ export async function POST(req: NextRequest) {
       return response
     }
 
-    const isValid = verifyTotpCode(record.secret, code)
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Código incorreto. Tente novamente.' },
-        { status: 400 }
-      )
+    // Se a requisição for explicitamente do tipo 'backup' ou se o formato corresponder a código de backup (hífen ou 8 caracteres alfanuméricos)
+    const isBackupType = type === 'backup' || (code.includes('-') && code.length >= 8)
+
+    if (isBackupType) {
+      const result = await verifyAndConsumeBackupCode(code, 'default')
+      if (!result.success) {
+        if (result.reason === 'already_used') {
+          return NextResponse.json(
+            { error: 'Este código de backup já foi utilizado anteriormente. Utilize outro código da sua lista.' },
+            { status: 400 }
+          )
+        }
+        if (result.reason === 'invalid_format') {
+          return NextResponse.json(
+            { error: 'Formato inválido. O código de backup deve ter 8 caracteres (ex: XXXX-XXXX).' },
+            { status: 400 }
+          )
+        }
+        return NextResponse.json(
+          { error: 'Código de backup inválido. Verifique os caracteres digitados.' },
+          { status: 400 }
+        )
+      }
+    } else {
+      const isValid = verifyTotpCode(record.secret, code)
+      if (!isValid) {
+        return NextResponse.json(
+          { error: 'Código incorreto. Verifique seu app autenticador.' },
+          { status: 400 }
+        )
+      }
     }
 
     // Código válido! Emite token de 7 dias

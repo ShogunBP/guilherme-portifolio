@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { isTwoFactorEnabled } from '@/lib/totp'
+import { isTwoFactorEnabled, getAvailableBackupCodesCount } from '@/lib/totp'
 
 export async function GET() {
   const session = await auth()
@@ -9,5 +9,8 @@ export async function GET() {
   }
 
   const enabled = isTwoFactorEnabled()
-  return NextResponse.json({ enabled })
+  const backupCodesCount = enabled ? getAvailableBackupCodesCount('default') : 0
+
+  return NextResponse.json({ enabled, backupCodesCount })
 }
+

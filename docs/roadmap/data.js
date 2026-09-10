@@ -1,61 +1,5 @@
 var ROADMAP_TASKS = [
   {
-    "id": "2fa-codigos-backup",
-    "title": "Códigos de Backup do 2FA",
-    "category": "features",
-    "status": "approved",
-    "area": "active",
-    "date": "2026-09-09",
-    "priority": "alta",
-    "tags": [
-      "backend",
-      "segurança"
-    ],
-    "progress": 8,
-    "progressFraction": {
-      "done": 1,
-      "total": 12
-    },
-    "summary": "Geração de 10 códigos de backup de uso único hasheados no SQLite com exibição única no setup e uso alternativo no login.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Implementar um mecanismo de recuperação de acesso caso o dispositivo do usuário com o app autenticador seja perdido ou fique inacessível, fornecendo 10 códigos de backup descartáveis gerados no momento da ativação do 2FA."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Geração no Setup:** Ao confirmar o primeiro código TOTP com sucesso no setup do 2FA (Card 1), o sistema gera 10 códigos de backup aleatórios no formato `XXXX-XXXX`.\n2. **Exibição Única:** Os 10 códigos são exibidos em texto claro uma única vez em tela dedicada (`/admin/setup-2fa/backup-codes`), com aviso destacado, botão de cópia de todos os códigos e uma trava por checkbox obrigatório (\"Já salvei meus códigos de backup com segurança\") antes de prosseguir.\n3. **Uso no Login:** Na tela de verificação `/admin/verify-2fa`, é exibida a opção alternativa \"Usar código de backup\". O usuário digita um dos códigos em vez do TOTP de 6 dígitos.\n4. **Descarte Imediato:** Ao validar o hash com sucesso, o código é marcado como usado (`used = 1`) no banco de dados e nunca mais pode ser reutilizado."
-      },
-      {
-        "heading": "Depende de",
-        "content": "Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de iniciar este. Os cards 3 e 4 dependem da estrutura criada aqui."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Tabela `two_factor_backup_codes` no SQLite (`id`, `user_id`, `code_hash`, `used`, `used_at`, `created_at`).\n- Geração criptograficamente segura de 10 códigos no formato `XXXX-XXXX`.\n- Armazenamento dos códigos sempre em formato hasheado (`bcryptjs`), nunca em texto puro.\n- Tela de exibição dos códigos pós-setup com botão de copiar e checkbox de confirmação.\n- Opção alternativa na tela `/admin/verify-2fa` para validar código de backup e emitir o cookie de sessão `admin_2fa_verified`.\n- Rejeição estrita de códigos já utilizados.\n\n### Não inclui (por ora)\n\n- Regeneração avulsa de códigos de backup fora do fluxo de redefinição completa (melhoria futura).\n- Exigência de código de backup para confirmar desativação ou redefinição de segurança (escopo do Card 3)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (geração segura, hashing com bcrypt, persistência SQLite), frontend (etapa de exibição no setup e alternância de input na verificação).\n- **Dependências:** `bcryptjs` (já presente no projeto) e módulo nativo `crypto`.\n- **Segurança:** códigos são armazenados exclusivamente como hashes; após uso, a flag `used` é ativada imediatamente."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Criar a tabela `two_factor_backup_codes` em `src/lib/db.ts`.\n2. Implementar em `src/lib/totp.ts` funções para gerar 10 códigos `XXXX-XXXX`, hashear e persistir no SQLite.\n3. Criar função de validação de código de backup que compara o hash, valida se `used === 0` e atualiza para `used = 1` com timestamp.\n4. Adicionar etapa no fluxo de setup (`/admin/setup-2fa`) para exibir os 10 códigos em texto claro com botão de cópia e trava por checkbox.\n5. Adicionar alternância na tela `/admin/verify-2fa` para alternar entre código TOTP e código de backup.\n6. Validar a rejeição de códigos já consumidos."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] 10 códigos de backup no formato `XXXX-XXXX` são gerados na ativação do 2FA\n- [ ] Códigos são armazenados hasheados no SQLite (nunca em texto puro)\n- [ ] Códigos são exibidos em texto claro exatamente uma vez, com botão de copiar e trava de confirmação antes de prosseguir\n- [ ] Opção \"Usar código de backup\" na tela de verificação permite login bem-sucedido\n- [ ] Código de backup usado é marcado como consumido e rejeitado em tentativas posteriores\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[approved]-2fa-codigos-backup"
-  },
-  {
     "id": "2fa-confirmacao-seguranca",
     "title": "Confirmação de Segurança para Desativar e Redefinir 2FA",
     "category": "features",
@@ -340,61 +284,60 @@ var ROADMAP_TASKS = [
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
   },
   {
-    "id": "2fa-basico-opcional",
-    "title": "2FA Básico Opcional (TOTP + Toggle)",
+    "id": "2fa-codigos-backup",
+    "title": "Códigos de Backup do 2FA",
     "category": "features",
     "status": "in-progress",
     "area": "active",
-    "date": "2026-09-09",
+    "date": "2026-09-10",
     "priority": "alta",
     "tags": [
       "backend",
-      "frontend",
       "segurança"
     ],
-    "progress": 54,
+    "progress": 50,
     "progressFraction": {
-      "done": 7,
-      "total": 13
+      "done": 6,
+      "total": 12
     },
-    "summary": "Implementação base de 2FA via TOTP totalmente opcional, sincronizada em 7 dias, com setup por QR Code e toggle simples no painel.",
+    "summary": "Geração de 10 códigos de backup de uso único hasheados no SQLite com exibição única no setup e uso alternativo no login.",
     "sections": [
       {
         "heading": "Objetivo",
-        "content": "Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238), sendo **totalmente opcional** — nunca forçado em nenhum login. O usuário ativa quando desejar pelo painel administrativo, mantendo o login funcionando apenas com o primeiro fator (senha ou social) enquanto estiver desativado."
+        "content": "Implementar um mecanismo de recuperação de acesso caso o dispositivo do usuário com o app autenticador seja perdido ou fique inacessível, fornecendo 10 códigos de backup descartáveis gerados no momento da ativação do 2FA."
       },
       {
         "heading": "Descrição Funcional",
-        "content": "1. **Login Sem 2FA:** Se o 2FA nunca foi ativado (`enabled = false`), o login com senha ou OAuth direciona o usuário imediatamente para o painel (`/admin`), sem qualquer tela de 2FA.\n2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/seguranca`) e clicar em \"Ativar 2FA\", abrindo a tela `/admin/setup-2fa`.\n3. **Ativação:** A tela de setup gera um segredo TOTP, exibe o QR Code escaneável e código alfanumérico para digitação manual, exigindo a confirmação do primeiro código de 6 dígitos para marcar `enabled = true`.\n4. **Desafio de Login:** Uma vez ativado, todo login subsequente (qualquer método) exige o código TOTP na tela `/admin/verify-2fa` antes de liberar o acesso.\n5. **Toggle Simples:** Nesta versão básica, o usuário pode desativar o 2FA com um simples toggle no painel logado (a exigência de confirmação de segundo fator para desativação será implementada no Card 3).\n6. **Duração de 7 dias:** A sessão JWT do NextAuth e o cookie de 2FA (`admin_2fa_verified`) possuem validade sincronizada de 7 dias (`604800` segundos)."
+        "content": "1. **Geração no Setup:** Ao confirmar o primeiro código TOTP com sucesso no setup do 2FA (Card 1), o sistema gera 10 códigos de backup aleatórios no formato `XXXX-XXXX`.\n2. **Exibição Única:** Os 10 códigos são exibidos em texto claro uma única vez em tela dedicada (`/admin/setup-2fa/backup-codes`), com aviso destacado, botão de cópia de todos os códigos e uma trava por checkbox obrigatório (\"Já salvei meus códigos de backup com segurança\") antes de prosseguir.\n3. **Uso no Login:** Na tela de verificação `/admin/verify-2fa`, é exibida a opção alternativa \"Usar código de backup\". O usuário digita um dos códigos em vez do TOTP de 6 dígitos.\n4. **Descarte Imediato:** Ao validar o hash com sucesso, o código é marcado como usado (`used = 1`) no banco de dados e nunca mais pode ser reutilizado."
       },
       {
         "heading": "Depende de",
-        "content": "`[done]-sqlite-persistencia-inicial`, `[done]-login-email-senha`, `[done]-login-social-google-github`. Este é o card 1 de 5 da Subfase 2.4 — os cards 2, 3 e 4 dependem deste."
+        "content": "Card 1 (`[ready-for-review]-2fa-basico-opcional`) deve estar `[done]` antes de iniciar este. Os cards 3 e 4 dependem da estrutura criada aqui."
       },
       {
         "heading": "Escopo",
-        "content": "### Inclui\n\n- Tabela `two_factor_auth` no SQLite (`id`, `secret`, `enabled`, `created_at`, `updated_at`).\n- Utilitários de geração e validação TOTP em `src/lib/totp.ts` utilizando a biblioteca `otpauth`.\n- Geração de imagem do QR Code em Data URL via biblioteca `qrcode`.\n- Cookie de sessão 2FA `admin_2fa_verified` assinado via HMAC-SHA256 (Web Crypto API em `src/lib/totp-token.ts`) com duração de 7 dias.\n- Configuração de `maxAge: 7 * 24 * 60 * 60` na sessão JWT do NextAuth em `src/auth.config.ts`.\n- Tela `/admin/setup-2fa` para geração de secret, exibição do QR Code e confirmação do primeiro código.\n- Tela `/admin/verify-2fa` para desafio de 6 dígitos no login, preservando deep-linking (`admin_redirect`).\n- Middleware condicional em `src/middleware.ts` que só exige 2FA se `enabled = true`.\n- Página de segurança mínima (`/admin/seguranca`) com status do 2FA e botão para ativar/desativar.\n\n### Não inclui (por ora)\n\n- Códigos de backup descartáveis (escopo do Card 2).\n- Confirmação com segundo fator para desativar ou redefinir (escopo do Card 3).\n- Script de emergência via SSH (escopo do Card 4).\n- Layout completo do painel com as 6 seções (escopo do Card 5)."
+        "content": "### Inclui\n\n- Tabela `two_factor_backup_codes` no SQLite (`id`, `user_id`, `code_hash`, `used`, `used_at`, `created_at`).\n- Geração criptograficamente segura de 10 códigos no formato `XXXX-XXXX`.\n- Armazenamento dos códigos sempre em formato hasheado (`bcryptjs`), nunca em texto puro.\n- Tela de exibição dos códigos pós-setup com botão de copiar e checkbox de confirmação.\n- Opção alternativa na tela `/admin/verify-2fa` para validar código de backup e emitir o cookie de sessão `admin_2fa_verified`.\n- Rejeição estrita de códigos já utilizados.\n\n### Não inclui (por ora)\n\n- Regeneração avulsa de códigos de backup fora do fluxo de redefinição completa (melhoria futura).\n- Exigência de código de backup para confirmar desativação ou redefinição de segurança (escopo do Card 3)."
       },
       {
         "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (NextAuth, rotas de validação TOTP, SQLite), frontend (telas de setup, verificação e página simples de segurança) e middleware (Edge Runtime).\n- **Dependências:** `otpauth` (RFC 6238) e `qrcode` (`@types/qrcode`).\n- **Impactos:** login sem 2FA permanece transparente; sessões ativas são sincronizadas para 7 dias."
+        "content": "- **Camadas envolvidas:** backend (geração segura, hashing com bcrypt, persistência SQLite), frontend (etapa de exibição no setup e alternância de input na verificação).\n- **Dependências:** `bcryptjs` (já presente no projeto) e módulo nativo `crypto`.\n- **Segurança:** códigos são armazenados exclusivamente como hashes; após uso, a flag `used` é ativada imediatamente."
       },
       {
         "heading": "Plano de Implementação",
-        "content": "1. Garantir que `otpauth`, `qrcode` e `@types/qrcode` estejam presentes no `package.json`.\n2. Implementar `src/lib/totp.ts` (geração de secret, URI, QR code e validação com tolerância de 30s).\n3. Implementar `src/lib/totp-token.ts` (assinatura/validação HMAC-SHA256 com `AUTH_SECRET` e validade de 7 dias).\n4. Configurar `session.maxAge: 604800` e `jwt.maxAge: 604800` em `src/auth.config.ts` e `src/auth.ts`.\n5. Criar tela de setup `/admin/setup-2fa` e rota de confirmação de primeiro código.\n6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.\n7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.\n8. Criar rota/página `/admin/seguranca` com toggle simples de ativar/desativar."
+        "content": "1. Criar a tabela `two_factor_backup_codes` em `src/lib/db.ts`.\n2. Implementar em `src/lib/totp.ts` funções para gerar 10 códigos `XXXX-XXXX`, hashear e persistir no SQLite.\n3. Criar função de validação de código de backup que compara o hash, valida se `used === 0` e atualiza para `used = 1` com timestamp.\n4. Adicionar etapa no fluxo de setup (`/admin/setup-2fa`) para exibir os 10 códigos em texto claro com botão de cópia e trava por checkbox.\n5. Adicionar alternância na tela `/admin/verify-2fa` para alternar entre código TOTP e código de backup.\n6. Validar a rejeição de códigos já consumidos."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA\n- [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos\n- [x] Login com 2FA ativo exige código TOTP em todos os métodos (Email/Senha, Google, GitHub)\n- [x] Código TOTP incorreto rejeita o acesso\n- [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código\n- [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
+        "content": "- [x] 10 códigos de backup no formato `XXXX-XXXX` são gerados na ativação do 2FA\n- [x] Códigos são armazenados hasheados no SQLite (nunca em texto puro)\n- [x] Códigos são exibidos em texto claro exatamente uma vez, com botão de copiar e trava de confirmação antes de prosseguir\n- [x] Opção \"Usar código de backup\" na tela de verificação permite login bem-sucedido\n- [x] Código de backup usado é marcado como consumido e rejeitado em tentativas posteriores\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**"
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-codigos-backup` e movida para `archive/features/`**"
       }
     ],
-    "path": "docs/active/features/[in-progress]-2fa-basico-opcional"
+    "path": "docs/active/features/[in-progress]-2fa-codigos-backup"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -1063,6 +1006,63 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/archive/features/[cancelled]-auth-painel-admin"
+  },
+  {
+    "id": "2fa-basico-opcional",
+    "title": "2FA Básico Opcional (TOTP)",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-09",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "frontend",
+      "segurança"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 12,
+      "total": 13
+    },
+    "summary": "Implementação base de 2FA via TOTP totalmente opcional, sincronizada em 7 dias, com setup por QR Code e toggle simples no painel.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238), sendo **totalmente opcional** — nunca forçado em nenhum login. O usuário ativa quando desejar pelo painel administrativo, mantendo o login funcionando apenas com o primeiro fator (senha ou social) enquanto estiver desativado."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Login Sem 2FA:** Se o 2FA nunca foi ativado (`enabled = false`), o login com senha ou OAuth direciona o usuário imediatamente para o painel (`/admin`), sem qualquer tela de 2FA.\n2. **Setup sob Demanda:** A qualquer momento, um usuário autenticado pode acessar a página de segurança (`/admin/seguranca`) e clicar em \"Ativar 2FA\", abrindo a tela `/admin/setup-2fa`.\n3. **Ativação:** A tela de setup gera um segredo TOTP, exibe o QR Code escaneável e código alfanumérico para digitação manual, exigindo a confirmação do primeiro código de 6 dígitos para marcar `enabled = true`.\n4. **Desafio de Login:** Uma vez ativado, todo login subsequente (qualquer método) exige o código TOTP na tela `/admin/verify-2fa` antes de liberar o acesso.\n5. **Toggle Simples:** Nesta versão básica, o usuário pode desativar o 2FA com um simples toggle no painel logado (a exigência de confirmação de segundo fator para desativação será implementada no Card 3).\n6. **Duração de 7 dias:** A sessão JWT do NextAuth e o cookie de 2FA (`admin_2fa_verified`) possuem validade sincronizada de 7 dias (`604800` segundos)."
+      },
+      {
+        "heading": "Depende de",
+        "content": "`[done]-sqlite-persistencia-inicial`, `[done]-login-email-senha`, `[done]-login-social-google-github`. Este é o card 1 de 5 da Subfase 2.4 — os cards 2, 3 e 4 dependem deste."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Tabela `two_factor_auth` no SQLite (`id`, `secret`, `enabled`, `created_at`, `updated_at`).\n- Utilitários de geração e validação TOTP em `src/lib/totp.ts` utilizando a biblioteca `otpauth`.\n- Geração de imagem do QR Code em Data URL via biblioteca `qrcode`.\n- Cookie de sessão 2FA `admin_2fa_verified` assinado via HMAC-SHA256 (Web Crypto API em `src/lib/totp-token.ts`) com duração de 7 dias.\n- Configuração de `maxAge: 7 * 24 * 60 * 60` na sessão JWT do NextAuth em `src/auth.config.ts`.\n- Tela `/admin/setup-2fa` para geração de secret, exibição do QR Code e confirmação do primeiro código.\n- Tela `/admin/verify-2fa` para desafio de 6 dígitos no login, preservando deep-linking (`admin_redirect`).\n- Middleware condicional em `src/middleware.ts` que só exige 2FA se `enabled = true`.\n- Página de segurança mínima (`/admin/seguranca`) com status do 2FA e botão para ativar/desativar.\n\n### Não inclui (por ora)\n\n- Códigos de backup descartáveis (escopo do Card 2).\n- Confirmação com segundo fator para desativar ou redefinir (escopo do Card 3).\n- Script de emergência via SSH (escopo do Card 4).\n- Layout completo do painel com as 6 seções (escopo do Card 5)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** backend (NextAuth, rotas de validação TOTP, SQLite), frontend (telas de setup, verificação e página simples de segurança) e middleware (Edge Runtime).\n- **Dependências:** `otpauth` (RFC 6238) e `qrcode` (`@types/qrcode`).\n- **Impactos:** login sem 2FA permanece transparente; sessões ativas são sincronizadas para 7 dias."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Garantir que `otpauth`, `qrcode` e `@types/qrcode` estejam presentes no `package.json`.\n2. Implementar `src/lib/totp.ts` (geração de secret, URI, QR code e validação com tolerância de 30s).\n3. Implementar `src/lib/totp-token.ts` (assinatura/validação HMAC-SHA256 com `AUTH_SECRET` e validade de 7 dias).\n4. Configurar `session.maxAge: 604800` e `jwt.maxAge: 604800` em `src/auth.config.ts` e `src/auth.ts`.\n5. Criar tela de setup `/admin/setup-2fa` e rota de confirmação de primeiro código.\n6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.\n7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.\n8. Criar rota/página `/admin/seguranca` com toggle simples de ativar/desativar."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA\n- [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos\n- [x] Login com 2FA ativo exige código TOTP em todos os métodos (Email/Senha, Google, GitHub)\n- [x] Código TOTP incorreto rejeita o acesso\n- [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código\n- [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)\n- [x] Validado e testado em ambiente local e em produção na VPS\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Validado com testes automatizados E2E locais (test-2fa-card1.ts e test-2fa-integration.ts) e em produção na VPS com build 34417110827 (rotas protegidas retornando 307 e APIs 2FA ativas com 401).\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-2fa-basico-opcional` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-2fa-basico-opcional"
   },
   {
     "id": "login-email-senha",

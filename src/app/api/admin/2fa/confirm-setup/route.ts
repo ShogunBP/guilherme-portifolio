@@ -4,6 +4,7 @@ import {
   getTwoFactorRecord,
   verifyTotpCode,
   enableTwoFactorAuth,
+  generateAndSaveBackupCodes,
 } from '@/lib/totp'
 import {
   create2FaVerifiedToken,
@@ -48,13 +49,16 @@ export async function POST(req: NextRequest) {
     // Ativa o 2FA no banco de dados SQLite
     enableTwoFactorAuth()
 
+    // Gera 10 códigos de backup descartáveis (armazenados hasheados com bcrypt)
+    const backupCodes = await generateAndSaveBackupCodes('default')
+
     // Gera tokens assinados por AUTH_SECRET (Web Crypto HMAC-SHA256)
     const verifiedToken = await create2FaVerifiedToken()
     const statusToken = await create2FaStatusToken(true)
 
     const response = NextResponse.json({
       success: true,
-      redirect: '/admin/seguranca',
+      backupCodes,
       message: '2FA ativado com sucesso!',
     })
 

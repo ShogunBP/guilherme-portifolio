@@ -22,6 +22,7 @@ function SegurancaContent() {
 
   const [loading, setLoading] = useState(true)
   const [enabled, setEnabled] = useState(false)
+  const [backupCodesCount, setBackupCodesCount] = useState<number | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(
     justActivated ? 'Autenticação de dois fatores ativada com sucesso!' : null
@@ -35,6 +36,9 @@ function SegurancaContent() {
         if (res.ok) {
           const data = await res.json()
           setEnabled(Boolean(data.enabled))
+          if (typeof data.backupCodesCount === 'number') {
+            setBackupCodesCount(data.backupCodesCount)
+          }
         }
       } catch {
         setError('Não foi possível verificar o status atual do 2FA.')
@@ -182,6 +186,23 @@ function SegurancaContent() {
                 (604.800 segundos), sem exigir reautenticação contínua durante o trabalho.
               </div>
             </div>
+
+            {/* Status dos códigos de backup */}
+            {enabled && backupCodesCount !== null && (
+              <div className="p-4 rounded-xl bg-[#060317] border border-purple-500/20 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                  <span className="text-xs text-gray-300">
+                    Códigos de backup descartáveis restantes: <strong className="text-white font-mono text-sm">{backupCodesCount}</strong> de 10
+                  </span>
+                </div>
+                {backupCodesCount <= 2 && (
+                  <span className="text-[11px] text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-md font-medium">
+                    Atenção: poucos códigos restantes
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Ações */}

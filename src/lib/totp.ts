@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 import * as OTPAuth from 'otpauth'
 import QRCode from 'qrcode'
 import { db } from './db'
@@ -134,4 +136,154 @@ export function disableTwoFactorAuth(): void {
     SET enabled = 0, updated_at = datetime('now')
     WHERE id = 'default'
   `).run()
+}
+
+/**
+ * Interface do registro de código de backup no SQLite.
+ */
+export interface BackupCodeRecord {
+  id: number
+  user_id: string
+  code_hash: string
+  used: number
+  used_at: string | null
+  created_at: string
+}
+
+const BACKUP_CODE_CHARSET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' // Base32 amigável (sem 0, 1, O, I para legibilidade)
+
+/**
+ * Gera um código alfanumérico aleatório seguro no formato XXXX-XXXX (ex: A3F9-8K2P).
+ */
+export function generateSingleBackupCode(): string {
+  const bytes = crypto.randomBytes(8)
+  let part1 = ''
+  let part2 = ''
+
+  for (let i = 0; i < 4; i++) {
+    part1 += BACKUP_CODE_CHARSET[bytes[i] % BACKUP_CODE_CHARSET.length]
+    part2 += BACKUP_CODE_CHARSET[bytes[i + 4] % BACKUP_CODE_CHARSET.length]
+  }
+
+  return `${part1}-${part2}`
+}
+
+/**
+ * Normaliza um código de backup (remove espaços, hífen e converte para maiúsculo).
+ */
+export function normalizeBackupCode(code: string): string {
+  return code.replace(/[\s-]/g, '').toUpperCase()
+}
+
+/**
+ * Formata um código de 8 caracteres no formato XXXX-XXXX.
+ */
+export function formatBackupCode(code: string): string {
+  const clean = normalizeBackupCode(code)
+  if (clean.length !== 8) return clean
+  return `${clean.slice(0, 4)}-${clean.slice(4)}`
+}
+
+/**
+ * Gera 10 códigos de backup descartáveis, hasheia com bcryptjs e salva no SQLite.
+ * Remove quaisquer códigos de backup antigos pertencentes ao usuário 'default'.
+ * Retorna os 10 códigos em texto claro formatados como XXXX-XXXX para exibição única.
+ */
+export async function generateAndSaveBackupCodes(userId = 'default'): Promise<string[]> {
+  const plainCodes: string[] = []
+  const hashedRecords: { hash: string }[] = []
+
+  for (let i = 0; i < 10; i++) {
+    const code = generateSingleBackupCode()
+    plainCodes.push(code)
+    // Hash do código normalizado (8 caracteres sem hífen)
+    const normalized = normalizeBackupCode(code)
+    const hash = await bcrypt.hash(normalized, 10)
+    hashedRecords.push({ hash })
+  }
+
+  // Transação no SQLite para invalidar anteriores e inserir novos
+  const insertTransaction = db.transaction(() => {
+    db.prepare('DELETE FROM two_factor_backup_codes WHERE user_id = ?').run(userId)
+
+    const insertStmt = db.prepare(`
+      INSERT INTO two_factor_backup_codes (user_id, code_hash, used, created_at)
+      VALUES (?, ?, 0, datetime('now'))
+    `)
+
+    for (const record of hashedRecords) {
+      insertStmt.run(userId, record.hash)
+    }
+  })
+
+  insertTransaction()
+
+  return plainCodes
+}
+
+/**
+ * Retorna a quantidade de códigos de backup não utilizados disponíveis.
+ */
+export function getAvailableBackupCodesCount(userId = 'default'): number {
+  const result = db
+    .prepare('SELECT COUNT(*) as count FROM two_factor_backup_codes WHERE user_id = ? AND used = 0')
+    .get(userId) as { count: number } | undefined
+  return result?.count ?? 0
+}
+
+export type VerifyBackupCodeResult =
+  | { success: true; message: string }
+  | { success: false; reason: 'not_found' | 'already_used' | 'invalid_format' }
+
+/**
+ * Valida um código de backup digitado pelo usuário.
+ * Se corresponder a um código não utilizado, marca como used = 1 e used_at = datetime('now').
+ * Se corresponder a um código já utilizado, retorna razão explícita 'already_used'.
+ */
+export async function verifyAndConsumeBackupCode(
+  inputCode: string,
+  userId = 'default'
+): Promise<VerifyBackupCodeResult> {
+  const normalized = normalizeBackupCode(inputCode)
+  if (normalized.length !== 8) {
+    return { success: false, reason: 'invalid_format' }
+  }
+
+  // Busca todos os códigos do usuário (para poder distinguir se foi usado ou nunca existiu)
+  const records = db
+    .prepare('SELECT id, code_hash, used FROM two_factor_backup_codes WHERE user_id = ?')
+    .all(userId) as BackupCodeRecord[]
+
+  if (!records || records.length === 0) {
+    return { success: false, reason: 'not_found' }
+  }
+
+  // 1. Verifica primeiro contra os códigos AINDA NÃO USADOS
+  for (const record of records) {
+    if (record.used === 0) {
+      const matches = await bcrypt.compare(normalized, record.code_hash)
+      if (matches) {
+        // Marca como usado imediatamente
+        db.prepare(`
+          UPDATE two_factor_backup_codes
+          SET used = 1, used_at = datetime('now')
+          WHERE id = ?
+        `).run(record.id)
+
+        return { success: true, message: 'Código de backup válido e consumido.' }
+      }
+    }
+  }
+
+  // 2. Se não bateu com nenhum não-usado, verifica se pertence a algum que JÁ FOI USADO
+  for (const record of records) {
+    if (record.used === 1) {
+      const matches = await bcrypt.compare(normalized, record.code_hash)
+      if (matches) {
+        return { success: false, reason: 'already_used' }
+      }
+    }
+  }
+
+  return { success: false, reason: 'not_found' }
 }
