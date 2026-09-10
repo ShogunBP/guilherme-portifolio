@@ -1,6 +1,6 @@
 # ✨ Script de Emergência via SSH para 2FA
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-09
 **Prioridade:** `média`
 **Tags:** `infra`, `segurança`, `dx`
@@ -66,7 +66,7 @@ Cards 1 (`[done]-2fa-basico-opcional`), 2 (`[done]-2fa-codigos-backup`) e 3 (`[d
 ## Review
 
 ## Feedback
-Aprovado pelo usuário em 09/09/2026. Depende da conclusão dos Cards 1 e 2.
+Script implementado no commit `55d191f`, validado em todos os 3 cenários operacionais (ativo, inativo e erro de banco) e aprovado pelo usuário.
 
 ## Decisão
 - [x] Aprovado
@@ -76,9 +76,9 @@ Aprovado pelo usuário em 09/09/2026. Depende da conclusão dos Cards 1 e 2.
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> Validado com sucesso nos 3 cenários operacionais e aprovado pelo usuário em 10/09/2026.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista operacional
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-2fa-script-emergencia` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista operacional
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-2fa-script-emergencia` e movida para `archive/features/`**
