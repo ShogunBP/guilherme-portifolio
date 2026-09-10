@@ -1,62 +1,5 @@
 var ROADMAP_TASKS = [
   {
-    "id": "2fa-script-emergencia",
-    "title": "Script de Emergência via SSH para 2FA",
-    "category": "features",
-    "status": "approved",
-    "area": "active",
-    "date": "2026-09-09",
-    "priority": "média",
-    "tags": [
-      "infra",
-      "segurança",
-      "dx"
-    ],
-    "progress": 8,
-    "progressFraction": {
-      "done": 1,
-      "total": 12
-    },
-    "summary": "Script de linha de comando para desativar o 2FA diretamente no SQLite via SSH em caso de perda total de acessos.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Prover um mecanismo operacional de última instância para que o administrador do portfólio consiga desativar o 2FA caso perca simultaneamente o dispositivo autenticador e todos os códigos de backup, operando diretamente no servidor via SSH sem depender de interface web ou rotas HTTP."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Acesso Direto ao Servidor:** O administrador conecta-se à VPS via SSH e executa o script `npx tsx scripts/emergency-disable-2fa.ts`.\n2. **Desativação no Banco:** O script lê o caminho do banco a partir de `process.env.DATABASE_PATH` e executa a desativação da flag `enabled` na tabela `two_factor_auth`.\n3. **Invalidação dos Códigos:** Todos os códigos de backup associados são marcados como usados ou deletados para impedir acessos residuais.\n4. **Feedback Claro:** O terminal imprime uma mensagem explicativa com o resultado da operação. Se o 2FA já estiver inativo, avisa sem emitir erro confuso.\n5. **Isolamento de Segurança:** O script nunca é exposto via web ou API HTTP — a chave de acesso SSH do servidor é o único controle de autorização."
-      },
-      {
-        "heading": "Depende de",
-        "content": "Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-backup`) devem estar `[done]`."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Script `scripts/emergency-disable-2fa.ts` executável via `npx tsx` ou `node`.\n- Conexão direta ao SQLite respeitando `process.env.DATABASE_PATH`.\n- Desativação do 2FA (`enabled = 0`) e invalidação de todos os códigos de backup.\n- Comentário explícito no topo do arquivo alertando que o script é estritamente para uso via SSH e jamais deve ser exposto via HTTP.\n- Menção no `README.md` da raiz do repositório na seção de scripts operacionais.\n\n### Não inclui (por ora)\n\n- Nenhuma rota de API, formulário web ou interface HTTP."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** infra / scripts (Node.js/TypeScript com `better-sqlite3`).\n- **Segurança:** restrito ao canal seguro SSH do host VPS; nenhuma dependência de autenticação web."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Criar o arquivo `scripts/emergency-disable-2fa.ts`.\n2. Implementar conexão com o SQLite usando `process.env.DATABASE_PATH` com fallback para `./data/portfolio.db`.\n3. Adicionar lógica de verificação se o 2FA está ativo: se já inativo, emitir mensagem clara e sair com código 0.\n4. Se ativo, atualizar `enabled = 0`, invalidar/limpar `two_factor_backup_codes` e imprimir confirmação destacada.\n5. Incluir aviso de segurança no topo do arquivo proibindo exposição HTTP.\n6. Adicionar instrução de uso no `README.md` da raiz do projeto."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Script conecta ao SQLite via `DATABASE_PATH` e desativa `enabled` do 2FA com sucesso\n- [ ] Todos os códigos de backup existentes são invalidados\n- [ ] Execução com 2FA já inativo informa o estado sem falhas\n- [ ] Após a execução, login volta a funcionar apenas com primeiro fator (sem pedir 2FA)\n- [ ] Comentários no topo do script reforçam proibição estrita de exposição HTTP\n- [ ] Validado e testado localmente com SQLite e documentado para uso em produção\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista operacional\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-script-emergencia` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[approved]-2fa-script-emergencia"
-  },
-  {
     "id": "admin-layout-painel",
     "title": "Layout Base do Painel e 6 Seções Placeholder",
     "category": "features",
@@ -225,6 +168,63 @@ var ROADMAP_TASKS = [
       }
     ],
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
+  },
+  {
+    "id": "2fa-script-emergencia",
+    "title": "Script de Emergência via SSH para 2FA",
+    "category": "features",
+    "status": "in-progress",
+    "area": "active",
+    "date": "2026-09-09",
+    "priority": "média",
+    "tags": [
+      "infra",
+      "segurança",
+      "dx"
+    ],
+    "progress": 58,
+    "progressFraction": {
+      "done": 7,
+      "total": 12
+    },
+    "summary": "Script de linha de comando para desativar o 2FA diretamente no SQLite via SSH em caso de perda total de acessos.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Prover um mecanismo operacional de última instância para que o administrador do portfólio consiga desativar o 2FA caso perca simultaneamente o dispositivo autenticador e todos os códigos de backup, operando diretamente no servidor via SSH sem depender de interface web ou rotas HTTP."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Acesso Direto ao Servidor:** O administrador conecta-se à VPS via SSH e executa o script `npx tsx scripts/emergency-disable-2fa.ts`.\n2. **Desativação no Banco:** O script lê o caminho do banco a partir de `process.env.DATABASE_PATH` e executa a desativação da flag `enabled` na tabela `two_factor_auth`.\n3. **Invalidação dos Códigos:** Todos os códigos de backup associados são marcados como usados ou deletados para impedir acessos residuais.\n4. **Feedback Claro:** O terminal imprime uma mensagem explicativa com o resultado da operação. Se o 2FA já estiver inativo, avisa sem emitir erro confuso.\n5. **Isolamento de Segurança:** O script nunca é exposto via web ou API HTTP — a chave de acesso SSH do servidor é o único controle de autorização."
+      },
+      {
+        "heading": "Depende de",
+        "content": "Cards 1 (`[done]-2fa-basico-opcional`), 2 (`[done]-2fa-codigos-backup`) e 3 (`[done]-2fa-confirmacao-seguranca`) estão concluídos ✅."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Script `scripts/emergency-disable-2fa.ts` executável via `npx tsx` ou `node`.\n- Conexão direta ao SQLite respeitando `process.env.DATABASE_PATH`.\n- Desativação do 2FA (`enabled = 0`) e invalidação de todos os códigos de backup.\n- Comentário explícito no topo do arquivo alertando que o script é estritamente para uso via SSH e jamais deve ser exposto via HTTP.\n- Menção no `README.md` da raiz do repositório na seção de scripts operacionais.\n\n### Não inclui (por ora)\n\n- Nenhuma rota de API, formulário web ou interface HTTP."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** infra / scripts (Node.js/TypeScript com `better-sqlite3`).\n- **Segurança:** restrito ao canal seguro SSH do host VPS; nenhuma dependência de autenticação web."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar o arquivo `scripts/emergency-disable-2fa.ts`.\n2. Implementar conexão com o SQLite usando `process.env.DATABASE_PATH` com fallback para `./data/portfolio.db`.\n3. Adicionar lógica de verificação se o 2FA está ativo: se já inativo, emitir mensagem clara e sair com código 0.\n4. Se ativo, atualizar `enabled = 0`, invalidar/limpar `two_factor_backup_codes` e imprimir confirmação destacada.\n5. Incluir aviso de segurança no topo do arquivo proibindo exposição HTTP.\n6. Adicionar instrução de uso no `README.md` da raiz do projeto."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Script conecta ao SQLite via `DATABASE_PATH` e desativa `enabled` do 2FA com sucesso\n- [x] Todos os códigos de backup existentes são invalidados\n- [x] Execução com 2FA já inativo informa o estado sem falhas\n- [x] Após a execução, login volta a funcionar apenas com primeiro fator (sem pedir 2FA)\n- [x] Comentários no topo do script reforçam proibição estrita de exposição HTTP\n- [x] Validado e testado localmente com SQLite e documentado para uso em produção\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista operacional\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-2fa-script-emergencia` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[in-progress]-2fa-script-emergencia"
   },
   {
     "id": "dropdown-remove-scroll-pagina",

@@ -131,6 +131,18 @@ Os dados do SQLite são persistidos no volume Docker nomeado `portfolio-data` mo
 
 ---
 
+## 🛠️ Scripts Operacionais
+
+| Script | Descrição | Como executar |
+|--------|-----------|---------------|
+| `scripts/hash-password.ts` | Gera hash bcrypt da senha do admin em Base64 | `npx tsx scripts/hash-password.ts <senha>` |
+| `scripts/emergency-disable-2fa.ts` | ⚠️ **Emergência:** desativa o 2FA diretamente no SQLite via SSH | `npx tsx scripts/emergency-disable-2fa.ts` |
+
+> **⚠️ Atenção:** O script `emergency-disable-2fa.ts` é estritamente para uso via SSH no servidor.
+> Nunca deve ser exposto via rota HTTP ou interface web.
+
+---
+
 ## 📂 Estrutura do Projeto
 
 ```text

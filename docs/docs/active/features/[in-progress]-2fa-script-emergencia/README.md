@@ -1,6 +1,6 @@
 # ✨ Script de Emergência via SSH para 2FA
 
-**Status:** approved
+**Status:** in-progress
 **Data:** 2026-09-09
 **Prioridade:** `média`
 **Tags:** `infra`, `segurança`, `dx`
@@ -22,7 +22,7 @@ Prover um mecanismo operacional de última instância para que o administrador d
 
 ## Depende de
 
-Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-backup`) devem estar `[done]`.
+Cards 1 (`[done]-2fa-basico-opcional`), 2 (`[done]-2fa-codigos-backup`) e 3 (`[done]-2fa-confirmacao-seguranca`) estão concluídos ✅.
 
 ## Escopo
 
@@ -54,12 +54,12 @@ Cards 1 (`[ready-for-review]-2fa-basico-opcional`) e 2 (`[draft]-2fa-codigos-bac
 
 ## Critérios de Conclusão
 
-- [ ] Script conecta ao SQLite via `DATABASE_PATH` e desativa `enabled` do 2FA com sucesso
-- [ ] Todos os códigos de backup existentes são invalidados
-- [ ] Execução com 2FA já inativo informa o estado sem falhas
-- [ ] Após a execução, login volta a funcionar apenas com primeiro fator (sem pedir 2FA)
-- [ ] Comentários no topo do script reforçam proibição estrita de exposição HTTP
-- [ ] Validado e testado localmente com SQLite e documentado para uso em produção
+- [x] Script conecta ao SQLite via `DATABASE_PATH` e desativa `enabled` do 2FA com sucesso
+- [x] Todos os códigos de backup existentes são invalidados
+- [x] Execução com 2FA já inativo informa o estado sem falhas
+- [x] Após a execução, login volta a funcionar apenas com primeiro fator (sem pedir 2FA)
+- [x] Comentários no topo do script reforçam proibição estrita de exposição HTTP
+- [x] Validado e testado localmente com SQLite e documentado para uso em produção
 
 ---
 
