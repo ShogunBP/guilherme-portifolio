@@ -6,7 +6,8 @@ import { COOKIE_2FA_VERIFIED, verify2FaVerifiedToken } from '@/lib/totp-token'
 export async function GET() {
   const cookieStore = await cookies()
   const redirectCookie = cookieStore.get('admin_redirect')
-  const defaultTarget = redirectCookie?.value ?? '/admin'
+  const rawTarget = redirectCookie?.value ?? '/admin'
+  const defaultTarget = rawTarget.startsWith('/') && !rawTarget.startsWith('//') ? rawTarget : '/admin'
 
   const enabled = isTwoFactorEnabled()
   const verifiedCookie = cookieStore.get(COOKIE_2FA_VERIFIED)?.value
