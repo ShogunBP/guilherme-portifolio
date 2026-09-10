@@ -119,6 +119,10 @@ export default async function AdminDashboardPage() {
             <form
               action={async () => {
                 'use server'
+                const { cookies } = await import('next/headers')
+                const cookieStore = await cookies()
+                cookieStore.delete('admin_2fa_verified')
+                cookieStore.delete('admin_2fa_status')
                 await signOut({ redirectTo: '/admin/login' })
               }}
             >

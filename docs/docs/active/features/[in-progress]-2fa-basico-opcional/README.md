@@ -1,7 +1,7 @@
-# ✨ 2FA Básico Opcional (TOTP + Toggle)
+# ✨ 2FA Básico Opcional (TOTP)
 
 **Status:** in-progress
-**Data:** 2026-09-09
+**Data:** 2026-09-10
 **Prioridade:** `alta`
 **Tags:** `backend`, `frontend`, `segurança`
 **Resumo:** Implementação base de 2FA via TOTP totalmente opcional, sincronizada em 7 dias, com setup por QR Code e toggle simples no painel.
@@ -62,12 +62,13 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 6. Criar tela de verificação `/admin/verify-2fa` com input de 6 dígitos e auto-focus.
 7. Ajustar `src/middleware.ts` para verificar `admin_2fa_verified` apenas se o 2FA estiver ativo no banco.
 8. Criar rota/página `/admin/seguranca` com toggle simples de ativar/desativar.
+9. **Correção de Logout:** Garantir que o logout (signOut) limpe os cookies de 2FA (`admin_2fa_verified` e `admin_2fa_status`), evitando que um novo login reaproveite a verificação anterior.
 
 ## Critérios de Conclusão
 
 - [x] 2FA opcional: login sem 2FA ativado entra direto no `/admin` sem redirecionamento para telas de 2FA
 - [x] Setup funcional: gera secret, exibe QR code real escaneável e confirma ativação com código de 6 dígitos
-- [x] Login com 2FA ativo exige código TOTP em todos os métodos (Email/Senha, Google, GitHub)
+- [ ] Login com 2FA ativo exige código TOTP em todos os métodos após logout (Email/Senha, Google, GitHub)
 - [x] Código TOTP incorreto rejeita o acesso
 - [x] Desativar pelo toggle simples desliga o 2FA e o próximo login não pede mais código
 - [x] Sessão principal JWT e cookie `admin_2fa_verified` configurados com duração sincronizada de 7 dias (`maxAge: 604800`)
@@ -78,17 +79,17 @@ Implementar a camada base de autenticação de dois fatores via TOTP (RFC 6238),
 ## Review
 
 ## Feedback
-Aprovado pelo usuário em 09/09/2026 para início imediato da execução do card 1 (`in-progress`).
+Reaberto pelo usuário em 10/09/2026: ao fazer logout, o cookie `admin_2fa_verified` permanecia no navegador do usuário, permitindo que um login subsequente entrasse diretamente em `/admin` sem exigir novamente o código de 6 dígitos TOTP.
 
 ## Decisão
-- [x] Aprovado
-- [ ] Alterações solicitadas
+- [ ] Aprovado
+- [x] Alterações solicitadas
 
 ---
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> Em validação após ajuste no signOut para limpar os cookies `admin_2fa_verified` e `admin_2fa_status`.
 
 - [ ] Todos os critérios de conclusão atendidos
 - [ ] Testado manualmente do ponto de vista do usuário

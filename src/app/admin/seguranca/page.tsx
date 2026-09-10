@@ -95,7 +95,23 @@ function SegurancaContent() {
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar ao Painel</span>
           </Link>
-          <span className="text-xs text-purple-300 font-mono">Fase 2.4 — Segurança</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-purple-300 font-mono hidden sm:inline">Fase 2.4 — Segurança</span>
+            <button
+              type="button"
+              onClick={async () => {
+                const { signOut } = await import('next-auth/react')
+                // Limpa cookie do lado cliente também
+                document.cookie = 'admin_2fa_verified=; path=/; max-age=0'
+                document.cookie = 'admin_2fa_status=; path=/; max-age=0'
+                await signOut({ callbackUrl: '/admin/login' })
+              }}
+              className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-colors cursor-pointer"
+            >
+              <PowerOff className="w-3.5 h-3.5" />
+              <span>Sair</span>
+            </button>
+          </div>
         </div>
 
         {/* Page Header */}

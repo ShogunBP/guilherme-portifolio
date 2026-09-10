@@ -91,10 +91,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id
         token.email = user.email
-        if ('twoFactorEnabled' in user) {
-          token.twoFactorEnabled = (user as { twoFactorEnabled?: boolean }).twoFactorEnabled
-        }
       }
+      // Sempre sincroniza o status mais recente do SQLite no token JWT
+      token.twoFactorEnabled = isTwoFactorEnabled()
+
       if (trigger === 'update' && session && typeof session === 'object' && 'twoFactorEnabled' in session) {
         token.twoFactorEnabled = (session as { twoFactorEnabled?: boolean }).twoFactorEnabled
       }
