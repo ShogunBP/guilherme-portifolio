@@ -20,5 +20,13 @@ jobs:
             cd ${{ secrets.VPS_PROJECT_PATH }}
             git fetch origin main
             git reset --hard origin/main
+            echo "=== Limpando cache e imagens antigas do Docker ==="
+            docker builder prune -af || true
+            docker image prune -af || true
+            df -h /
+            echo "=== Iniciando build Docker ==="
             docker compose build --no-cache
             docker compose up -d --force-recreate
+            echo "=== Limpeza pos-deploy ==="
+            docker image prune -f || true
+            df -h /
