@@ -1,6 +1,6 @@
 # ✨ Layout Base do Painel e 6 Seções Placeholder
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `frontend`, `ui-ux`
@@ -187,14 +187,14 @@ Padronizadas através do componente reutilizável [`src/app/admin/(dashboard)/co
 - [x] Navegação funcional entre as 6 seções, painel geral e segurança com destaque na rota ativa
 - [x] Header exibindo breadcrumbs corretos, e-mail logado, link para o site público e botão de logout
 - [x] Todas as 6 páginas de seções exibem aviso visual de placeholder e a fase correta do roadmap
-- [ ] Validado e testado em ambiente local e em produção na VPS
+- [x] Validado e testado em ambiente local e em produção na VPS
 
 ---
 
 ## Review
 
 ## Feedback
-Aprovado pelo usuário em 09/09/2026. Implementação concluída e enviada no commit `9de95db`. Aguardando validação final de testes do usuário.
+Aprovado e validado pelo usuário em 11/09/2026. Layout base implementado, borda lateral direita corrigida e largura expandida para 100% com scrollbar cósmica no commit `508f6e0`. Concluído com sucesso na VPS.
 
 ## Decisão
 - [x] Aprovado
@@ -204,15 +204,16 @@ Aprovado pelo usuário em 09/09/2026. Implementação concluída e enviada no co
 
 ## Validação
 
-> Registrado em 11/09/2026 durante testes do usuário.
+> Registrado e validado em 11/09/2026 pelo usuário em produção.
 
 - **Compilação de Produção (`npm run build`):** 27 páginas estáticas e dinâmicas geradas com sucesso, com 0 erros TypeScript.
 - **Navegação e Breadcrumbs:** Validados nos viewports Desktop (1280x800) e Mobile (375x700) via Chrome DevTools MCP.
 - **Gaveta Mobile:** Abertura, fechamento ao clicar em links e desvinculação de contêiner testados com `createPortal`.
 - **Logout Seguro:** Validação de revogação de sessão e exclusão dos cookies de 2FA.
-- **Deploy:** Commit `9de95db` publicado na branch `main`.
+- **Ajuste Widescreen & Scrollbar:** Largura 100% sem borda cinza na VPS validada pelo usuário no commit `508f6e0`.
+- **Deploy:** Commits `9de95db` e `508f6e0` publicados na branch `main`.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente do ponto de vista do usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-admin-layout-painel` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente do ponto de vista do usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-admin-layout-painel` e movida para `archive/features/`**
