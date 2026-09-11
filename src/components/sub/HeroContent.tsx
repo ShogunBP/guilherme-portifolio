@@ -8,8 +8,11 @@ import { FC } from 'react'
 import { TbDeviceLaptop } from 'react-icons/tb'
 import { PointerHighlight } from '../ui/pointer-highlight'
 import { NavbarButton } from '../ui/resizable-navbar'
+import { useTranslation } from 'react-i18next'
 
 const HeroContent: FC = () => {
+  const { t } = useTranslation()
+
   function smoothScrollTo(element: HTMLElement, duration = 1000) {
     const start = window.scrollY
     const end = element.getBoundingClientRect().top + start
@@ -47,7 +50,7 @@ const HeroContent: FC = () => {
       <motion.div variants={slideInFromTop} className="flex items-center gap-2">
         <Badge variant="secondary" className="bg-red-500 text-white dark:bg-red-500 font-extrabold">
           <TbDeviceLaptop />
-          The Developer
+          {t('hero.badge')}
         </Badge>
       </motion.div>
 
@@ -56,15 +59,15 @@ const HeroContent: FC = () => {
         className="flex flex-col items-center justify-between gap-3 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight"
       >
         <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
-          Guilherme Menezes
+          {t('hero.name')}
         </span>
         <PointerHighlight rectangleClassName="rounded-none">
           <span className="text-primary inline-flex items-center justify-center p-3 text-3xl lg:text-6xl leading-none">
-            Desenvolvedor Full-Stack
+            {t('hero.role')}
           </span>
         </PointerHighlight>
         <span className="text-base text-muted-foreground italic max-w-[500px] mx-auto">
-          Migração de legados, performance e escalabilidade com Vue.js e .NET.
+          {t('hero.description')}
         </span>
       </motion.div>
 
@@ -79,7 +82,7 @@ const HeroContent: FC = () => {
           onClick={handleConnectClick}
         >
           <span className="w-2 h-2 bg-destructive rounded-full"></span>
-          Let&apos;s Connect ↓
+          {t('hero.cta_connect')}
         </NavbarButton>
         <NavbarButton
           variant="dark"
@@ -88,7 +91,7 @@ const HeroContent: FC = () => {
           href="https://github.com/ShogunBP/"
         >
           <FaGithub className="mr-1" />
-          <span>GitHub</span>
+          <span>{t('hero.cta_github')}</span>
         </NavbarButton>
       </motion.div>
     </motion.section>

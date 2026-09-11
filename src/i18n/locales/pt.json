@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "badge": "O Desenvolvedor",
+    "name": "Guilherme Menezes",
+    "role": "Desenvolvedor Full-Stack",
+    "description": "Migração de legados, performance e escalabilidade com Vue.js e .NET.",
+    "cta_connect": "Vamos Conversar ↓",
+    "cta_github": "GitHub"
+  },
+  "nav": {
+    "about": "Sobre",
+    "skills": "Skills",
+    "experience": "Experiência",
+    "resume": "Currículo",
+    "projects": "Projetos",
+    "blog": "Blog",
+    "contact": "Contato"
+  },
+  "skills": {
+    "heading": "Especialidade Técnica",
+    "subheading": "Uma seleção refinada das minhas habilidades em ferramentas e tecnologias modernas de desenvolvimento",
+    "footer": "Constantemente refinando e expandindo meu conjunto de habilidades técnicas"
+  },
+  "experience": {
+    "heading": "Experiência Profissional & Projetos",
+    "subheading": "Destaques da minha carreira e projetos relevantes que demonstram minhas habilidades e impacto.",
+    "jobs": [
+      {
+        "title": "Desenvolvedor Full-Stack",
+        "company": "SCHOTT",
+        "location": "Diadema – São Paulo – Brasil",
+        "date": "Jan 2024 – Mar 2025",
+        "description": "Migração Vue 2 → 3, redesign de dashboard e plataforma de monitoramento industrial com Vue 3 e ASP.NET.",
+        "achievements": [
+          "Liderou migração e redesign de dashboard (+40% performance).",
+          "Desenvolveu plataforma com sensores, temas dark/light e KPIs em tempo real.",
+          "Evoluiu filtros dinâmicos e painéis com dados atualizados.",
+          "Stack: Vue.js 2/3, TypeScript, ASP.NET, Entity Framework, MySQL, Docker, Azure DevOps."
+        ]
+      },
+      {
+        "title": "Desenvolvedor",
+        "company": "Avanth",
+        "location": "Brasil",
+        "date": "Fev 2023 – Out 2023",
+        "description": "Dashboard para fintech com Vue.js 2 e .NET 7, APIs RESTful com JWT e RBAC.",
+        "achievements": [
+          "Redução de 40% no tempo de processamento de operações financeiras.",
+          "APIs .NET 7 com autenticação JWT e controle de acesso RBAC.",
+          "Stack: Vue.js 2, Vuex, JavaScript, .NET 7, SQL Server, Swagger."
+        ]
+      },
+      {
+        "title": "Desenvolvedor",
+        "company": "CREN",
+        "location": "Brasil",
+        "date": "Jan 2022 – Dez 2022",
+        "description": "Prontuário eletrônico em WinForms com foco em usabilidade e conformidade LGPD.",
+        "achievements": [
+          "+40% de agilidade e -70% em erros de digitação.",
+          "Stack: C#, WinForms, MySQL, Dapper, DevExpress."
+        ]
+      }
+    ]
+  },
+  "resume": {
+    "heading": "Meu Currículo",
+    "subheading": "Veja minhas qualificações profissionais e experiência em desenvolvimento full-stack.",
+    "download": "Baixar Currículo",
+    "error": "Falha ao carregar o PDF"
+  },
+  "footer": {
+    "description": "Criando aplicações web escaláveis, ferramentas open-source e experiências digitais inovadoras.",
+    "quick_links": "Links Rápidos",
+    "connect": "Conecte-se",
+    "built_by": "Feito com ❤️ por Guilherme Menezes.",
+    "visitors": "Visitantes"
+  },
+  "contact": {
+    "heading": "Fale comigo",
+    "subheading": "Tem um projeto ou dúvida? Me chame e vamos transformar suas ideias em realidade.",
+    "field_name": "Nome",
+    "field_email": "E-mail",
+    "field_subject": "Assunto",
+    "field_message": "Digite sua mensagem...",
+    "submit": "Enviar Mensagem",
+    "sending": "Enviando...",
+    "success": "Mensagem enviada com sucesso!",
+    "error": "Falha ao enviar mensagem. Tente novamente.",
+    "error_generic": "Ocorreu um erro. Tente novamente mais tarde.",
+    "copied": "copiado!"
+  }
+}

@@ -1,6 +1,7 @@
 import Footer from '@/components/main/Footer'
 import { Navbar } from '@/components/main/Navbar'
 import { ThemeProvider } from '@/components/theme-provider'
+import { I18nProvider } from '@/components/providers/I18nProvider'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
@@ -35,10 +36,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          {children}
+          <I18nProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </I18nProvider>
         </ThemeProvider>
-        <Footer />
       </body>
     </html>
   )

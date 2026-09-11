@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "badge": "The Developer",
+    "name": "Guilherme Menezes",
+    "role": "Full-Stack Developer",
+    "description": "Legacy migration, performance and scalability with Vue.js and .NET.",
+    "cta_connect": "Let's Connect ↓",
+    "cta_github": "GitHub"
+  },
+  "nav": {
+    "about": "About",
+    "skills": "Skills",
+    "experience": "Experience",
+    "resume": "Resume",
+    "projects": "Projects",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "skills": {
+    "heading": "Technical Expertise",
+    "subheading": "A refined selection of my proficiency in modern development tools and technologies",
+    "footer": "Constantly refining and expanding my technical skillset"
+  },
+  "experience": {
+    "heading": "Professional Experience & Projects",
+    "subheading": "Highlights of my career and key projects showcasing my skills & impact.",
+    "jobs": [
+      {
+        "title": "Full-Stack Developer",
+        "company": "SCHOTT",
+        "location": "Diadema – São Paulo – Brazil",
+        "date": "Jan 2024 – Mar 2025",
+        "description": "Vue 2 → 3 migration, dashboard redesign and industrial monitoring platform with Vue 3 and ASP.NET.",
+        "achievements": [
+          "Led migration and dashboard redesign (+40% performance).",
+          "Built platform with sensors, dark/light themes and real-time KPIs.",
+          "Enhanced dynamic filters and panels with live data.",
+          "Stack: Vue.js 2/3, TypeScript, ASP.NET, Entity Framework, MySQL, Docker, Azure DevOps."
+        ]
+      },
+      {
+        "title": "Developer",
+        "company": "Avanth",
+        "location": "Brazil",
+        "date": "Feb 2023 – Oct 2023",
+        "description": "Fintech dashboard with Vue.js 2 and .NET 7, RESTful APIs with JWT and RBAC.",
+        "achievements": [
+          "40% reduction in financial transaction processing time.",
+          ".NET 7 APIs with JWT authentication and RBAC.",
+          "Stack: Vue.js 2, Vuex, JavaScript, .NET 7, SQL Server, Swagger."
+        ]
+      },
+      {
+        "title": "Developer",
+        "company": "CREN",
+        "location": "Brazil",
+        "date": "Jan 2022 – Dec 2022",
+        "description": "Electronic health record in WinForms focused on usability and LGPD compliance.",
+        "achievements": [
+          "+40% agility and -70% in typing errors.",
+          "Stack: C#, WinForms, MySQL, Dapper, DevExpress."
+        ]
+      }
+    ]
+  },
+  "resume": {
+    "heading": "My Resume",
+    "subheading": "View my professional qualifications and experience in full-stack development.",
+    "download": "Download Resume",
+    "error": "Failed to load PDF"
+  },
+  "footer": {
+    "description": "Crafting scalable web apps, open-source tools, and innovative digital experiences.",
+    "quick_links": "Quick Links",
+    "connect": "Connect",
+    "built_by": "Built with ❤️ by Guilherme Menezes.",
+    "visitors": "Visitors"
+  },
+  "contact": {
+    "heading": "Get in Touch",
+    "subheading": "Have a project or question? Reach out and let's turn your ideas into reality.",
+    "field_name": "Name",
+    "field_email": "Email",
+    "field_subject": "Subject",
+    "field_message": "Please drop your short message...",
+    "submit": "Send Message",
+    "sending": "Sending...",
+    "success": "Message sent successfully!",
+    "error": "Failed to send message. Please try again.",
+    "error_generic": "An error occurred. Please try again later.",
+    "copied": "copied!"
+  }
+}

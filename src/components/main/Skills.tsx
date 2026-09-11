@@ -4,6 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Skill, skills } from '@/constants'
 import SkillDataProvider from '../sub/SkillDataProvider'
+import { useTranslation } from 'react-i18next'
 
 const uniqueSkills: Skill[] = Array.from(
   skills
@@ -17,6 +18,8 @@ const uniqueSkills: Skill[] = Array.from(
 ).sort((a, b) => a.skill_name.localeCompare(b.skill_name))
 
 const Skills = () => {
+  const { t } = useTranslation()
+
   return (
     <section
       id="skills"
@@ -35,10 +38,10 @@ const Skills = () => {
           id="skills-heading"
           className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground"
         >
-          Technical Expertise
+          {t('skills.heading')}
         </h2>
         <p className="mt-2 text-sm sm:text-base text-muted-foreground font-medium">
-          A refined selection of my proficiency in modern development tools and technologies
+          {t('skills.subheading')}
         </p>
       </div>
 
@@ -87,7 +90,7 @@ const Skills = () => {
 
       {/* Footer */}
       <p className="mt-6 text-center text-sm text-muted-foreground font-medium">
-        Constantly refining and expanding my technical skillset
+        {t('skills.footer')}
       </p>
     </section>
   )

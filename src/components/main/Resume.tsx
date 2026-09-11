@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useEffect, useState, useRef } from 'react'
 import { FaDownload } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 
 const Document = dynamic(() => import('react-pdf').then((mod) => mod.Document), { ssr: false })
 const Page = dynamic(() => import('react-pdf').then((mod) => mod.Page), { ssr: false })
@@ -12,6 +13,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
 const ResumeSection = () => {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [containerWidth, setContainerWidth] = useState<number>(890)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -64,9 +66,9 @@ const ResumeSection = () => {
         viewport={{ once: true }}
         className="text-center mb-10"
       >
-        <h2 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">My Resume</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">{t('resume.heading')}</h2>
         <p className="mt-2 text-muted-foreground text-sm italic">
-          View my professional qualifications and experience in full-stack development.
+          {t('resume.subheading')}
         </p>
       </motion.div>
 
@@ -79,7 +81,7 @@ const ResumeSection = () => {
       >
         <div ref={wrapperRef} className="relative w-full overflow-y-auto">
           {error ? (
-            <p className="text-destructive text-center text-lg p-4">Failed to load PDF: {error}</p>
+            <p className="text-destructive text-center text-lg p-4">{t('resume.error')}: {error}</p>
           ) : (
             <Document
               file="/resume.pdf"
@@ -107,7 +109,7 @@ const ResumeSection = () => {
         className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium shadow-md hover:shadow-lg transition-all"
       >
         <FaDownload className="text-base" />
-        Download Resume
+        {t('resume.download')}
       </motion.a>
     </section>
   )

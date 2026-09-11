@@ -6,9 +6,11 @@ import { FC, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { FaLinkedin, FaTwitter } from 'react-icons/fa'
 import { RxGithubLogo } from 'react-icons/rx'
+import { useTranslation } from 'react-i18next'
 
 const Footer: FC = () => {
   const pathname = usePathname()
+  const { t } = useTranslation()
   const [visitorCount, setVisitorCount] = useState<number>(0)
 
   useEffect(() => {
@@ -28,7 +30,7 @@ const Footer: FC = () => {
     // Syncing external storage to React state
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisitorCount(count)
-  }, [])
+  }, [pathname])
 
   const socialLinks = [
     {
@@ -48,7 +50,11 @@ const Footer: FC = () => {
     },
   ]
 
-  const quickLinks = ['About', 'Skills', 'Projects']
+  const quickLinks = [
+    { label: t('nav.about'), href: '#about' },
+    { label: t('nav.skills'), href: '#skills' },
+    { label: t('nav.projects'), href: '#projects' },
+  ]
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -84,23 +90,23 @@ const Footer: FC = () => {
           <motion.div className="space-y-4" variants={childVariants}>
             <h1 className="text-2xl font-extrabold bg-clip-text">Guilherme Menezes</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Crafting scalable web apps, open-source tools, and innovative digital experiences.
+              {t('footer.description')}
             </p>
           </motion.div>
 
           <motion.div className="space-y-4" variants={childVariants}>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Quick Links
+              {t('footer.quick_links')}
             </h2>
             <ul className="space-y-2 text-sm">
               {quickLinks.map((item) => (
-                <li key={item}>
+                <li key={item.href}>
                   <a
-                    href={`#${item.toLowerCase()}`}
+                    href={item.href}
                     className="hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label={`Navigate to ${item} section`}
+                    aria-label={`Navigate to ${item.label} section`}
                   >
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
@@ -109,7 +115,7 @@ const Footer: FC = () => {
 
           <motion.div className="space-y-4" variants={childVariants}>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Connect
+              {t('footer.connect')}
             </h2>
             <div className="flex flex-wrap gap-3">
               {socialLinks.map((link) => (
@@ -152,10 +158,10 @@ const Footer: FC = () => {
             strategy="lazyOnload"
           />
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Built with ❤️ by Guilherme Menezes.
+            © {new Date().getFullYear()} {t('footer.built_by')}
           </p>
           <p className="text-xs text-muted-foreground">
-            Visitors:{' '}
+            {t('footer.visitors')}:{' '}
             <span className="font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
               {visitorCount.toLocaleString()}
             </span>

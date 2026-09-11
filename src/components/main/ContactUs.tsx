@@ -15,6 +15,7 @@ import {
 import { FaSquarePhone } from 'react-icons/fa6'
 import { buttonVariants } from '../ui/button'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 
 interface FormData {
   name: string
@@ -24,6 +25,7 @@ interface FormData {
 }
 
 const ContactUs: FC = () => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -50,13 +52,13 @@ const ContactUs: FC = () => {
       })
 
       if (response.ok) {
-        setStatus('Message sent successfully!')
+        setStatus(t('contact.success'))
         setFormData({ name: '', email: '', subject: '', message: '' })
       } else {
-        setStatus('Failed to send message. Please try again.')
+        setStatus(t('contact.error'))
       }
     } catch {
-      setStatus('An error occurred. Please try again later.')
+      setStatus(t('contact.error_generic'))
     } finally {
       setIsSubmitting(false)
       setTimeout(() => setStatus(''), 5000)
@@ -65,7 +67,7 @@ const ContactUs: FC = () => {
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast.success(`${label} copied!`)
+    toast.success(`${label} ${t('contact.copied')}`)
   }
 
   const cardVariants: Variants = {
@@ -108,9 +110,9 @@ const ContactUs: FC = () => {
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-4xl font-extrabold">Fale comigo</h2>
+              <h2 className="text-4xl font-extrabold">{t('contact.heading')}</h2>
               <p className="text-muted-foreground leading-relaxed text-base">
-                Tem um projeto ou dúvida? Me chame e vamos transformar suas ideias em realidade.
+                {t('contact.subheading')}
               </p>
 
               <div className="space-y-5 text-foreground">
@@ -150,7 +152,11 @@ const ContactUs: FC = () => {
               animate="visible"
             >
               <form onSubmit={handleSubmit} className="space-y-5" aria-label="Contact Form">
-                {['name', 'email', 'subject'].map((field, i) => (
+                {[
+                  { field: 'name', placeholder: t('contact.field_name') },
+                  { field: 'email', placeholder: t('contact.field_email') },
+                  { field: 'subject', placeholder: t('contact.field_subject') },
+                ].map(({ field, placeholder }, i) => (
                   <motion.div
                     key={field}
                     custom={i}
@@ -173,7 +179,7 @@ const ContactUs: FC = () => {
                         name={field}
                         value={formData[field as keyof FormData]}
                         onChange={handleChange}
-                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        placeholder={placeholder}
                         className="w-full pl-10 pr-4 py-3 bg-background/50 text-foreground rounded-none focus:outline-none focus:ring-2 focus:ring-primary placeholder-muted-foreground transition-all"
                         required
                         aria-label={field}
@@ -186,7 +192,7 @@ const ContactUs: FC = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Please Drop Your Short Message..."
+                    placeholder={t('contact.field_message')}
                     className="w-full pl-4 pr-4 py-3 bg-background/50 text-foreground rounded-none h-36 resize-none focus:outline-none focus:ring-2 focus:ring-primary placeholder-muted-foreground transition-all"
                     required
                     aria-label="Message"
@@ -206,11 +212,11 @@ const ContactUs: FC = () => {
                 >
                   {isSubmitting ? (
                     <>
-                      <FaSpinner className="animate-spin" /> Sending...
+                      <FaSpinner className="animate-spin" /> {t('contact.sending')}
                     </>
                   ) : (
                     <>
-                      <FaPaperPlane /> Send Message
+                      <FaPaperPlane /> {t('contact.submit')}
                     </>
                   )}
                 </motion.button>

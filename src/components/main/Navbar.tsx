@@ -19,18 +19,20 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaBlog, FaBriefcase, FaCode, FaEnvelope, FaProjectDiagram, FaUser } from 'react-icons/fa'
 import { Button } from '../ui/button'
+import { useTranslation } from 'react-i18next'
 
 export function Navbar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
 
   const navItems = [
-    { name: 'About', link: '#about', icon: <FaUser /> },
-    { name: 'Skills', link: '#skills', icon: <FaCode /> },
-    { name: 'Experience', link: '#experience', icon: <FaBriefcase /> },
-    { name: 'Projects', link: '#projects', icon: <FaProjectDiagram /> },
-    { name: 'Blogs', link: '#blogs', icon: <FaBlog /> },
+    { name: t('nav.about'), link: '#about', icon: <FaUser /> },
+    { name: t('nav.skills'), link: '#skills', icon: <FaCode /> },
+    { name: t('nav.experience'), link: '#experience', icon: <FaBriefcase /> },
+    { name: t('nav.projects'), link: '#projects', icon: <FaProjectDiagram /> },
+    { name: t('nav.blog'), link: '#blogs', icon: <FaBlog /> },
   ]
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import { FC, JSX } from 'react'
 import Image from 'next/image'
 import { Timeline as TimelineComponent } from '@/components/ui/timeline'
 import { FaBriefcase, FaBuilding, FaLaptopCode } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 
 export interface TimelineItem {
   id: number
@@ -122,8 +123,35 @@ export const TimelineElement: FC<{ item: TimelineItem; index: number }> = ({ ite
   </div>
 )
 
+interface TranslatedJob {
+  title: string
+  company: string
+  location: string
+  date: string
+  description: string
+  achievements: string[]
+}
+
 const Timeline: FC = () => {
-  const timelineContent = timelineData.map((item) => ({
+  const { t } = useTranslation()
+
+  const translatedJobs = (t('experience.jobs', { returnObjects: true }) as TranslatedJob[]) || []
+
+  const mergedItems: TimelineItem[] = timelineData.map((baseItem, index) => {
+    const translated = Array.isArray(translatedJobs) ? translatedJobs[index] : undefined
+    if (!translated) return baseItem
+    return {
+      ...baseItem,
+      title: translated.title || baseItem.title,
+      company: translated.company || baseItem.company,
+      location: translated.location || baseItem.location,
+      date: translated.date || baseItem.date,
+      description: translated.description || baseItem.description,
+      achievements: translated.achievements || baseItem.achievements,
+    }
+  })
+
+  const timelineContent = mergedItems.map((item) => ({
     title: item.date,
     content: <TimelineElement key={item.id} item={item} index={item.id} />,
   }))
@@ -138,10 +166,10 @@ const Timeline: FC = () => {
           className="text-center mb-16"
         >
           <h1 className="text-5xl font-bold tracking-tight text-primary">
-            Professional Experience & Projects
+            {t('experience.heading')}
           </h1>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-base">
-            Highlights of my career and key projects showcasing my skills & impact.
+            {t('experience.subheading')}
           </p>
         </motion.div>
 
