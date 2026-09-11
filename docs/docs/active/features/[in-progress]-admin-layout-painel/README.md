@@ -1,6 +1,6 @@
 # ✨ Layout Base do Painel e 6 Seções Placeholder
 
-**Status:** approved
+**Status:** in-progress
 **Data:** 2026-09-09
 **Prioridade:** `alta`
 **Tags:** `frontend`, `ui-ux`
@@ -30,7 +30,7 @@ Entregar a estrutura base de navegação e o layout responsivo do painel adminis
 
 ## Depende de
 
-Independente dos cards 1 a 4 de 2FA (pode ser executado em paralelo). Depende apenas da autenticação básica já existente (`[done]-login-email-senha`).
+Cards 1 a 4 do 2FA concluídos (`[done]-2fa-basico-opcional`, `[done]-2fa-codigos-backup`, `[done]-2fa-confirmacao-seguranca`, `[done]-2fa-script-emergencia`) e autenticação básica (`[done]-login-email-senha`) ✅.
 
 ## Escopo
 
@@ -67,10 +67,10 @@ Independente dos cards 1 a 4 de 2FA (pode ser executado em paralelo). Depende ap
 
 ## Critérios de Conclusão
 
-- [ ] Layout compartilhado com sidebar responsiva no desktop e menu expansível no mobile
-- [ ] Navegação funcional entre as 6 seções, painel geral e segurança com destaque na rota ativa
-- [ ] Header exibindo breadcrumbs corretos, e-mail logado, link para o site público e botão de logout
-- [ ] Todas as 6 páginas de seções exibem aviso visual de placeholder e a fase correta do roadmap
+- [x] Layout compartilhado com sidebar responsiva no desktop e menu expansível no mobile
+- [x] Navegação funcional entre as 6 seções, painel geral e segurança com destaque na rota ativa
+- [x] Header exibindo breadcrumbs corretos, e-mail logado, link para o site público e botão de logout
+- [x] Todas as 6 páginas de seções exibem aviso visual de placeholder e a fase correta do roadmap
 - [ ] Validado e testado em ambiente local e em produção na VPS
 
 ---

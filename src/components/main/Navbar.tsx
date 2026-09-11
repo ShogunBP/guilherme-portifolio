@@ -15,11 +15,13 @@ import { LanguageToggle } from '@/components/ui/language-toggle'
 import { ThemeToggle } from '@/hooks/use-toogle'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaBlog, FaBriefcase, FaCode, FaEnvelope, FaProjectDiagram, FaUser } from 'react-icons/fa'
 import { Button } from '../ui/button'
 
 export function Navbar() {
+  const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -36,6 +38,10 @@ export function Navbar() {
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  if (pathname?.startsWith('/admin')) {
+    return null
+  }
 
   return (
     <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-300`}>

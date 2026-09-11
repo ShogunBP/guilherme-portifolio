@@ -3,13 +3,16 @@
 import { motion } from 'framer-motion'
 import Script from 'next/script'
 import { FC, useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { FaLinkedin, FaTwitter } from 'react-icons/fa'
 import { RxGithubLogo } from 'react-icons/rx'
 
 const Footer: FC = () => {
+  const pathname = usePathname()
   const [visitorCount, setVisitorCount] = useState<number>(0)
 
   useEffect(() => {
+    if (pathname?.startsWith('/admin')) return
     const savedCount = localStorage.getItem('visitorCount')
     const lastVisit = localStorage.getItem('lastVisit')
     const today = new Date().toDateString()
@@ -62,6 +65,10 @@ const Footer: FC = () => {
   const childVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  }
+
+  if (pathname?.startsWith('/admin')) {
+    return null
   }
 
   return (

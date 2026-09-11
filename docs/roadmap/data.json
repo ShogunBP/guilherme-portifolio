@@ -1,61 +1,5 @@
 [
   {
-    "id": "admin-layout-painel",
-    "title": "Layout Base do Painel e 6 Seções Placeholder",
-    "category": "features",
-    "status": "approved",
-    "area": "active",
-    "date": "2026-09-09",
-    "priority": "alta",
-    "tags": [
-      "frontend",
-      "ui-ux"
-    ],
-    "progress": 9,
-    "progressFraction": {
-      "done": 1,
-      "total": 11
-    },
-    "summary": "Casca de navegação do painel administrativo com sidebar responsiva, header, entrada para segurança e 6 seções placeholder.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Entregar a estrutura base de navegação e o layout responsivo do painel administrativo, acomodando as 6 seções previstas no roadmap do projeto (Hero, Skills, Currículo, Projetos, Idioma, Guestbook) e a área de Segurança, cada uma com sua rota e página placeholder."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "1. **Layout Compartilhado:** Um layout consistente (`src/app/admin/(dashboard)/layout.tsx`) com sidebar lateral no desktop e menu expansível no mobile, utilizando a mesma identidade visual cósmica e dark glassmorphic do site público.\n2. **Navegação Funcional:** Menu lateral permitindo transitar entre todas as seções e a visão geral, com destaque visual nítido para a rota ativa.\n3. **Header com Contexto:** Barra superior exibindo breadcrumbs da rota atual, e-mail do usuário autenticado, link externo para visualizar o site público e botão de logout funcional.\n4. **Indicador de Segurança:** Área na sidebar ou header informando o estado da segurança (\"2FA Ativo\" ou \"2FA Inativo\"), lendo o estado real ou operando com fallback enquanto os cards 1-4 são finalizados.\n5. **Dashboard Principal (`/admin`):** Grid de cards visuais clicáveis direcionando para as 6 seções e para a página de Segurança.\n6. **Páginas Placeholder:** Cada seção como rota autônoma exibindo um visual moderno com indicação explícita de qual fase futura do roadmap implementará sua edição real:\n   - `/admin/hero` — Hero & Bio (Fase 4)\n   - `/admin/skills` — Skills & Habilidades (Fase 5)\n   - `/admin/curriculo` — Experiência & Currículo (Fase 6)\n   - `/admin/projetos` — Projetos & Portfólio (Fase 7)\n   - `/admin/idioma` — Idioma & Traduções (Fase 3)\n   - `/admin/guestbook` — Guestbook & Mensagens (Fase 8)\n   - `/admin/security` — Segurança & 2FA (Cards 1 a 4)"
-      },
-      {
-        "heading": "Depende de",
-        "content": "Independente dos cards 1 a 4 de 2FA (pode ser executado em paralelo). Depende apenas da autenticação básica já existente (`[done]-login-email-senha`)."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Grupo de rotas `src/app/admin/(dashboard)/layout.tsx` para compartilhar o layout sem interferir nas telas de login (`/admin/login`) ou verificação (`/admin/verify-2fa`).\n- Sidebar responsiva com navegação para as 6 seções, dashboard e segurança.\n- Header com breadcrumbs, email do usuário, atalho \"Ver site\" e ação de logout.\n- Dashboard inicial com cards visuais de acesso rápido.\n- 6 páginas placeholder com design refinado, skeletons ilustrativos e avisos informativos das fases futuras.\n\n### Não inclui (por ora)\n\n- Nenhuma funcionalidade de edição real de dados, formulários CRUD ou persistência de conteúdo (escopo das Fases 3 a 8)."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** frontend (Next.js App Router, Route Groups, Tailwind CSS, Lucide Icons, componentes ShadCN).\n- **Consistência:** paleta escura cósmica (`#030014`, tons de roxo/índigo, bordas suaves, tipografia com Inter)."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Criar o layout `src/app/admin/(dashboard)/layout.tsx` com sidebar e header responsivos.\n2. Criar a página de visão geral `src/app/admin/(dashboard)/page.tsx`.\n3. Criar as 6 páginas placeholder:\n   - `src/app/admin/(dashboard)/hero/page.tsx`\n   - `src/app/admin/(dashboard)/skills/page.tsx`\n   - `src/app/admin/(dashboard)/curriculo/page.tsx`\n   - `src/app/admin/(dashboard)/projetos/page.tsx`\n   - `src/app/admin/(dashboard)/idioma/page.tsx`\n   - `src/app/admin/(dashboard)/guestbook/page.tsx`\n4. Deixar preparada a rota e navegação para `src/app/admin/(dashboard)/security/page.tsx`.\n5. Validar navegação, breadcrumbs e logout em desktop e mobile."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Layout compartilhado com sidebar responsiva no desktop e menu expansível no mobile\n- [ ] Navegação funcional entre as 6 seções, painel geral e segurança com destaque na rota ativa\n- [ ] Header exibindo breadcrumbs corretos, e-mail logado, link para o site público e botão de logout\n- [ ] Todas as 6 páginas de seções exibem aviso visual de placeholder e a fase correta do roadmap\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-admin-layout-painel` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[approved]-admin-layout-painel"
-  },
-  {
     "id": "admin-troca-credenciais",
     "title": "Gerenciamento de Credenciais do Admin pelo Painel",
     "category": "features",
@@ -168,6 +112,62 @@
       }
     ],
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
+  },
+  {
+    "id": "admin-layout-painel",
+    "title": "Layout Base do Painel e 6 Seções Placeholder",
+    "category": "features",
+    "status": "in-progress",
+    "area": "active",
+    "date": "2026-09-09",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "ui-ux"
+    ],
+    "progress": 45,
+    "progressFraction": {
+      "done": 5,
+      "total": 11
+    },
+    "summary": "Casca de navegação do painel administrativo com sidebar responsiva, header, entrada para segurança e 6 seções placeholder.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Entregar a estrutura base de navegação e o layout responsivo do painel administrativo, acomodando as 6 seções previstas no roadmap do projeto (Hero, Skills, Currículo, Projetos, Idioma, Guestbook) e a área de Segurança, cada uma com sua rota e página placeholder."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "1. **Layout Compartilhado:** Um layout consistente (`src/app/admin/(dashboard)/layout.tsx`) com sidebar lateral no desktop e menu expansível no mobile, utilizando a mesma identidade visual cósmica e dark glassmorphic do site público.\n2. **Navegação Funcional:** Menu lateral permitindo transitar entre todas as seções e a visão geral, com destaque visual nítido para a rota ativa.\n3. **Header com Contexto:** Barra superior exibindo breadcrumbs da rota atual, e-mail do usuário autenticado, link externo para visualizar o site público e botão de logout funcional.\n4. **Indicador de Segurança:** Área na sidebar ou header informando o estado da segurança (\"2FA Ativo\" ou \"2FA Inativo\"), lendo o estado real ou operando com fallback enquanto os cards 1-4 são finalizados.\n5. **Dashboard Principal (`/admin`):** Grid de cards visuais clicáveis direcionando para as 6 seções e para a página de Segurança.\n6. **Páginas Placeholder:** Cada seção como rota autônoma exibindo um visual moderno com indicação explícita de qual fase futura do roadmap implementará sua edição real:\n   - `/admin/hero` — Hero & Bio (Fase 4)\n   - `/admin/skills` — Skills & Habilidades (Fase 5)\n   - `/admin/curriculo` — Experiência & Currículo (Fase 6)\n   - `/admin/projetos` — Projetos & Portfólio (Fase 7)\n   - `/admin/idioma` — Idioma & Traduções (Fase 3)\n   - `/admin/guestbook` — Guestbook & Mensagens (Fase 8)\n   - `/admin/security` — Segurança & 2FA (Cards 1 a 4)"
+      },
+      {
+        "heading": "Depende de",
+        "content": "Cards 1 a 4 do 2FA concluídos (`[done]-2fa-basico-opcional`, `[done]-2fa-codigos-backup`, `[done]-2fa-confirmacao-seguranca`, `[done]-2fa-script-emergencia`) e autenticação básica (`[done]-login-email-senha`) ✅."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Grupo de rotas `src/app/admin/(dashboard)/layout.tsx` para compartilhar o layout sem interferir nas telas de login (`/admin/login`) ou verificação (`/admin/verify-2fa`).\n- Sidebar responsiva com navegação para as 6 seções, dashboard e segurança.\n- Header com breadcrumbs, email do usuário, atalho \"Ver site\" e ação de logout.\n- Dashboard inicial com cards visuais de acesso rápido.\n- 6 páginas placeholder com design refinado, skeletons ilustrativos e avisos informativos das fases futuras.\n\n### Não inclui (por ora)\n\n- Nenhuma funcionalidade de edição real de dados, formulários CRUD ou persistência de conteúdo (escopo das Fases 3 a 8)."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** frontend (Next.js App Router, Route Groups, Tailwind CSS, Lucide Icons, componentes ShadCN).\n- **Consistência:** paleta escura cósmica (`#030014`, tons de roxo/índigo, bordas suaves, tipografia com Inter)."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar o layout `src/app/admin/(dashboard)/layout.tsx` com sidebar e header responsivos.\n2. Criar a página de visão geral `src/app/admin/(dashboard)/page.tsx`.\n3. Criar as 6 páginas placeholder:\n   - `src/app/admin/(dashboard)/hero/page.tsx`\n   - `src/app/admin/(dashboard)/skills/page.tsx`\n   - `src/app/admin/(dashboard)/curriculo/page.tsx`\n   - `src/app/admin/(dashboard)/projetos/page.tsx`\n   - `src/app/admin/(dashboard)/idioma/page.tsx`\n   - `src/app/admin/(dashboard)/guestbook/page.tsx`\n4. Deixar preparada a rota e navegação para `src/app/admin/(dashboard)/security/page.tsx`.\n5. Validar navegação, breadcrumbs e logout em desktop e mobile."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Layout compartilhado com sidebar responsiva no desktop e menu expansível no mobile\n- [x] Navegação funcional entre as 6 seções, painel geral e segurança com destaque na rota ativa\n- [x] Header exibindo breadcrumbs corretos, e-mail logado, link para o site público e botão de logout\n- [x] Todas as 6 páginas de seções exibem aviso visual de placeholder e a fase correta do roadmap\n- [ ] Validado e testado em ambiente local e em produção na VPS\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-admin-layout-painel` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/active/features/[in-progress]-admin-layout-painel"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
