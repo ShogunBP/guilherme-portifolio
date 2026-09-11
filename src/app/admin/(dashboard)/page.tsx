@@ -85,9 +85,9 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <div className="space-y-8 max-w-7xl">
+    <div className="space-y-8 w-full">
       {/* Welcome / Overview Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-500/25 backdrop-blur-md shadow-xl shadow-purple-950/20">
+      <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-500/25 backdrop-blur-md shadow-xl shadow-purple-950/20 w-full">
         <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -126,7 +126,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Grid of 7 Section Cards (All Clickable) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
         {sections.map((section) => {
           const Icon = section.icon
           const isSecurity = section.href === '/admin/security'

@@ -102,6 +102,38 @@ if (pathname?.startsWith('/admin')) {
 }
 ```
 
+### Tentativa 3 (Ajuste visual) — Borda cinza na lateral direita e largura restrita em monitores 1080p+
+- **O que foi feito:** Na primeira versão do dashboard e dos placeholders de seção, foram utilizadas classes Tailwind de largura máxima fixa (`max-w-7xl` em [`page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/(dashboard)/page.tsx) e `max-w-5xl` em [`SectionPlaceholder.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/(dashboard)/components/SectionPlaceholder.tsx)), sem customização global de calha de barra de rolagem e sem `color-scheme: dark` forçado na tag raiz `<html>`.
+- **Resultado real:** Em resoluções widescreen (ex.: 1920x1080 / Full HD), o conteúdo centralizava deixando um espaço vazio à direita em vez de ocupar 100% da área útil disponível. Simultaneamente, o navegador Chromium no Windows renderizava a calha da barra de rolagem vertical do sistema operacional com fundo cinza claro (`#f1f1f1` com 17px de espessura), criando a ilusão visual de uma borda vertical cinza indesejada cortando toda a lateral direita da aplicação cósmica.
+- **Correção aplicada:**
+  1. Em [`src/app/globals.css`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/globals.css): Definido `html { color-scheme: dark; }` e adicionada estilização global da barra de rolagem cósmica (`::-webkit-scrollbar` com largura de 8px, track na cor `#030014` idêntica ao fundo, e thumb roxo translúcido com `scrollbar-color` para navegadores modernos).
+  2. Em [`src/app/layout.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/layout.tsx): Definido `className="dark" style={{ colorScheme: 'dark' }}` na tag `<html>` e `bg-[#030014] text-white min-h-screen` no `<body>`.
+  3. Em [`src/app/admin/(dashboard)/layout.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/(dashboard)/layout.tsx): Adicionado `w-full min-w-0` no contêiner principal e no elemento `<main>`.
+  4. Em [`src/app/admin/(dashboard)/page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/(dashboard)/page.tsx): Substituído `max-w-7xl` por `w-full` no contêiner raiz, no banner de boas-vindas e no grid de cards.
+  5. Em [`src/app/admin/(dashboard)/components/SectionPlaceholder.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/(dashboard)/components/SectionPlaceholder.tsx): Substituído `max-w-5xl` por `w-full`.
+
+```css
+/* Trecho comprovando a remoção da borda cinza em src/app/globals.css */
+html {
+  color-scheme: dark;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030014;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.25);
+  border-radius: 9999px;
+  border: 2px solid #030014;
+}
+```
+
 ---
 
 ## Implementação Realizada

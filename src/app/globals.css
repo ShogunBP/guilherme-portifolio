@@ -3,6 +3,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  color-scheme: dark;
+}
+
+/* Sleek cosmic scrollbar for the entire application */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030014;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.25);
+  border-radius: 9999px;
+  border: 2px solid #030014;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.25) #030014;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
