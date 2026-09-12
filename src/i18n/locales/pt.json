@@ -14,7 +14,8 @@
     "resume": "Currículo",
     "projects": "Projetos",
     "blog": "Blog",
-    "contact": "Contato"
+    "contact": "Contato",
+    "portfolio": "Portfólio"
   },
   "skills": {
     "heading": "Especialidade Técnica",
@@ -88,6 +89,7 @@
     "success": "Mensagem enviada com sucesso!",
     "error": "Falha ao enviar mensagem. Tente novamente.",
     "error_generic": "Ocorreu um erro. Tente novamente mais tarde.",
+    "location": "Diadema – São Paulo – Brasil",
     "copied": "copiado!"
   }
 }

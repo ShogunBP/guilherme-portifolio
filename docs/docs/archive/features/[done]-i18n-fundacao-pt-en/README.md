@@ -1,6 +1,6 @@
 # ✨ Sistema de Idioma PT/EN — Fundação (i18next)
 
-**Status:** in-progress
+**Status:** done
 **Data:** 2026-09-11
 **Prioridade:** `alta`
 **Tags:** `frontend`, `i18n`, `ux`
@@ -364,9 +364,9 @@ Todos os textos hardcoded foram convertidos em chamadas a `t()`:
 - [x] `LanguageToggle` chama `i18n.changeLanguage()` e persiste no `localStorage`
 - [x] Ao alternar para EN, todos os textos da landing mudam instantaneamente sem reload
 - [x] Ao recarregar a página, o idioma escolhido é restaurado do `localStorage`
-- [x] Nenhum texto hardcoded residual nos componentes migrados
+- [x] Nenhum texto hardcoded residual nos componentes migrados (inclusive header mobile e endereço)
 - [x] `npm run build` sem erros de TypeScript (27/27 rotas geradas)
-- [ ] Testado em desktop e mobile, local e produção na VPS
+- [x] Testado em desktop e mobile, local e produção na VPS
 
 ---
 
@@ -374,7 +374,7 @@ Todos os textos hardcoded foram convertidos em chamadas a `t()`:
 
 ## Feedback
 
-Aprovado pelo usuário em 11/09/2026. Chaves PT/EN revisadas e aprovadas. Arquitetura idêntica ao padrão do projeto Thiago Bahls (`dev/utils/reference/SISTEMA_TRADUCAO.md`). Execução iniciada e testada localmente com sucesso.
+Aprovado e validado pelo usuário em 12/09/2026. Relatório de verificação de texto residual executado, 2 micro-ajustes aplicados (`nav.portfolio` e `contact.location`) e aprovados para encerramento do card com sucesso.
 
 ## Decisão
 
@@ -385,17 +385,17 @@ Aprovado pelo usuário em 11/09/2026. Chaves PT/EN revisadas e aprovadas. Arquit
 
 ## Validação
 
-> Registrado em 11/09/2026 durante testes automatizados e em navegador.
+> Registrado e validado em 12/09/2026.
 
 - **Compilação (`npm run build`):** Executada com sucesso sem erros TypeScript, gerando 27 páginas estáticas e dinâmicas.
 - **Alternância PT ↔ EN via DevTools:** Testada no navegador local:
-  - Estado PT inicial verificado: `"localStorageLang":"pt"`, `"badgeText":"O Desenvolvedor"`, `"roleText":"Desenvolvedor Full-Stack"`.
-  - Clique no botão de idioma: transição imediata para `"localStorageLang":"en"`, `"badgeText":"The Developer"`, `"roleText":"Full-Stack Developer"`, `"skillsHeading":"Technical Expertise"`, `"contactHeading":"Get in Touch"`.
+  - Estado PT inicial verificado: `"localStorageLang":"pt"`, `"badgeText":"O Desenvolvedor"`, `"roleText":"Desenvolvedor Full-Stack"`, `"mobileTitle":"Portfólio"`, `"location":"Diadema – São Paulo – Brasil"`.
+  - Clique no botão de idioma: transição imediata para `"localStorageLang":"en"`, `"badgeText":"The Developer"`, `"roleText":"Full-Stack Developer"`, `"skillsHeading":"Technical Expertise"`, `"contactHeading":"Get in Touch"`, `"mobileTitle":"Portfolio"`, `"location":"Diadema – São Paulo – Brazil"`.
   - Recarregamento da página (F5): preferência em inglês preservada sem piscar.
   - Alternância de volta para PT: restabelecimento imediato de todos os textos em português.
-- **Deploy:** Enviando código e configurações para a branch `main` para validação em produção na VPS.
+- **Deploy:** Código e configurações enviados para a branch `main` e validados na VPS.
 
-- [ ] Todos os critérios de conclusão atendidos
-- [ ] Testado manualmente em PT e EN na VPS pelo usuário
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-i18n-fundacao-pt-en` e movida para `archive/features/`**
+- [x] Todos os critérios de conclusão atendidos
+- [x] Testado manualmente em PT e EN na VPS pelo usuário
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-i18n-fundacao-pt-en` e movida para `archive/features/`**

@@ -14,7 +14,8 @@
     "resume": "Resume",
     "projects": "Projects",
     "blog": "Blog",
-    "contact": "Contact"
+    "contact": "Contact",
+    "portfolio": "Portfolio"
   },
   "skills": {
     "heading": "Technical Expertise",
@@ -88,6 +89,7 @@
     "success": "Message sent successfully!",
     "error": "Failed to send message. Please try again.",
     "error_generic": "An error occurred. Please try again later.",
+    "location": "Diadema – São Paulo – Brazil",
     "copied": "copied!"
   }
 }

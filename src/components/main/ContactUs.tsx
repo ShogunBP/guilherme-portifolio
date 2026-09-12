@@ -140,7 +140,7 @@ const ContactUs: FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <FaMapMarkerAlt className="text-primary text-lg" />
-                  <span className="text-sm font-medium select-text">Diadema – São Paulo – Brasil</span>
+                  <span className="text-sm font-medium select-text">{t('contact.location')}</span>
                 </div>
               </div>
             </motion.div>

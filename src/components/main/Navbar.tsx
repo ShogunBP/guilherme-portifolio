@@ -85,7 +85,7 @@ export function Navbar() {
             </Link>
 
             <span className="absolute left-1/2 -translate-x-1/2 z-10 text-lg font-bold text-neutral-800 dark:text-neutral-200 pointer-events-none">
-              {isMobileMenuOpen ? 'Menu' : 'Portfólio'}
+              {isMobileMenuOpen ? 'Menu' : t('nav.portfolio')}
             </span>
 
             <div className="flex flex-1 items-center justify-end gap-4 z-10">
