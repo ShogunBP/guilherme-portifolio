@@ -32,17 +32,43 @@ if (!i18n.isInitialized) {
         caches: ['localStorage'],
         lookupLocalStorage: 'i18nextLng',
       },
+      react: {
+        bindI18n: 'languageChanged loaded',
+        bindI18nStore: 'added',
+      },
     })
-
-  // TODO Fase 3.2: endpoint dinâmico para chaves gerenciadas pelo painel
-  // i18n.on('languageChanged', (lng) => {
-  //   fetch(`/api/translations?language=${lng}`)
-  //     .then((r) => r.json())
-  //     .then((data) => {
-  //       i18n.addResourceBundle(lng, 'translation', data, true, true)
-  //     })
-  //     .catch(() => {/* silently fall back to defaultResources */})
-  // })
 }
+
+// Função que busca e aplica os overrides do servidor
+async function applyServerOverrides(lng: string) {
+  if (typeof window === 'undefined') return
+  try {
+    const res = await fetch(`/api/translations?lang=${lng}`)
+    if (!res.ok) return
+    const data = await res.json()
+    if (data && Object.keys(data).length > 0) {
+      i18n.addResourceBundle(lng, 'translation', data, true, true)
+      // Se houver chaves aninhadas/arrays, aplica unflatten para suportar returnObjects: true
+      const { unflatten } = await import('@/lib/i18n-utils')
+      const nested = unflatten(data)
+      if (Object.keys(nested).length > 0) {
+        i18n.addResourceBundle(lng, 'translation', nested, true, true)
+      }
+      i18n.emit('loaded')
+    }
+  } catch {
+    // Silently fall back to defaultResources — nunca quebrar o site por erro de rede
+  }
+}
+
+// Chamar UMA VEZ no carregamento inicial (não só ao trocar idioma)
+if (typeof window !== 'undefined') {
+  applyServerOverrides(i18n.language)
+}
+
+// Chamar a cada troca de idioma
+i18n.on('languageChanged', (lng) => {
+  applyServerOverrides(lng)
+})
 
 export default i18n

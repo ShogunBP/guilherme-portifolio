@@ -44,6 +44,17 @@ function initDatabase(dbPath: string): Database.Database {
 
     CREATE INDEX IF NOT EXISTS idx_backup_codes_user_used 
     ON two_factor_backup_codes(user_id, used);
+
+    CREATE TABLE IF NOT EXISTS translation_overrides (
+      key        TEXT    NOT NULL,
+      lang       TEXT    NOT NULL,
+      value      TEXT    NOT NULL,
+      updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (key, lang)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_translation_overrides_lang
+      ON translation_overrides(lang);
   `)
 
   return db
