@@ -43,12 +43,12 @@ const providers: Provider[] = [
         return null
       }
 
-      if (email !== adminEmail) {
-        return null
-      }
+      // 🛡️ Sentinel: Always perform the slow cryptographic hash comparison
+      // to prevent timing attacks that could allow user enumeration.
+      const isEmailValid = email === adminEmail
 
       const isValid = bcrypt.compareSync(password, adminPasswordHash)
-      if (!isValid) {
+      if (!isEmailValid || !isValid) {
         return null
       }
 
