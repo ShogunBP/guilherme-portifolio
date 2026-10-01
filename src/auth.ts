@@ -47,7 +47,7 @@ const providers: Provider[] = [
         return null
       }
 
-      const isValid = bcrypt.compareSync(password, adminPasswordHash)
+      const isValid = await bcrypt.compare(password, adminPasswordHash)
       if (!isValid) {
         return null
       }
