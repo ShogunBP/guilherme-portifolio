@@ -1,4 +1,4 @@
-# Portfólio — Guilherme Menezes
+# Guilherme Menezes Portfólio
 
 **Desenvolvedor Full-Stack · Vue.js & .NET · Performance e Escalabilidade**
 
