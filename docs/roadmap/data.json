@@ -333,6 +333,63 @@
     "path": "docs/archive/bugs/[done]-admin-retorna-landing-em-desenvolvimento"
   },
   {
+    "id": "bloqueio-sincrono-login",
+    "title": "Bloqueio síncrono no login",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "backend",
+      "segurança",
+      "performance"
+    ],
+    "progress": 40,
+    "progressFraction": {
+      "done": 2,
+      "total": 5
+    },
+    "summary": "Trocar bcrypt síncrono por operação assíncrona e avaliar limites contra abuso de login.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "A PR #8 identifica uso de `bcrypt.compareSync` no fluxo de login não autenticado, bloqueando o event loop durante o custo criptográfico."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Enviar tentativas concorrentes ao endpoint de autenticação.\n2. Observar latência de outras requisições enquanto `compareSync` executa.\n3. Comparar com a implementação assíncrona sob carga controlada."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "A autenticação deve evitar bloquear o event loop e limitar abuso por rate limiting, mantendo resposta correta para credenciais válidas e inválidas."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "`src/auth.ts` usa comparação síncrona na branch analisada. A PR troca por `await bcrypt.compare()`, mitigando o bloqueio do event loop, mas não elimina custo de CPU nem substitui rate limiting."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: backend de autenticação.\n- Arquivo principal: `src/auth.ts`.\n- A PR também altera `next.config.ts` com headers/CSP não relacionados, criando escopo misturado e possíveis conflitos com PRs #2, #7 e #9.\n- A análise não executou testes de carga, login ou build."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "A operação síncrona de bcrypt é executada durante uma requisição não autenticada. A operação assíncrona delega o trabalho, mas o endpoint ainda precisa de limites de abuso."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Trocar apenas a comparação por operação assíncrona compatível com `authorize`.\n2. Testar login válido, inválido, erro e concorrência controlada.\n3. Avaliar rate limiting, timeout e limites de recursos como escopo complementar.\n4. Separar e consolidar headers/CSP no card próprio.\n5. Usar o gerenciador e scripts declarados pelo repositório; não aceitar apenas o claim de `pnpm build`.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: `compareSync` foi substituído por `await bcrypt.compare`; não houve teste de carga ou concorrência.\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-bloqueio-sincrono-login` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-bloqueio-sincrono-login"
+  },
+  {
     "id": "dropdown-remove-scroll-pagina",
     "title": "Dropdown do ThemeToggle — Remove o scroll da página ao abrir",
     "category": "bugs",
@@ -387,6 +444,63 @@
       }
     ],
     "path": "docs/archive/bugs/[done]-dropdown-remove-scroll-pagina"
+  },
+  {
+    "id": "enumeracao-temporal-administrador",
+    "title": "Enumeração temporal do administrador",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "segurança",
+      "backend",
+      "infra"
+    ],
+    "progress": 40,
+    "progressFraction": {
+      "done": 2,
+      "total": 5
+    },
+    "summary": "Reduzir diferença temporal na autenticação e validar headers sem comprometer HTTPS e ambientes locais.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "A PR #7 aponta retorno antecipado em `src/auth.ts` quando o e-mail não corresponde ao administrador, criando possível diferença temporal entre e-mails válidos e inválidos. Também inclui headers em `next.config.ts`."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Enviar tentativas de autenticação com e-mails válidos e inválidos.\n2. Medir várias amostras em condições equivalentes.\n3. Observar headers de segurança em rotas públicas e administrativas."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "A autenticação não deve revelar validade do e-mail por tempo de resposta, e headers devem ser compatíveis com HTTPS integral, subdomínios e desenvolvimento."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "O retorno antecipado e a ausência de hash dummy podem manter diferenças mensuráveis. A comparação incondicional proposta reduz o problema, mas não foi acompanhada de medição. HSTS com `includeSubDomains` e `preload` exige decisão operacional."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: backend de autenticação e infra.\n- Arquivos: `src/auth.ts`, `next.config.ts`, `.jules/sentinel.md`.\n- A análise não executou build, benchmark ou checks da PR."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "O fluxo condiciona o trabalho criptográfico à validade do identificador. A política de headers foi adicionada no mesmo PR, misturando dois escopos e aumentando o risco de revisão incompleta."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Separar a correção temporal da política de headers.\n2. Avaliar hash dummy e comparar amostras em ambiente controlado.\n3. Confirmar comportamento de `bcrypt` e tratamento assíncrono.\n4. Decidir HSTS, `includeSubDomains` e `preload` com base no domínio real.\n5. Testar login válido, inválido e falhas sem registrar credenciais.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: comparação bcrypt assíncrona e tentativa para e-mail inválido foram revisadas; não houve medição temporal nem teste autenticado.\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-enumeracao-temporal-administrador` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-enumeracao-temporal-administrador"
   },
   {
     "id": "esgotamento-disco-build-docker-vps",
@@ -616,6 +730,177 @@
       }
     ],
     "path": "docs/archive/bugs/[done]-flicker-navbar-logo-scroll"
+  },
+  {
+    "id": "hardening-html-email-contato",
+    "title": "Hardening HTML do e-mail de contato",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "backend",
+      "segurança",
+      "api"
+    ],
+    "progress": 80,
+    "progressFraction": {
+      "done": 4,
+      "total": 5
+    },
+    "summary": "Escapar corretamente conteúdo enviado no e-mail de contato sem introduzir regressão no assunto.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "A rota de contato insere nome, assunto e mensagem fornecidos pelo usuário em um template HTML de e-mail. A PR #4 troca a remoção simples de `<` e `>` por `escapeHtml`."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Enviar conteúdo com entidades, aspas e marcação para a API de contato.\n2. Inspecionar o HTML do e-mail recebido.\n3. Verificar também o assunto e entradas com CRLF e tamanho excessivo."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Conteúdo do usuário deve ser exibido como texto no e-mail, sem HTML interpretável, e o assunto deve preservar o texto esperado sem entidades literais indevidas."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "A sanitização existente remove `<` e `>`, o que já bloqueia tags simples no corpo, mas não é um escaping HTML completo. A PR melhora o corpo, porém aplica `sanitizedSubject` no header `subject`, podendo fazer o assunto exibir `&amp;` literalmente. Não há evidência de teste da branch."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: backend e API.\n- Arquivo: `src/app/api/contact/route.ts`.\n- A análise indicou que o e-mail é validado por regex; não foram avaliados limites de tamanho nem CRLF em execução.\n- O risco principal é HTML injection no e-mail de notificação, não XSS confirmado no site."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "O mesmo valor escapado para HTML foi reutilizado no campo de assunto, que possui contrato diferente. O escaping deve ocorrer por contexto: HTML no corpo e tratamento apropriado para assunto/headers."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Separar valores de texto cru validados dos valores escapados para o corpo HTML.\n2. Escapar `&` antes dos demais caracteres no corpo.\n3. Definir tratamento para CRLF, tamanho e conteúdo do assunto.\n4. Adicionar testes unitários do helper e testes da rota sem credenciais reais.\n5. Confirmar envio usando uma integração controlada ou mock do provedor.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: harness com `fetch` mockado confirmou escaping, sanitização do assunto e rejeição de payload não-string; não houve envio real de e-mail.\n\n- [x] Bug não reproduz mais\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-hardening-html-email-contato` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-hardening-html-email-contato"
+  },
+  {
+    "id": "headers-seguranca-ausentes",
+    "title": "Headers de segurança ausentes",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "segurança",
+      "infra",
+      "frontend"
+    ],
+    "progress": 80,
+    "progressFraction": {
+      "done": 4,
+      "total": 5
+    },
+    "summary": "Adicionar e validar headers HTTP de segurança nas respostas da aplicação conforme as PRs 2 e 9.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "O checkout analisado não possui `headers()` de segurança em `next.config.ts`. As PRs #2 e #9 propõem headers para reduzir exposição a clickjacking, MIME sniffing e transporte sem HTTPS."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Inspecionar `next.config.ts` na branch `main`.\n2. Fazer uma requisição a uma rota pública e observar os headers de resposta.\n3. Comparar com a política desejada para produção, desenvolvimento e subdomínios."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "As respostas devem possuir headers de segurança compatíveis com o deployment, sem quebrar OAuth, HMR, PDFs ou ambientes locais."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "Não há configuração confirmada de headers no `next.config.ts` da branch analisada. As PRs #2 e #9 são propostas concorrentes para o mesmo arquivo."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend e infra.\n- Arquivos: `next.config.ts`; `.jules/sentinel.md` nas PRs.\n- PR #2 propõe nosniff, DENY, X-XSS-Protection, Referrer-Policy e HSTS.\n- PR #9 é superconjunto, adicionando Permissions-Policy e `preload` ao HSTS.\n- A análise foi somente estática; o build dos branches não foi reproduzido."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "A aplicação ainda não declara uma política centralizada de headers no Next.js. As PRs adicionam blocos sobrepostos e não devem ser mescladas simultaneamente sem consolidação."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Escolher e consolidar uma única política a partir das PRs #2 e #9.\n2. Decidir explicitamente se `includeSubDomains` e `preload` são compatíveis com o domínio e HTTPS integral.\n3. Remover documentação/arquivos `.jules/sentinel.md` duplicados ou vazios do resultado final.\n4. Validar respostas reais em produção-like, desenvolvimento e rotas de autenticação.\n5. Avaliar CSP separadamente, sem introduzir `unsafe-inline`/`unsafe-eval` sem justificativa.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: headers confirmados em servidor de desenvolvimento e sem regressão observada nas rotas locais; produção/Cloudflare ainda não validada.\n\n- [x] Bug não reproduz mais\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-headers-seguranca-ausentes` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-headers-seguranca-ausentes"
+  },
+  {
+    "id": "headers-seguranca-duplicados",
+    "title": "Headers de segurança duplicados",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "segurança",
+      "infra",
+      "frontend"
+    ],
+    "progress": 80,
+    "progressFraction": {
+      "done": 4,
+      "total": 5
+    },
+    "summary": "Consolidar a proposta de headers da PR 9 e evitar conflito com as PRs 2 e 7.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "As PRs #2, #7 e #9 adicionam políticas sobrepostas em `next.config.ts`. A PR #9 propõe o conjunto mais amplo entre as três, incluindo `Permissions-Policy` e HSTS com `preload`."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Comparar os diffs das PRs #2, #7 e #9 contra `main`.\n2. Tentar aplicar mais de uma alteração ao mesmo `next.config.ts`.\n3. Observar conflito de hunks e arquivos `.jules/sentinel.md` adicionados repetidamente."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Uma única política de headers, revisada por domínio/deployment, sem duplicação, conflito de merge, arquivo sentinel vazio ou diretiva incompatível com desenvolvimento."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "As PRs são concorrentes. A PR #9 é um superconjunto da #2, mas adiciona HSTS `preload`, que exige decisão operacional. O `.jules/sentinel.md` da PR #9 é vazio. Nenhuma das propostas inclui CSP robusta."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend e infra.\n- Arquivo principal: `next.config.ts`.\n- PRs relacionadas: #2, #7 e #9.\n- A análise foi somente estática; não houve build ou verificação de headers em respostas reais."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "O bot criou PRs independentes para o mesmo alerta sem reconciliar branches anteriores. A correção deve ser consolidada em uma única política antes de qualquer merge."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Comparar todos os headers e escolher o conjunto necessário.\n2. Excluir `preload` até confirmar requisitos do domínio, ou registrar decisão humana explícita.\n3. Remover `.jules/sentinel.md` vazio/duplicado.\n4. Validar headers em rotas públicas, login, API e desenvolvimento.\n5. Avaliar CSP em card separado, evitando diretivas permissivas sem justificativa.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: política única de headers confirmada em desenvolvimento; produção/Cloudflare e decisão operacional de HSTS ainda pendentes.\n\n- [x] Bug não reproduz mais\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-headers-seguranca-duplicados` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-headers-seguranca-duplicados"
   },
   {
     "id": "hero-destaque-texto-desalinhado",
@@ -944,6 +1229,177 @@
       }
     ],
     "path": "docs/archive/bugs/[done]-navbar-travando-intermediario"
+  },
+  {
+    "id": "open-redirect-fluxo-autenticacao",
+    "title": "Open redirect no fluxo de autenticação",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "segurança",
+      "backend",
+      "frontend",
+      "api"
+    ],
+    "progress": 40,
+    "progressFraction": {
+      "done": 2,
+      "total": 5
+    },
+    "summary": "Consolidar a validação de redirectTo no login, 2FA, middleware e destino de redirect.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "As PRs #3, #5 e #6 tratam do mesmo vetor: valores `redirectTo` ou destinos derivados aceitam `//host`, podendo produzir redirect externo após login ou 2FA."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Fornecer `//evil.example`, URL absoluta, vazio e caminho local em query/cookie.\n2. Exercitar login, confirmação 2FA, middleware e `redirect-target`.\n3. Registrar URL final e resposta sem usar credenciais reais."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Somente destinos locais permitidos devem ser preservados, com fallback seguro para `/admin` quando a entrada for inválida."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "A branch `main` ainda possui validações textuais incompletas. A PR #6 cobre mais pontos — `LoginForm`, `verify-2fa`, API de verificação, `redirect-target/route.ts` e `middleware.ts` — mas ainda duplica a regra e não possui testes automatizados."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend, backend e API de autenticação.\n- Arquivos envolvidos: `src/app/admin/login/LoginForm.tsx`, `src/app/admin/verify-2fa/page.tsx`, `src/app/api/admin/2fa/verify/route.ts`, `src/app/api/admin/redirect-target/route.ts`, `src/middleware.ts`.\n- Nenhuma PR teve checks ou testes independentes confirmados na análise."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "A aplicação trata `startsWith('/')` como sinônimo de caminho relativo, embora `//` seja protocol-relative. A duplicação aumenta o risco de correções divergentes."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Consolidar as PRs #3, #5 e #6 em uma única alteração coerente.\n2. Preferir helper compartilhado com fallback seguro e validação por URL/origem.\n3. Testar todos os consumidores e transições login/2FA/deep-link.\n4. Incluir casos de barra invertida e normalização do Next.js.\n5. Verificar ausência de destino externo em respostas e navegação final.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: helper compartilhado validado em 15/15 casos e consumidores atualizados; fluxo autenticado completo, cookie e 2FA ainda não foram exercitados.\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-open-redirect-fluxo-autenticacao` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-open-redirect-fluxo-autenticacao"
+  },
+  {
+    "id": "open-redirect-login-parcial",
+    "title": "Open redirect parcial no login",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "segurança",
+      "frontend",
+      "api"
+    ],
+    "progress": 40,
+    "progressFraction": {
+      "done": 2,
+      "total": 5
+    },
+    "summary": "Corrigir o bloqueio incompleto de URLs protocol-relative em login, 2FA e API conforme a PR 3.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "A validação textual de `redirectTo` aceita strings iniciadas por `//`, que podem ser interpretadas como URLs protocol-relative externas."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Fornecer `redirectTo=//evil.example` ao fluxo de login ou 2FA.\n2. Exercitar a conclusão do login.\n3. Observar se o destino é aceito como caminho local ou se pode sair da origem."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Somente caminhos locais permitidos devem ser aceitos; valores protocol-relative, absolutos, vazios ou malformados devem cair em destino seguro."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "Na branch `main`, a análise encontrou validações vulneráveis em `LoginForm.tsx`, `verify-2fa/page.tsx` e `src/app/api/admin/2fa/verify/route.ts`. A PR #3 corrige os três consumidores, mas não cobre o destino centralizado nem o middleware."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend, backend e API de autenticação.\n- Arquivos propostos pela PR #3: `src/app/admin/login/LoginForm.tsx`, `src/app/admin/verify-2fa/page.tsx`, `src/app/api/admin/2fa/verify/route.ts`.\n- Não há testes automatizados nem evidência independente de execução."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "A checagem `startsWith('/')` confunde caminhos locais com URLs protocol-relative. A correção precisa ser centralizada ou aplicada a todos os consumidores para evitar cobertura parcial."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Mapear todos os consumidores de `redirectTo` e `admin_redirect`.\n2. Criar helper seguro ou validação equivalente única.\n3. Cobrir `//evil.example`, `/admin/path`, URL absoluta, vazio e deep-linking com cookie/query.\n4. Avaliar também formas com barra invertida e normalização do framework.\n5. Executar testes de login e 2FA sem expor credenciais.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: casos do helper validados e rotas não autenticadas redirecionam ao login; fluxo autenticado não foi exercitado.\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-open-redirect-login-parcial` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-open-redirect-login-parcial"
+  },
+  {
+    "id": "open-redirect-loginform-parcial",
+    "title": "Open redirect parcial no LoginForm",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "segurança",
+      "frontend"
+    ],
+    "progress": 40,
+    "progressFraction": {
+      "done": 2,
+      "total": 5
+    },
+    "summary": "Avaliar a correção isolada do LoginForm para URLs protocol-relative e sua cobertura incompleta.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "A PR #5 adiciona `!redirectTo.startsWith('//')` em dois pontos de `LoginForm.tsx` para impedir redirects protocol-relative após autenticação."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Acessar o login com `redirectTo=//evil.example`.\n2. Concluir o login.\n3. Repetir o fluxo por 2FA e pelo endpoint de redirect."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Nenhum caminho controlado pelo usuário deve redirecionar para origem externa; todos os consumidores devem aplicar a mesma política."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "A correção da PR #5 cobre somente dois pontos do `LoginForm`. Permanecem consumidores em `verify-2fa/page.tsx`, `api/admin/2fa/verify/route.ts` e `api/admin/redirect-target/route.ts`. A forma com barra invertida também não é tratada explicitamente."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend e autenticação.\n- Arquivo da PR: `src/app/admin/login/LoginForm.tsx`.\n- `.jules/sentinel.md` é documentação adicional.\n- Não há testes automatizados; apenas build alegado pelo autor."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "A validação foi corrigida localmente, mas a regra não foi centralizada nem propagada a todos os destinos. O cookie `admin_redirect` é HttpOnly e criado pelo middleware, reduzindo alguns vetores, mas não substitui validação consistente."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Não aplicar a PR isoladamente como solução final.\n2. Consolidar com as PRs #3 e #6.\n3. Criar testes para protocol-relative, barra invertida, caminho local, URL absoluta e deep-linking.\n4. Remover documentação duplicada e confirmar o contrato do destino seguro.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "> Evidências parciais registradas no LOG: os dois destinos do LoginForm usam o helper e o login local renderiza; credenciais e redirect autenticado não foram testados.\n\n- [ ] Bug não reproduz mais\n- [ ] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-open-redirect-loginform-parcial` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-open-redirect-loginform-parcial"
   },
   {
     "id": "resume-pdf-largura-sem-resize",
@@ -1758,6 +2214,58 @@
       }
     ],
     "path": "docs/archive/features/[done]-login-social-google-github"
+  },
+  {
+    "id": "a11y-botoes-navbar",
+    "title": "Acessibilidade dos botões da navbar",
+    "category": "enhancements",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "frontend",
+      "ui-ux"
+    ],
+    "progress": 90,
+    "progressFraction": {
+      "done": 9,
+      "total": 10
+    },
+    "summary": "Corrigir foco, teclado e nomes acessíveis dos controles da navbar conforme a PR 1.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "A PR #1 (`ux-a11y-navbar-improvements-13606226299156377748`) identificou controles da navbar com semântica e nomes acessíveis insuficientes."
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "A análise da branch confirmou que `MobileNavToggle` usa SVG cru com `onClick`, sem foco e teclado adequados, e que botões somente com ícone em `src/components/ui/resizable-navbar.tsx` e `src/components/main/Navbar.tsx` podem não ter nome acessível. A PR analisada não contém a correção: `gh pr diff 1 --name-only` listou somente `.Jules/palette.md` e `pnpm-lock.yaml`.\n\nO lockfile adicionado também não corresponde ao fluxo principal observado no repositório, que usa npm, criando risco de tooling duplicado e diff sem benefício funcional."
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "Recriar a correção diretamente nos componentes da navbar, usando elementos `button` semânticos, `aria-label`, `aria-expanded`, texto quando necessário e estados `focus-visible`, sem adicionar um segundo gerenciador de dependências."
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- Controles utilizáveis por teclado e tecnologias assistivas.\n- Nome acessível para botões somente com ícone.\n- Alvo de toque e indicação de foco preservados em desktop e móvel.\n- Nenhuma alteração de dependências ou lockfile não utilizado."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Inspecionar `src/components/ui/resizable-navbar.tsx` e `src/components/main/Navbar.tsx`.\n2. Substituir o `onClick` em SVG cru por botão semântico e adicionar estados ARIA.\n3. Nomear os botões de contato e preservar o layout responsivo.\n4. Testar teclado, foco visível, leitores de tela por atributos DOM e viewports desktop/móvel."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Toggle móvel é um `button` focável, acionável por teclado e possui nome acessível.\n- [x] `aria-expanded` representa o estado do menu.\n- [x] Botões somente com ícone possuem nome acessível e foco visível.\n- [x] Fluxos desktop e móvel não apresentam regressão visual ou funcional.\n- [x] Nenhum lockfile ou dependência não necessária é introduzido.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Evidências: Playwright local confirmou nomes acessíveis após scroll, abertura/fechamento mobile por teclado, `aria-expanded` correto e 0 erros de console; TypeScript, ESLint e `git diff --check` passaram. O clone invisível de medição ainda pode receber foco por Tab.\n\n- [x] Melhoria perceptível e funcional\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-a11y-botoes-navbar` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/archive/enhancements/[done]-a11y-botoes-navbar"
   },
   {
     "id": "auth-deep-linking-cookie",

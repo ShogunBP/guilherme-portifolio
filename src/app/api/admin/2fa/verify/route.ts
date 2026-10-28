@@ -11,6 +11,7 @@ import {
   COOKIE_OPTIONS_VERIFIED,
   COOKIE_OPTIONS_STATUS,
 } from '@/lib/totp-token'
+import { sanitizeLocalRedirect } from '@/lib/safe-redirect'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -33,8 +34,7 @@ export async function POST(req: NextRequest) {
     // Se 2FA não estiver ativo no banco, libera imediatamente
     if (!record || record.enabled !== 1) {
       const redirectCookie = req.cookies.get('admin_redirect')?.value
-      const safeRedirect =
-        redirectCookie && redirectCookie.startsWith('/') ? redirectCookie : '/admin'
+      const safeRedirect = sanitizeLocalRedirect(redirectCookie)
 
       const response = NextResponse.json({
         success: true,
@@ -82,8 +82,7 @@ export async function POST(req: NextRequest) {
     const statusToken = await create2FaStatusToken(true)
 
     const redirectCookie = req.cookies.get('admin_redirect')?.value
-    const safeRedirect =
-      redirectCookie && redirectCookie.startsWith('/') ? redirectCookie : '/admin'
+    const safeRedirect = sanitizeLocalRedirect(redirectCookie)
 
     const response = NextResponse.json({
       success: true,

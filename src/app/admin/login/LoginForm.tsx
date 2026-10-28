@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Lock, Mail, KeyRound, AlertCircle, Loader2 } from 'lucide-react'
+import { sanitizeLocalRedirect } from '@/lib/safe-redirect'
 
 interface LoginFormProps {
   availableProviders: {
@@ -123,8 +124,7 @@ export default function LoginForm({
         try {
           const redirectRes = await fetch('/api/admin/redirect-target')
           const { redirectTo } = await redirectRes.json()
-          const safeRedirect =
-            redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+          const safeRedirect = sanitizeLocalRedirect(redirectTo)
           router.push(safeRedirect)
         } catch {
           router.push('/admin')
@@ -162,8 +162,7 @@ export default function LoginForm({
       try {
         const redirectRes = await fetch('/api/admin/redirect-target')
         const { redirectTo } = await redirectRes.json()
-        const safeRedirect =
-          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/admin'
+        const safeRedirect = sanitizeLocalRedirect(redirectTo)
         router.push(safeRedirect)
       } catch {
         router.push('/admin')

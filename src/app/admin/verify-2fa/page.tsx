@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { ShieldCheck, AlertCircle, Loader2, ArrowRight, LogOut, KeyRound, Smartphone } from 'lucide-react'
+import { sanitizeLocalRedirect } from '@/lib/safe-redirect'
 
 export default function Verify2FaPage() {
   const router = useRouter()
@@ -77,8 +78,8 @@ export default function Verify2FaPage() {
         return
       }
 
-      // Sucesso! Redireciona para o destino ou /admin
-      const redirectUrl = data.redirect && data.redirect.startsWith('/') ? data.redirect : '/admin'
+      // Sucesso! Redireciona para o destino local seguro ou /admin
+      const redirectUrl = sanitizeLocalRedirect(data.redirect)
       router.push(redirectUrl)
       router.refresh()
     } catch {

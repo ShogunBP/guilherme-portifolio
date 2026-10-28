@@ -43,12 +43,11 @@ const providers: Provider[] = [
         return null
       }
 
-      if (email !== adminEmail) {
-        return null
-      }
+      // Mitigação de enumeração temporal: a comparação custosa (bcrypt) é sempre
+      // executada, mesmo com e-mail inválido, para uniformizar o tempo de resposta.
+      const isValid = await bcrypt.compare(password, adminPasswordHash)
 
-      const isValid = bcrypt.compareSync(password, adminPasswordHash)
-      if (!isValid) {
+      if (email !== adminEmail || !isValid) {
         return null
       }
 

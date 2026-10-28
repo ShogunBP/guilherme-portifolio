@@ -7,6 +7,7 @@ import {
   verify2FaStatusToken,
   verify2FaVerifiedToken,
 } from './lib/totp-token'
+import { sanitizeLocalRedirect } from './lib/safe-redirect'
 
 const { auth } = NextAuth(authConfig)
 
@@ -25,13 +26,18 @@ export default auth(async (req) => {
         return NextResponse.next()
       }
       // Qualquer outra página /admin/* redireciona para login e preserva deep-link
+      // (cookie sanitizado: apenas caminhos locais são gravados)
       const loginUrl = new URL('/admin/login', nextUrl)
       const response = NextResponse.redirect(loginUrl)
-      response.cookies.set('admin_redirect', nextUrl.pathname + nextUrl.search, {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-      })
+      response.cookies.set(
+        'admin_redirect',
+        sanitizeLocalRedirect(nextUrl.pathname + nextUrl.search),
+        {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+        }
+      )
       return response
     }
 
@@ -53,7 +59,7 @@ export default auth(async (req) => {
       if (is2FaEnabled && !is2FaVerified) {
         return NextResponse.redirect(new URL('/admin/verify-2fa', nextUrl))
       }
-      const dest = req.cookies.get('admin_redirect')?.value || '/admin'
+      const dest = sanitizeLocalRedirect(req.cookies.get('admin_redirect')?.value)
       const response = NextResponse.redirect(new URL(dest, nextUrl))
       response.cookies.delete('admin_redirect')
       return response
@@ -63,7 +69,7 @@ export default auth(async (req) => {
     if (isVerify2FaPage) {
       // Se 2FA não está habilitado ou já está verificado, redireciona para /admin
       if (!is2FaEnabled || is2FaVerified) {
-        const dest = req.cookies.get('admin_redirect')?.value || '/admin'
+        const dest = sanitizeLocalRedirect(req.cookies.get('admin_redirect')?.value)
         const response = NextResponse.redirect(new URL(dest, nextUrl))
         response.cookies.delete('admin_redirect')
         return response
@@ -91,13 +97,18 @@ export default auth(async (req) => {
 
     // Se 2FA estiver ativado mas o cookie estiver ausente/inválido:
     // Redireciona para o desafio /admin/verify-2fa preservando deep-linking
+    // (cookie sanitizado: apenas caminhos locais são gravados)
     const verifyUrl = new URL('/admin/verify-2fa', nextUrl)
     const response = NextResponse.redirect(verifyUrl)
-    response.cookies.set('admin_redirect', nextUrl.pathname + nextUrl.search, {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-    })
+    response.cookies.set(
+      'admin_redirect',
+      sanitizeLocalRedirect(nextUrl.pathname + nextUrl.search),
+      {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+      }
+    )
     return response
   }
 

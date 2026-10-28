@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { isTwoFactorEnabled } from '@/lib/totp'
 import { COOKIE_2FA_VERIFIED, verify2FaVerifiedToken } from '@/lib/totp-token'
+import { sanitizeLocalRedirect } from '@/lib/safe-redirect'
 
 export async function GET() {
   const cookieStore = await cookies()
   const redirectCookie = cookieStore.get('admin_redirect')
-  const defaultTarget = redirectCookie?.value ?? '/admin'
+  // Cookie é sanitizado antes de qualquer uso: apenas caminhos locais passam.
+  const defaultTarget = sanitizeLocalRedirect(redirectCookie?.value)
 
   const enabled = isTwoFactorEnabled()
   const verifiedCookie = cookieStore.get(COOKIE_2FA_VERIFIED)?.value

@@ -28,11 +28,11 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
 
   const navItems = [
-    { name: t('nav.about'), link: '#about', icon: <FaUser /> },
-    { name: t('nav.skills'), link: '#skills', icon: <FaCode /> },
-    { name: t('nav.experience'), link: '#experience', icon: <FaBriefcase /> },
-    { name: t('nav.projects'), link: '#projects', icon: <FaProjectDiagram /> },
-    { name: t('nav.blog'), link: '#blogs', icon: <FaBlog /> },
+    { name: t('nav.about'), link: '#about', icon: <FaUser aria-hidden="true" /> },
+    { name: t('nav.skills'), link: '#skills', icon: <FaCode aria-hidden="true" /> },
+    { name: t('nav.experience'), link: '#experience', icon: <FaBriefcase aria-hidden="true" /> },
+    { name: t('nav.projects'), link: '#projects', icon: <FaProjectDiagram aria-hidden="true" /> },
+    { name: t('nav.blog'), link: '#blogs', icon: <FaBlog aria-hidden="true" /> },
   ]
 
   useEffect(() => {
@@ -59,11 +59,12 @@ export function Navbar() {
             <Button
               variant="default"
               className="rounded-full z-50"
+              aria-label={t('nav.contact')}
               onClick={() => {
                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
               }}
             >
-              <FaEnvelope />
+              <FaEnvelope aria-hidden="true" />
             </Button>
           </div>
         </NavBody>
@@ -126,8 +127,10 @@ export function Navbar() {
                 }}
                 variant="default"
                 className="w-full rounded-full"
+                aria-label={t('nav.contact')}
               >
-                <FaEnvelope />
+                <FaEnvelope aria-hidden="true" />
+                <span>{t('nav.contact')}</span>
               </Button>
             </div>
           </MobileNavMenu>

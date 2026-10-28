@@ -2,7 +2,7 @@
 
 ## Panorama
 
-Atualizado em 2026-10-28 pelo board da ferramenta adaptada, que lê `docs/docs/PADRONIZATION.md` e os cards em `docs/docs/`. O quadro possui 3 cards draft, 1 in-progress, 41 done e 2 cancelled. A última validação completa conhecida retornou 51 erros e 39 avisos do acervo; não equivale à aprovação dos cards.
+Atualizado em 2026-10-28 após o arquivamento autorizado de nove cards, pelo board da ferramenta adaptada, que lê `docs/docs/PADRONIZATION.md` e os cards em `docs/docs/`. O quadro possui 3 cards draft, 1 in-progress, 52 done e 2 cancelled. A última validação completa conhecida retornou 51 erros e 39 avisos do acervo; não equivale à aprovação dos cards.
 
 **Em andamento**
 - `docs/docs/active/features/[in-progress]-workspace-multiagente-maestri/` — aprovação humana parcial: 25/25 testes, ferramenta documental, recuperação de falhas e paralelismo OpenCode validados; Planejador e os novos agentes OpenCode respondem; Playwright MCP do QA foi validado em página local controlada.
@@ -177,3 +177,21 @@ O card `padronizar-rotas-portugues-para-ingles` foi validado pelo humano, movido
 - O card de `/admin` foi encerrado como não reproduzido: cinco reproduções controladas landing → `/admin` terminaram em `/admin/login`; não houve causa comprovada nem alteração de código. A limitação do cenário de digitar na barra de endereço foi registrada.
 - O card visual foi encerrado após detalhamento da causa comprovada no layout raiz/scrollbar global e da correção com `admin-shell`. `npx tsc --noEmit` e `npx eslint` terminaram com exit 0; `npm run lint` permaneceu falhando por `next lint` no Next 16, fora do escopo. QA pós-correção por navegador não foi executado pelo agente; a validação visual humana foi registrada.
 - Ambos foram movidos para `docs/docs/archive/bugs/[done]-.../`. O sync do roadmap concluiu com 49 itens, 4 active e 45 archive; `validate` retornou exit 1 pela baseline legada de 51 erros e 39 avisos.
+
+**Complemento — início autorizado dos nove cards de PRs**
+- O humano autorizou em 2026-10-28: “Pode iniciar a implementação dos nove cards.” Os nove cards foram movidos para `[in-progress]`, os nove README receberam `Status: in-progress` e cada LOG registrou a transição e a autorização.
+- O roadmap foi sincronizado após a transição: `58 itens encontrados (13 active, 45 archive)`, com dois avisos legados sobre `navbar-logo-hover-cor-hardcoded`. O board confirmou 10 cards in-progress, incluindo o workspace principal.
+- A implementação foi delegada em paralelo com propriedade exclusiva: Âmbar ficou com navbar e e-mail de contato; Nébula ficou com headers, autenticação e redirects. Os escopos sobrepostos das PRs de redirects e headers devem ser consolidados sem aplicar patches cegamente.
+- Nenhum card foi marcado como done; não houve commit, push, merge, landing ou exclusão de floor/branch. Validação técnica e humana permanecem pendentes.
+
+**Complemento — consolidação da análise das nove pull requests**
+- A retomada consolidou os relatórios de Âmbar, Nébula, Íris e Lúmen nos nove cards já existentes; não foram criados cards duplicados e nenhuma implementação nova foi iniciada nesta etapa.
+- Evidências principais: TypeScript global exit 0; ESLint proporcional exit 0, com aviso preexistente em `LoginForm.tsx:380`; `git diff --check` exit 0; helper de redirect 15/15; headers locais confirmados; navbar desktop/mobile e contato validados localmente sem credenciais ou envio real.
+- Pendências registradas: fluxo autenticado completo de login/2FA e deep-linking não testado; headers não validados em produção/Cloudflare; HSTS `includeSubDomains` requer decisão operacional; rate limiting permanece fora do escopo; o clone invisível de medição da navbar ainda pode receber foco por Tab.
+- Os nove cards continuam `[in-progress]`, sem `done`, commit, push, merge ou landing. Roadmap sincronizado com 58 itens, 13 ativos e 45 arquivados; permanecem dois avisos legados de `navbar-logo-hover-cor-hardcoded`.
+
+**Complemento — nove cards arquivados como done por autorização humana**
+- Em 2026-10-28, o humano autorizou marcar os nove cards de PR como `done`. As nove pastas foram renomeadas com prefixo `[done]` e movidas de `docs/docs/active/` para `docs/docs/archive/`; os LOGs receberam registros append-only da transição.
+- As limitações foram preservadas sem inventar validações: fluxo autenticado completo e produção/Cloudflare não foram exercitados; não houve teste de carga/concorrência; o clone invisível de medição da navbar ainda pode receber foco por Tab; nenhum e-mail real foi enviado.
+- O roadmap foi sincronizado com `58 itens encontrados (4 active, 54 archive)`; o board confirmou 3 cards `[draft]`, 1 `[in-progress]`, 52 `[done]` e 2 `[cancelled]`. `validate` retornou exit 1 com 56 erros e 39 avisos, todos na baseline/acervo, incluindo os novos cards parciais arquivados; não foram corrigidos automaticamente.
+- O arquivo canônico `dev/utils/ROADMAP-EXECUCAO.md` foi lido. Os cards em preparação são: `features/admin-troca-credenciais`, `features/sso-path-projetos-satelite` e `enhancements/otimizacoes-painel-traducoes`. Nenhum deles foi implementado ou teve status alterado.

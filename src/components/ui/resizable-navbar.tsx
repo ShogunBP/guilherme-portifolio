@@ -155,6 +155,7 @@ export const NavItems = ({ items, className, isScrolled, onItemClick }: NavItems
           className="relative px-2 py-1.5 lg:px-4 lg:py-2 text-neutral-600 dark:text-neutral-300 shrink-0"
           key={`link-${item.name}`}
           href={item.link}
+          aria-label={item.name}
         >
           {hovered === idx && (
             <motion.div className="absolute inset-0 h-full w-full rounded-full bg-gray-100 dark:bg-neutral-800" />
@@ -249,21 +250,23 @@ export const MobileNavToggle = ({
   onClick: () => void
 }) => {
   return (
-    <>
-      {isOpen ? (
-        <IconX
-          data-testid="mobile-toggle"
-          className={cn('text-black dark:text-white', className)}
-          onClick={onClick}
-        />
-      ) : (
-        <IconMenu2
-          data-testid="mobile-toggle"
-          className={cn('text-black dark:text-white', className)}
-          onClick={onClick}
-        />
+    <button
+      type="button"
+      data-testid="mobile-toggle"
+      aria-label={isOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+      aria-expanded={isOpen}
+      onClick={onClick}
+      className={cn(
+        'inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-black outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:text-white',
+        className,
       )}
-    </>
+    >
+      {isOpen ? (
+        <IconX aria-hidden="true" className="h-6 w-6" />
+      ) : (
+        <IconMenu2 aria-hidden="true" className="h-6 w-6" />
+      )}
+    </button>
   )
 }
 
