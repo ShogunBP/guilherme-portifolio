@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility improvements for Mobile Nav and Icon Buttons
+**Learning:** Raw SVG icons used for toggles (`IconX`, `IconMenu2`) and standalone icon buttons without text (`FaEnvelope`) create significant accessibility barriers for screen readers and keyboard navigation. Using `onClick` directly on SVGs fails to provide semantic meaning or proper focus handling.
+**Action:** Always wrap interactive SVGs in semantic `<button>` elements, provide descriptive `aria-label`s, communicate state using `aria-expanded` (for toggles), and ensure visible focus states (`focus-visible:ring`). Add visible text to full-width mobile buttons to increase clarity and tap target sizes.
