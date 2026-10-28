@@ -1,0 +1,12 @@
+[      80ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://guilhermemenezes.dev/admin/login:0
+[   17502ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://guilhermemenezes.dev/admin/resume?_rsc=MB54gAX280Bv495Z:0
+[   17529ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://guilhermemenezes.dev/admin/resume?_rsc=qaT4hmtwYlaJFf9Z:0
+[   17564ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://guilhermemenezes.dev/admin/resume:0
+[   17610ms] Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at rX (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:46254)
+    at iu (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:97295)
+    at sd (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:137985)
+    at https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:132871
+    at se (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:132972)
+    at s$ (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:159536)
+    at MessagePort.O (https://guilhermemenezes.dev/_next/static/chunks/0m_p1bxtorv5i.js:1:7701)

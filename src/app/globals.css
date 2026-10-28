@@ -3,32 +3,67 @@
 
 @custom-variant dark (&:is(.dark *));
 
-html {
-  color-scheme: dark;
-}
-
-/* Sleek cosmic scrollbar for the entire application */
+/* Neutral scrollbar for public pages (theme-aware, follows the light/dark tokens) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030014;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
+/* Cosmic dark theme + purple scrollbar, scoped to the admin panel via .admin-shell */
+html:has(.admin-shell) {
+  color-scheme: dark;
+  scrollbar-color: rgba(168, 85, 247, 0.25) #030014;
+}
+
+html:has(.admin-shell)::-webkit-scrollbar-track {
+  background: #030014;
+}
+
+html:has(.admin-shell)::-webkit-scrollbar-thumb {
   background: rgba(168, 85, 247, 0.25);
   border-radius: 9999px;
   border: 2px solid #030014;
 }
 
-::-webkit-scrollbar-thumb:hover {
+html:has(.admin-shell)::-webkit-scrollbar-thumb:hover {
   background: rgba(168, 85, 247, 0.5);
 }
 
-* {
-  scrollbar-width: thin;
+.admin-shell ::-webkit-scrollbar-track {
+  background: #030014;
+}
+
+.admin-shell ::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.25);
+  border-radius: 9999px;
+  border: 2px solid #030014;
+}
+
+.admin-shell ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
+}
+
+.admin-shell,
+.admin-shell * {
   scrollbar-color: rgba(168, 85, 247, 0.25) #030014;
 }
 

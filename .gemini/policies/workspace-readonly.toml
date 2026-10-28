@@ -1,0 +1,9 @@
+# Permissões mínimas para diagnóstico e navegação no workspace.
+# Escritas, redirecionamentos e demais comandos continuam exigindo confirmação.
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["maestri list", "maestri check", "git status", "git diff", "git log", "git show"]
+decision = "allow"
+priority = 100
+modes = ["default", "autoEdit", "plan"]

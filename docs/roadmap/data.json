@@ -1,71 +1,5 @@
 [
   {
-    "id": "i18n-painel-export-import",
-    "title": "Painel de Traduções — Export/Import (Fase 3.2.2)",
-    "category": "features",
-    "status": "approved",
-    "area": "active",
-    "date": "2026-09-14",
-    "priority": "média",
-    "tags": [
-      "frontend",
-      "backend",
-      "i18n",
-      "admin"
-    ],
-    "progress": 6,
-    "progressFraction": {
-      "done": 1,
-      "total": 18
-    },
-    "summary": "Funcionalidade de exportação e importação de traduções com diff preview antes de confirmar, construída sobre o core do card 3.2.1.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Adicionar ao painel `/admin/idioma` as seções de Export e Import:\n- **Export:** gerar um `.json` com os valores em uso (override + fallback JSON) por categoria e idioma selecionados\n- **Import:** carregar um `.json`, calcular o diff chave a chave, mostrar prévia (antes/depois) e confirmar antes de aplicar"
-      },
-      {
-        "heading": "Depende de",
-        "content": "Card 3.2.1 concluído (`[done]-i18n-painel-traducoes-core`) ✅ — rotas de CRUD e `src/lib/i18n-utils.ts` já existentes."
-      },
-      {
-        "heading": "Referência de Arquitetura",
-        "content": "`dev/utils/reference/SISTEMA_TRADUCAO.md` — mesmo padrão do sistema de referência, com melhoria do diff antes de confirmar.\n\n---"
-      },
-      {
-        "heading": "Decisões de Design aplicáveis a este card",
-        "content": "| # | Decisão |\n|---|---|\n| 1 | Export reflete o valor **em uso** (override do banco OU fallback do JSON) — não só overrides |\n| 2 | Export com escopo: seletor de categorias (checkbox múltiplo) + idioma (PT / EN / ambos) |\n| 3 | Import: diff chave a chave contra valor atual → prévia → confirmação explícita para aplicar |\n| 4 | Import só aplica chaves com valor **diferente** do atual — não regrava o que não mudou |\n| 5 | Rotas de export/import exigem sessão de admin |\n\n---"
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- `GET /api/admin/translations/export?categories={cat1,cat2}&langs={pt,en}` — gera JSON com valores em uso, escopo selecionado\n- `POST /api/admin/translations/import/preview` — recebe JSON, retorna diff sem aplicar\n- `POST /api/admin/translations/import/confirm` — aplica o diff confirmado\n- Seção **Export** na tela `/admin/idioma`: checkboxes de categoria, seletor de idioma, botão Exportar\n- Seção **Import** na tela `/admin/idioma`: input de arquivo, botão Analisar, prévia de diff (tabela antes/depois), botão Confirmar Importação\n\n### Não inclui\n\n- Criação de chaves novas via import\n- Categorias `projects` e `blog` (conteúdo dinâmico — Fases 5/6)\n\n---"
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- Importar `flatten` de `src/lib/i18n-utils.ts` — **não redefinir** em nenhuma rota\n- `GET /api/admin/translations/export`: merge `{ ...base, ...overrides }` filtrado por categoria\n- `POST /api/admin/translations/import/preview`: comparar `incoming[key]` vs `overrides[key] ?? base[key]` — só retornar chaves diferentes\n- `POST /api/admin/translations/import/confirm`: iterar sobre o diff confirmado e chamar `upsertOverride`\n- UI de Import: duas fases distintas — fase 1 (Analisar) mostra diff; fase 2 (Confirmar) aplica\n\n---"
-      },
-      {
-        "heading": "Rotas",
-        "content": "### `GET /api/admin/translations/export`\n\n```\n?categories=hero,nav    → só essas categorias (omitir = todas)\n&langs=pt,en            → idiomas (omitir = ambos)\n```\n\nRetorna:\n```json\n{\n  \"pt\": { \"hero.role\": \"Desenvolvedor Full-Stack\", ... },\n  \"en\": { \"hero.role\": \"Full-Stack Developer\", ... }\n}\n```\n\n### `POST /api/admin/translations/import/preview`\n\nBody:\n```json\n{ \"translations\": { \"pt\": { \"hero.role\": \"novo valor\" }, \"en\": { ... } } }\n```\n\nRetorna:\n```json\n{ \"diff\": [{ \"key\": \"hero.role\", \"lang\": \"pt\", \"currentValue\": \"valor atual\", \"newValue\": \"novo valor\" }] }\n```\n\n### `POST /api/admin/translations/import/confirm`\n\nBody:\n```json\n{ \"diff\": [{ \"key\": \"hero.role\", \"lang\": \"pt\", \"newValue\": \"novo valor\" }] }\n```\n\nRetorna:\n```json\n{ \"ok\": true, \"applied\": 1 }\n```\n\n---"
-      },
-      {
-        "heading": "Layout das seções na tela",
-        "content": "```\nEXPORT:\n  Categorias: [✓] hero [✓] nav [✓] skills [✓] experience [✓] resume [✓] footer [✓] contact\n              [Selecionar todas] [Limpar]\n  Idioma:     (•) PT  ( ) EN  ( ) Ambos\n  [Exportar JSON]  → download do arquivo\n\nIMPORT:\n  [Escolher arquivo .json] — exibe nome do arquivo selecionado\n  [Analisar]\n\n  → (após analisar) Prévia de mudanças:\n  ┌────────────────────┬──────────────┬──────────────────┬──────────────────┐\n  │ Chave              │ Idioma       │ Valor atual      │ Novo valor       │\n  ├────────────────────┼──────────────┼──────────────────┼──────────────────┤\n  │ hero.role          │ EN           │ Full-Stack Dev   │ Full Stack Dev   │\n  └────────────────────┴──────────────┴──────────────────┴──────────────────┘\n  X chave(s) serão alteradas.\n  [Cancelar]  [Confirmar Importação]\n```\n\n---"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] `GET /api/admin/translations/export` importa `flatten` de `i18n-utils`, sem redefinição local\n- [ ] Export de categoria `hero` em PT → arquivo com apenas chaves `hero.*` e valores em uso\n- [ ] Export de todas as categorias em ambos os idiomas → arquivo completo e correto\n- [ ] `POST /api/admin/translations/import/preview` retorna só as chaves com valor diferente\n- [ ] Import com 1 chave alterada → prévia mostra só 1 linha, confirmar aplica só essa\n- [ ] Import com arquivo idêntico ao estado atual → prévia vazia, nada é aplicado\n- [ ] Confirmar importação → overrides gravados, página recarrega estado do banco\n- [ ] Rotas exigem sessão admin — sem sessão retorna 401\n- [ ] `npm run build` sem erros de TypeScript\n- [ ] Testado em produção na VPS antes de marcar como `[done]`\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Export testado com escopos variados (uma categoria, todas, PT, EN, ambos)\n- [ ] Import testado com arquivo válido e com arquivo sem diferenças\n- [ ] Nenhuma regressão nos critérios do card 3.2.1\n- [ ] **Pasta renomeada para `[done]-i18n-painel-export-import` e movida para `archive/features/`**\n- [ ] Se for o último card da Fase 3, atualizar `dev/utils/ROADMAP-EXECUCAO.md`"
-      }
-    ],
-    "path": "docs/active/features/[approved]-i18n-painel-export-import"
-  },
-  {
     "id": "admin-troca-credenciais",
     "title": "Gerenciamento de Credenciais do Admin pelo Painel",
     "category": "features",
@@ -180,66 +114,223 @@
     "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
   },
   {
-    "id": "i18n-painel-traducoes-core",
-    "title": "Painel de Traduções — Core: Edição em Tempo Real (Fase 3.2.1)",
+    "id": "workspace-multiagente-maestri",
+    "title": "Workspace multiagente de desenvolvimento web no Maestri",
     "category": "features",
     "status": "in-progress",
     "area": "active",
-    "date": "2026-09-14",
+    "date": "2026-10-27",
     "priority": "alta",
     "tags": [
-      "frontend",
-      "backend",
-      "i18n",
-      "admin"
+      "infra",
+      "dx",
+      "docs",
+      "segurança"
     ],
-    "progress": 87,
+    "progress": 6,
     "progressFraction": {
-      "done": 13,
-      "total": 15
+      "done": 1,
+      "total": 18
     },
-    "summary": "Schema SQLite, rotas de leitura/escrita e tela `/admin/idioma` com batch editing completo (editar, salvar, descartar, restaurar por campo e global). Export/Import ficam no card 3.2.2.",
+    "summary": "Sete papéis no Maestri com delegação nativa, Kanban preservado e execução aprovada pelo humano.",
     "sections": [
       {
         "heading": "Objetivo",
-        "content": "Substituir o placeholder de `/admin/idioma` pela interface real de edição de traduções, com:\n- Overrides persistidos no SQLite (overlay sobre `pt.json`/`en.json`)\n- Site público consumindo overrides via `GET /api/translations` em tempo real\n- Interface batch: editar livremente → Salvar global / Descartar / Restaurar padrão"
+        "content": "Disponibilizar um workspace reutilizável para projetos web, com sete papéis independentes, delegação funcional, execução paralela segura, testes e gerenciamento Git. Usar prioritariamente os recursos nativos do Maestri, sem construir outro orquestrador quando os mecanismos existentes atenderem à necessidade. O Kanban continua sendo a fonte oficial das tarefas e aprovações; nenhuma implementação ou configuração operacional desta proposta começa antes da aprovação humana."
       },
       {
-        "heading": "Depende de",
-        "content": "Fase 3 fundação concluída (`[done]-i18n-fundacao-pt-en`) ✅ — `config.ts` com `TODO Fase 3.2` já reservado."
-      },
-      {
-        "heading": "Próximo card",
-        "content": "`[approved]-i18n-painel-export-import` (Fase 3.2.2) — Export/Import de traduções."
-      },
-      {
-        "heading": "Referência de Arquitetura",
-        "content": "`dev/utils/reference/SISTEMA_TRADUCAO.md` — padrão validado no projeto Thiago Bahls.\n\n---"
-      },
-      {
-        "heading": "Decisões de Design aplicáveis a este card",
-        "content": "| # | Decisão |\n|---|---|\n| 1 | Banco SQLite armazena **apenas overrides** — `pt.json`/`en.json` são a base/fallback |\n| 2 | Sem criação de chaves novas pelo painel — só edição de valores existentes |\n| 3 | Painel organizado pelas 7 categorias dos JSONs |\n| 4 | **Batch edit:** editar livremente → Salvar global (modal) / Descartar tudo (modal) / Descartar por categoria (sem modal) |\n| 5 | **Restaurar padrão por campo:** sem confirmação, entra no draft como `to-delete` — DELETE executado só no Salvar |\n| 6 | **Restaurar tudo ao padrão:** botão global com modal de confirmação, também entra no draft |\n| 7 | Badge `● N alterações não salvas` no header da página, navegação livre, aviso `beforeunload` |\n| 8 | `GET /api/translations` é pública — rotas de escrita exigem sessão de admin |\n\n---"
+        "heading": "Descrição Funcional",
+        "content": "O humano revisa os cards pelo fluxo existente. O Orquestrador verifica a aprovação antes de delegar a implementação; o agente executor confere novamente o card antes de trabalhar. Planejador, Programadores, Frontend Designer, QA e Git Manager atuam sob demanda, com responsabilidades separadas.\n\nA delegação usa os mecanismos nativos de comunicação do Maestri: descoberta de sessões com list, recrutamento com recruit quando necessário, envio com ask, tarefas independentes com ask --batch e acompanhamento pontual com check. Os agentes reportam o resultado ao Orquestrador, vinculando a resposta ao card. A disponibilidade desses comandos foi consultada nas skills e na ajuda instalada; o funcionamento entre as três CLIs ainda precisa de teste real após aprovação.\n\nCada agente registra atividades, tentativas, resultados reais e evidências no LOG.md do card correspondente. O Orquestrador coordena as escritas compartilhadas, sincroniza o roadmap e consolida o Panorama de docs/DIARIO.md. Ao terminar tecnicamente, executa-se a validação prevista pelas skills e o card permanece em in-progress para validação humana. Agentes não marcam Decisão ou Validação nem aprovam ou concluem cards automaticamente.\n\nA implementação será incremental: primeiro o ciclo mínimo de delegação aprovada, integração com as skills, paralelismo isolado e testes. Recuperação avançada e monitoramento contínuo ficam para evolução posterior, somente se houver necessidade comprovada.\n\n| Papel | CLI | Modelo a configurar | Estado da verificação |\n|---|---|---|---|\n| Orquestrador | Claude Code | gpt-6.0-sol | CLI instalada; acesso ao identificador solicitado não verificado |\n| Planejador | Claude Code | gpt-6.0-sol | CLI instalada; acesso ao identificador solicitado não verificado |\n| Programador 1 | OpenCode | opencode/deepseek-v4.1-flash-free | Identificador listado por opencode models; preserva a escolha DeepSeek V4.1 Flash |\n| Programador 2 | OpenCode | opencode/glm-5.3-flash-free | Identificador listado por opencode models; preserva a escolha GLM 5.3 Flash |\n| Frontend Designer | OpenCode | opencode/nemotron-3.5-super-vl-free | Inferência multimodal, screenshot e tool calling verificados; sessão Íris migrada no mesmo nó |\n| QA / Tester | OpenCode | opencode/glm-5.3-flash-free | Tool calling e Playwright MCP verificados; sessão Lúmen migrada no mesmo nó |\n| Git Manager | Claude Code | gpt-5.6-luna | CLI instalada; acesso ao identificador solicitado não verificado |\n\nOs identificadores OpenCode foram confirmados novamente em 2026-10-27. Trata-se da identificação real dos modelos escolhidos, não de substituição por outros modelos. A listagem não comprova uma inferência bem-sucedida. Não haverá troca silenciosa dos modelos selecionados; um perfil indisponível será reportado como bloqueado."
       },
       {
         "heading": "Escopo",
-        "content": "### Inclui\n\n- `src/lib/i18n-utils.ts` — função `flatten` compartilhada (usada aqui e pelo card 3.2.2)\n- Tabela `translation_overrides` (`key`, `lang`, `value`, `updated_at`) no SQLite\n- `GET /api/translations?lang={lng}` — pública, retorna overrides ativos do idioma\n- `GET /api/admin/translations` — autenticada, retorna overrides de ambos os idiomas\n- `PUT /api/admin/translations` — upsert de overrides em lote\n- `DELETE /api/admin/translations` — remoção de overrides em lote\n- Ativar o `TODO Fase 3.2` no `config.ts`: fetch inicial + `languageChanged` com `addResourceBundle`\n- Tela `/admin/idioma` completa: abas de categoria, batch editing, restaurar por campo, restaurar global, badge dirty count\n\n> **Convenção:** `?lang=` em todas as rotas — sem exceção.\n\n### Não inclui (→ card 3.2.2)\n\n- `GET /api/admin/translations/export`\n- `POST /api/admin/translations/import/preview`\n- `POST /api/admin/translations/import/confirm`\n- Seções de Export e Import na UI\n\n---"
+        "content": "### Inclui\n- Preservação de docs/docs/active/, docs/docs/archive/, categorias, prefixos de status, cards existentes e compatibilidade com o roadmap atual. Nenhuma migração de diretórios é necessária para esta entrega.\n- Adaptação das skills docs-standard e diario-projeto e da ferramenta de dev/reference-skill/ aos caminhos e às regras do projeto, sem importar regras de produto do projeto de referência.\n- Preservação de docs/docs/PADRONIZATION.md como padrão existente. Se docs/README.md for necessário como entrada oficial, ele deve apontar para esse padrão, sem duplicar regras ou exigir movimentação de cards. A ferramenta deve ser adaptada para separar o caminho do padrão da raiz dos cards, em vez de impor a estrutura da referência.\n- Evolução incremental de CLAUDE.md, AGENTS.md e GEMINI.md, preservando instruções existentes e compartilhando regras de aprovação humana, segurança, testes, colaboração e documentação sem duplicação desnecessária.\n- Sete papéis configurados no Maestri, com sessões independentes acionadas sob demanda e os identificadores reais dos modelos escolhidos.\n- Uso prioritário de roles, presets, recruit, ask, ask --batch, check e floors/worktrees nativos, conforme compatibilidade verificada. Scripts pequenos somente para lacunas concretas que os recursos nativos não atendam.\n- Verificação de aprovação antes de delegar e executar implementação; ferramenta de cards recusando transições reservadas ao humano no uso pelos agentes.\n- Execução paralela de tarefas aprovadas independentes em worktrees, com propriedade explícita de arquivos. Escritas no Kanban oficial e no diário são coordenadas pelo Orquestrador, evitando fontes de tarefas divergentes entre worktrees.\n- Testes reais de delegação, resposta, bloqueio de tarefa não aprovada, paralelismo e integração com LOGs, diário e roadmap.\n- Configuração mínima de QA no OpenCode com Playwright MCP independente, sem acesso irrestrito ao filesystem e somente considerada funcional após conexão e teste reais.\n- Tratamento básico de falhas: registrar a tentativa, verificar a sessão antes de reenviar e não repetir automaticamente operações com efeitos de escrita. Repetição somente com justificativa e limite explícito; persistindo a falha, reportar o bloqueio.\n\n### Não inclui (por ora)\n- Alterações funcionais no portfólio, autenticação ou traduções em desenvolvimento.\n- Migração das árvores do Kanban, reescrita de cards antigos ou correção retroativa de seu histórico.\n- Novo orquestrador, scheduler, fila própria de tarefas, banco de execuções, dashboard ou outra fonte oficial de tarefas.\n- Monitoramento contínuo, watchdogs, retomada automática após reinício, retries automáticos, rollback genérico ou infraestrutura avançada de locks e recuperação. Necessidades comprovadas podem motivar cards posteriores.\n- Aprovação, cancelamento ou encerramento automático de cards por agentes; marcação de Decisão ou Validação por iniciativa dos agentes.\n- Commit, push, merge, landing de floor, exclusão de branches ou descarte de alterações sem autorização específica.\n- Instalação de outra CLI, troca de provedor/modelo, exposição de segredos ou bypass de permissões para contornar integração indisponível."
       },
       {
         "heading": "Requisitos Técnicos",
-        "content": "- `src/lib/i18n-utils.ts` exporta `flatten` — Passos 4c/4d/4e do card 3.2.2 importam daqui\n- Estado duplo: `committed` (banco) e `draft` (edições locais)\n- `dirtyCount` skipa keys em `toDelete` para evitar double-count\n- `handleSave` sincroniza `draft` com `newCommitted` após salvar\n\n---"
+        "content": "- Camadas envolvidas: configuração nativa do Maestri, instruções compartilhadas, adaptação mínima das ferramentas documentais e testes de integração; sem mudança inicial em src/.\n- Dependências ou integrações necessárias: Maestri disponível e sessão Maestro; Claude Code e OpenCode 2.1.4 operam os sete papéis atuais. Gemini CLI foi detectado na análise inicial, mas foi retirado dos papéis Íris e Lúmen após falhas de disponibilidade; `GEMINI.md` permanece preservado para outros consumidores. Versões e disponibilidade devem ser rechecadas na execução.\n- Impactos em outras partes do sistema: preservar o checkout sujo. Roadmap e Portfolio eram shells para executar o roadmap e o servidor, já encerrados pelo humano; não constituíam uma equipe de agentes existente.\n- Compatibilidade documental: a regra local .agents/workflows/docs-standard.md exige docs/docs/active/, docs/docs/archive/ e sincronização com node docs/roadmap/roadmap-server.js --sync. A adaptação preservará esses caminhos e a exigência de autorização explícita para avanço de status. A revisão permaneceu em ready-for-review até a aprovação humana explícita registrada em Decisão; o status atual é approved.\n- Bloqueio comprovado na referência: board e validate retornaram erro por ausência de docs/README.md. A solução planejada é adaptar a leitura do padrão e a raiz dos cards, não criar outra árvore docs/active/ nem mover o acervo para satisfazer o script.\n- Governança obrigatória: docs-standard rege cards, templates, transições, LOGs e validação; diario-projeto rege o Panorama e os acréscimos ao diário. Entradas históricas e tentativas anteriores não serão apagadas. Critérios técnicos só podem ser marcados com evidências; Decisão e Validação ficam com o humano.\n- Aprovação humana: o ciclo mínimo deve recusar delegação de implementação sem card aprovado e exigir a conferência pelo executor. Planejamento de card pode ocorrer antes da aprovação, mas não implementação. Instruções Markdown e um parâmetro de CLI não constituem sandbox nem prova independente de identidade humana; não alegar proteção absoluta contra edição arbitrária do filesystem.\n- Segurança MCP: Gemini CLI foi retirado da arquitetura operacional de Íris e Lúmen. Playwright MCP 0.0.80 está configurado localmente no OpenCode com sessão isolada, respostas de imagem omitidas, service workers bloqueados e sem `--allow-unrestricted-file-access`. O QA comprovou descoberta e uso em página `data:` local; o executável aponta para o Chrome instalado neste Windows e deve ser ajustado em outro ambiente.\n- Economia: ativar agentes sob demanda, compartilhar apenas o contexto necessário e reutilizar as sessões adequadas. O Orquestrador não refaz o planejamento ou implementação delegados. Nenhuma infraestrutura própria será criada apenas por antecipação.\n- Fontes consultadas na análise inicial: skills locais maestri, maestri-manager e maestri-workspace; ajuda instalada de maestri ask/recruit, claude e gemini; documentação via Context7 de OpenCode (https://github.com/anomalyco/opencode/blob/dev/services/www/src/docs/content/cli/commands.mdx) e Gemini CLI (https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/cli-reference.md e https://github.com/google-gemini/gemini-cli/blob/main/docs/reference/configuration.md). A busca Context7 por Maestri retornou produtos chamados Maestro sem correspondência confirmada, que não foram usados como fonte deste Maestri."
       },
       {
-        "heading": "Validação e Evidências de Execução",
-        "content": "### 1. Schema SQLite (`src/lib/db.ts`) e Helpers (`src/lib/translations.ts`)\n```sql\nCREATE TABLE IF NOT EXISTS translation_overrides (\n  key        TEXT    NOT NULL,\n  lang       TEXT    NOT NULL,\n  value      TEXT    NOT NULL,\n  updated_at TEXT    NOT NULL DEFAULT (datetime('now')),\n  PRIMARY KEY (key, lang)\n);\n\nCREATE INDEX IF NOT EXISTS idx_translation_overrides_lang\n  ON translation_overrides(lang);\n```\n- Testado via `src/lib/translations.ts`:\n  - `getOverridesByLang('pt')` / `getOverridesByLang('en')`\n  - `upsertOverride(key, lang, value)`\n  - `deleteOverride(key, lang)`\n  - `deleteAllOverrides()`\n\n### 2. Utilitários de Transformação (`src/lib/i18n-utils.ts`)\n- Funções `flatten` e `unflatten` criadas para compatibilidade total entre chaves escalares (`hero.role`) e arrays aninhados de histórico profissional (`experience.jobs.0.title`, `experience.jobs.0.achievements.0`).\n\n### 3. Rota Pública de Overrides (`src/app/api/translations/route.ts`)\n- `GET /api/translations?lang=pt` acessível sem autenticação (200 OK) retornando objeto de overrides ativos.\n\n### 4. Integração Dinâmica no i18n (`src/i18n/config.ts`)\n- `applyServerOverrides(lng)` chamada no carregamento inicial (`typeof window !== 'undefined'`) e a cada troca de idioma (`i18n.on('languageChanged')`).\n- Merge via `i18n.addResourceBundle(lng, 'translation', data, true, true)` com emissão de evento reativo para atualização imediata dos componentes React.\n\n### 5. Rotas Autenticadas do Painel Admin (`src/app/api/admin/translations/route.ts`)\n- `GET`: retorna overrides por idioma ou ambos `{ pt: {...}, en: {...} }` (401 sem sessão).\n- `PUT`: upsert em lote `{ updates: [{ key, lang, value }] }` (401 sem sessão).\n- `DELETE`: remoção em lote `{ deletes: [{ key, lang }] }` ou `{ all: true }` (401 sem sessão).\n\n### 6. Interface do Painel Administrativo (`src/app/admin/(dashboard)/idioma/page.tsx`)\n- Visual cósmico em harmonia com `#030014`, gradientes púrpuras, vidro fumê e feedback de status.\n- Navegação entre as 7 categorias: `hero`, `nav`, `skills`, `experience`, `resume`, `footer`, `contact`.\n- Renderização especializada de `experience.jobs` em cards expansíveis para cada uma das 3 empresas/cargos (`SCHOTT`, `Avanth`, `CREN`), incluindo realizações.\n- Suporte a edição em lote (batch), contagem reativa de `dirtyCount`, avisos `beforeunload`, descarte por categoria, descarte total com modal de confirmação e restauração global com modal de confirmação.\n\n### 7. Testes de Integração e Ciclo Completo no Navegador\n1. Acesso à rota `/admin/idioma` com autenticação.\n2. Edição do campo `hero.role` em inglês para `\"Senior Full-Stack Engineer\"`.\n3. Notificação e badge de rascunho ativados (`1 alteração não salva`).\n4. Clique em \"Salvar Alterações\" → Modal de confirmação exibindo 1 atualização → Gravado no SQLite com sucesso.\n5. Verificação na landing page pública (`http://localhost:3000`): ao selecionar English, o cargo refletiu `\"Senior Full-Stack Engineer\"` em tempo real sem rebuild.\n6. Retorno ao painel administrativo → Clique em \"Restaurar padrão\" em `hero.role` → Indicador de restauração pendente exibido.\n7. Confirmação do salvamento → Override excluído do SQLite.\n8. Verificação na landing page pública: cargo restaurado para `\"Full-Stack Developer\"`.\n9. `npm run build` executado com sucesso e zero erros de TypeScript."
+        "heading": "Plano de Implementação",
+        "content": "1. Aprovação humana recebida em 2026-10-27 e registrada em Decisão; card movido para approved. Manter Validação desmarcada até os testes e a validação humana final.\n2. Após aprovação, adaptar minimamente as skills e a ferramenta documental aos caminhos atuais; conferir o quadro, manter a baseline de problemas legados separada e compartilhar as regras nas três CLIs. Não migrar cards nem criar nova fonte de tarefas.\n3. Configurar os papéis e modelos no Maestri sob demanda, começando pelo Planejador e por um executor para comprovar o ciclo mínimo. Usar os identificadores OpenCode confirmados e testar o acesso dos demais perfis sem trocar modelos silenciosamente. Completar os sete papéis incrementalmente.\n4. Demonstrar uma delegação aprovada de ponta a ponta com os recursos nativos: conferir o card, enviar tarefa, receber resultado, registrar evidência no LOG.md e consolidar o diário. Testar também a recusa de uma implementação sem aprovação, sem editar cards existentes para fabricar o cenário.\n5. Executar duas tarefas aprovadas independentes em paralelo por ask --batch, isoladas em floors/worktrees quando houver escrita. Definir arquivos de cada executor e coordenar os registros no Kanban oficial, sem permitir alterações simultâneas nos mesmos arquivos.\n6. Integrar o QA com os testes existentes e o navegador real; configurar Playwright MCP local no OpenCode com opções suportadas e sem acesso irrestrito a arquivos. Registrar falhas reais e bloquear a etapa se não houver conexão e teste funcional, sem simular sucesso.\n7. Consolidar evidências dos testes de comunicação, delegação, aprovação, paralelismo e skills. Demonstrar tratamento básico de falha sem reenvio cego. Só propor automação adicional se uma lacuna concreta impedir o ciclo mínimo e, se ampliar o escopo, obter aprovação antes de implementá-la.\n8. Executar a validação documental adaptada, sincronizar o roadmap e atualizar o Panorama. Apresentar a entrega técnica mantendo o card em in-progress para validação e encerramento pelo humano. Cards adicionais não recebem aprovação por herança automática."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [x] `src/lib/i18n-utils.ts` criado com `flatten` exportado\n- [x] Schema `translation_overrides` criado sem erros\n- [x] `GET /api/translations?lang=` retorna overrides sem autenticação\n- [x] `config.ts` busca overrides no carregamento inicial e ao trocar idioma\n- [x] Editar `hero.role` em EN pelo painel → site público reflete sem rebuild\n- [x] Chave sem override exibe valor do JSON normalmente\n- [x] Restaurar padrão por campo entra no draft como `to-delete`, executado no Salvar\n- [x] Restaurar tudo ao padrão (modal) marca todos os overrides para delete via Salvar\n- [x] Descartar tudo reverte estado local ao banco\n- [x] Badge de alterações visível durante edição\n- [x] Rotas de escrita retornam 401 sem sessão admin\n- [x] `npm run build` sem erros de TypeScript\n- [ ] Testado em produção na VPS antes de marcar como `[done]`\n\n---"
+        "content": "- [ ] Estrutura e cards do Kanban preservados, sem migração de diretórios ou nova fonte oficial de tarefas.\n- [ ] docs-standard e diario-projeto adaptadas ao projeto; ferramenta lê o padrão e os cards atuais, sem exigir a organização do projeto de referência.\n- [ ] Instruções das três CLIs consistentes e sem perda de conteúdo existente; aprovação, Decisão, Validação e conclusão permanecem sob controle humano.\n- [ ] Sete papéis configurados sob demanda com os modelos escolhidos; Programadores usam opencode/deepseek-v4.1-flash-free e opencode/glm-5.3-flash-free, com acesso efetivo testado.\n- [ ] Delegação e resposta real de tarefa aprovada demonstradas usando recursos nativos do Maestri, com evidências no LOG.md.\n- [ ] Caso negativo comprova a recusa de implementação sem aprovação e a recusa de transições reservadas ao humano na ferramenta usada pelos agentes.\n- [ ] Duas tarefas aprovadas independentes executadas em paralelo com isolamento e propriedade de arquivos, sem colisões de escrita.\n- [ ] Testes automatizados e de navegador registrados; integração OpenCode/Playwright comprovada antes de ser declarada funcional.\n- [ ] Falha registrada e acompanhamento pontual demonstrado sem reenvio automático nem alegação de recuperação avançada implementada.\n- [ ] LOGs, sincronização do roadmap e Panorama do diário refletem resultados reais, preservando o histórico.\n- [ ] Validação documental executada com resultado real e eventuais problemas legados separados.\n- [ ] Entrega técnica apresentada em in-progress para validação humana, sem aprovação ou conclusão automática por agentes.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-workspace-multiagente-maestri` e movida para `archive/features/`**"
       }
     ],
-    "path": "docs/active/features/[in-progress]-i18n-painel-traducoes-core"
+    "path": "docs/active/features/[in-progress]-workspace-multiagente-maestri"
+  },
+  {
+    "id": "otimizacoes-painel-traducoes",
+    "title": "Otimizações no Painel de Traduções (Transações e Acessibilidade)",
+    "category": "enhancements",
+    "status": "draft",
+    "area": "active",
+    "date": "2026-10-05",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "backend",
+      "banco",
+      "ui-ux"
+    ],
+    "progress": 0,
+    "progressFraction": {
+      "done": 0,
+      "total": 9
+    },
+    "summary": "Transação atômica em lote no SQLite para importação e suporte ao atalho Esc no modal de traduções.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "A Fase 3.2.2 entregou o sistema de Exportação e Importação de traduções no painel `/admin/language`, integrando:\n- Download de arquivos `.json` com filtro de categorias e idiomas.\n- Upload de arquivos `.json` com cálculo de diff chave a chave.\n- Gravação das substituições no SQLite e invalidação de cache SSR com `revalidatePath`.\n\nA funcionalidade está homologada e plenamente operacional. Durante a revisão técnica do Tech Lead, foram identificadas duas oportunidades de melhoria incremental para robustez de banco e refinamento de experiência do usuário.\n\n---"
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "1. **Persistência Sequencial no SQLite (Ausência de Transação Explícita):**\n   No endpoint [`src/app/api/admin/translations/import/confirm/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/admin/translations/import/confirm/route.ts), as alterações confirmadas são gravadas através de um loop sequencial simples:\n   ```typescript\n   for (const item of diff) {\n     if (!item.key || !item.lang || typeof item.newValue !== 'string') continue\n     if (!['pt', 'en'].includes(item.lang)) continue\n\n     upsertOverride(item.key, item.lang, item.newValue)\n     appliedCount++\n   }\n   ```\n   Embora o volume de chaves do portfólio seja pequeno (~130 chaves) e a execução no SQLite leve poucos milissegundos, a ausência de uma transação atômica (`db.transaction`) significa que, em caso de falha inesperada ou interrupção no meio do loop, parte do diff ficaria gravada e parte não.\n\n2. **Acessibilidade no Modal (Fechamento via Teclado):**\n   No componente [`src/app/admin/(dashboard)/language/page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/%28dashboard%29/language/page.tsx), o modal de Exportar/Importar fecha ao clicar no botão `X`, no botão `Cancelar`/`Fechar` ou no backdrop. No entanto, não há captura da tecla `Escape` (`Esc`) para fechar o modal via teclado, o que é um padrão recomendado de acessibilidade e agilidade para o usuário.\n\n---"
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "1. **Helper de Transação no Banco:**\n   Implementar em `src/lib/translations.ts` a função `upsertOverridesBatch(items: Array<{ key: string, lang: string, value: string }>)` utilizando o método nativo `db.transaction()` do `better-sqlite3`. Isso garante rollback automático total se qualquer registro falhar.\n\n2. **Atalho de Teclado no Modal:**\n   Adicionar um listener de `keydown` no `useEffect` dentro da tela `/admin/language` para que pressionar `Esc` execute `handleCloseExportImportModal()` caso o modal esteja aberto.\n\n---"
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- **Confiabilidade no Banco:** Garantia matemática de atomicidade (ACID) na importação de traduções em lote.\n- **Experiência do Usuário (UX/Acessibilidade):** Navegação mais fluida e intuitiva permitindo dispensar modais rapidamente com o teclado.\n\n---"
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar `upsertOverridesBatch` em `src/lib/translations.ts` envelopado em `db.transaction(() => { ... })()`.\n2. Refatorar `src/app/api/admin/translations/import/confirm/route.ts` para invocar a função em lote.\n3. Adicionar listener da tecla `Escape` em `src/app/admin/(dashboard)/language/page.tsx` com limpeza adequada no desmontar do componente.\n4. Validar o build e a navegação por teclado.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] Importação de traduções confirmada executa dentro de uma transação SQLite atômica.\n- [ ] Pressionar `Esc` com o modal de Exportar/Importar aberto fecha a interface com segurança.\n- [ ] Nenhum listener de evento residual deixado no `window`.\n- [ ] `npm run build` passa sem erros de tipagem.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Melhoria perceptível e funcional\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-otimizacoes-painel-traducoes` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/active/enhancements/[draft]-otimizacoes-painel-traducoes"
+  },
+  {
+    "id": "admin-layout-componentes-faltando",
+    "title": "Componentes SidebarNav e Breadcrumb não criados pelo executor da Fase 3.2.1",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-14",
+    "priority": "alta",
+    "tags": [
+      "frontend"
+    ],
+    "progress": 83,
+    "progressFraction": {
+      "done": 5,
+      "total": 6
+    },
+    "summary": "O executor da Fase 3.2.1 criou layout.tsx importando SidebarNav e Breadcrumb que nunca existiram, quebrando o dev server com Module not found.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "O `layout.tsx` do admin dashboard importa dois componentes que não foram criados durante a execução da Fase 3.2.1:\n- `import { SidebarNav } from './components/SidebarNav'`\n- `import { Breadcrumb } from './components/Breadcrumb'`\n\nO `MobileSidebar.tsx` também importa `SidebarNav`. Nenhum dos dois arquivos existia em `src/app/admin/(dashboard)/components/`."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Rodar `npm run dev` após a execução da Fase 3.2.1\n2. Abrir qualquer rota do admin no navegador\n3. Observar erro no browser: `Module not found: Can't resolve './SidebarNav'` e `Module not found: Can't resolve './components/Breadcrumb'`"
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "Dev server sobe sem erros e o layout admin renderiza com sidebar de navegação e breadcrumb funcionais."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "Dev server sobe mas qualquer rota admin retorna 500. Console do browser exibe:\n```\nModule not found: Can't resolve './SidebarNav'\n  → src/app/admin/(dashboard)/components/MobileSidebar.tsx:7\nModule not found: Can't resolve './components/SidebarNav'\n  → src/app/admin/(dashboard)/layout.tsx:12\nModule not found: Can't resolve './components/Breadcrumb'\n  → src/app/admin/(dashboard)/layout.tsx:13\n```"
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend\n- Arquivos com import inválido:\n  - `src/app/admin/(dashboard)/layout.tsx` (linhas 12–13)\n  - `src/app/admin/(dashboard)/components/MobileSidebar.tsx` (linha 7)\n- Arquivos faltantes:\n  - `src/app/admin/(dashboard)/components/SidebarNav.tsx`\n  - `src/app/admin/(dashboard)/components/Breadcrumb.tsx`"
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "O executor criou o `layout.tsx` e o `MobileSidebar.tsx` referenciando componentes de navegação planejados, mas não implementou os arquivos correspondentes — provavelmente por falta de escopo explícito no roteiro da Fase 3.2.1 sobre esses componentes de suporte."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "Criar os dois arquivos faltantes seguindo o padrão visual já estabelecido no projeto (paleta roxa/cósmica, active state por rota):\n- `SidebarNav.tsx`: lista de links de navegação com active state baseado em `usePathname()`\n- `Breadcrumb.tsx`: breadcrumb dinâmico baseado nos segmentos do pathname, com mapeamento de rótulos legíveis\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "- [x] Bug não reproduz mais — `npm run dev` sobe sem erros de módulo (testado e confirmado)\n- [x] Nenhuma regressão identificada — layout admin renderiza perfeitamente com sidebar e breadcrumb\n- [x] `npx tsc --noEmit` sem erros após criação dos arquivos\n- [x] Mover para `archive/bugs/` após aprovação do teste pelo usuário"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-admin-layout-componentes-faltando"
+  },
+  {
+    "id": "admin-retorna-landing-em-desenvolvimento",
+    "title": "Rota admin retorna à landing em desenvolvimento",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "dx"
+    ],
+    "progress": 83,
+    "progressFraction": {
+      "done": 5,
+      "total": 6
+    },
+    "summary": "Corrigir o acesso a /admin no ambiente de desenvolvimento, que retorna à landing em vez do painel administrativo.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "No ambiente de desenvolvimento, acessar diretamente `/admin` retorna à landing page em vez de abrir o painel administrativo. Em produção, o mesmo caminho abre o painel corretamente."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Iniciar o servidor de desenvolvimento local.\n2. Abrir diretamente `http://localhost:3000/admin`.\n3. Observar a URL final e a página exibida."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "`/admin` deve preservar o fluxo do painel administrativo no desenvolvimento, exibindo o login quando não houver sessão e o dashboard quando houver sessão, como ocorre em produção."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "O acesso direto a `/admin` no desenvolvimento retorna à landing page. O comportamento diverge do ambiente de produção."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend, roteamento e autenticação.\n- Arquivo(s) suspeito(s): `src/middleware.ts`, `src/app/admin/(dashboard)/layout.tsx`, `src/app/admin/login/page.tsx`, configuração do servidor Next.js.\n- Logs de erro (se houver): não informado; reproduzir com console e rede locais."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "Pode haver uma divergência entre o middleware, o matcher de `/admin`, a resolução do layout protegido ou a configuração de desenvolvimento, fazendo a requisição cair na rota pública em vez do fluxo administrativo."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Reproduzir no servidor de desenvolvimento e registrar URL final, status e console.\n2. Comparar middleware, matcher, redirects e árvore de rotas com o comportamento de produção.\n3. Corrigir somente a causa comprovada, preservando o login, o deep-linking e a proteção do painel.\n4. Testar `/admin` com e sem sessão e verificar que a landing continua funcionando.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "O bug não foi reproduzido de forma determinística no ambiente de desenvolvimento. Âmbar executou cinco reproduções controladas do fluxo landing → `/admin`; todas terminaram em `/admin/login`. Não houve causa comprovada, alteração de código ou correção aplicada. O cenário exato informado pelo humano — digitar `/admin` na barra da landing e pressionar Enter — não foi controlado diretamente pelo agente. O humano informou que o acesso funciona em outro navegador e autorizou o encerramento como não reproduzido.\n\n- [x] Bug não reproduzido nas cinco reproduções controladas\n- [x] Nenhuma regressão identificada nas reproduções executadas\n- [x] Limitação do cenário específico da barra de endereço registrada\n- [x] **Pasta renomeada para `[done]-admin-retorna-landing-em-desenvolvimento` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-admin-retorna-landing-em-desenvolvimento"
   },
   {
     "id": "dropdown-remove-scroll-pagina",
@@ -352,6 +443,62 @@
       }
     ],
     "path": "docs/archive/bugs/[done]-esgotamento-disco-build-docker-vps"
+  },
+  {
+    "id": "estilos-admin-vazam-landing",
+    "title": "Estilos do admin vazam para a landing",
+    "category": "bugs",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "frontend",
+      "ui-ux"
+    ],
+    "progress": 89,
+    "progressFraction": {
+      "done": 8,
+      "total": 9
+    },
+    "summary": "Isolar fundo e scrollbar do painel administrativo para impedir vazamento visual na landing page.",
+    "sections": [
+      {
+        "heading": "Descrição",
+        "content": "Estilos globais usados pelo painel administrativo estão vazando para a landing page. O fundo do admin aparece na landing e o scrollbar global usa o roxo do painel também na página pública."
+      },
+      {
+        "heading": "Como Reproduzir",
+        "content": "1. Iniciar o servidor local.\n2. Abrir o painel administrativo e depois navegar para a landing page, ou abrir a landing diretamente após carregar o admin.\n3. Observar o fundo da página e as cores do scrollbar."
+      },
+      {
+        "heading": "Comportamento Esperado",
+        "content": "A landing deve manter seu próprio fundo e identidade visual. O scrollbar pode continuar estilizado, mas deve usar as cores adequadas à landing page. Os estilos do painel não devem afetar páginas públicas."
+      },
+      {
+        "heading": "Comportamento Atual",
+        "content": "O fundo do painel aparece na landing e o scrollbar fica roxo, com a aparência do admin, em vez de usar as cores da página pública."
+      },
+      {
+        "heading": "Contexto Técnico",
+        "content": "- Camada afetada: frontend e estilos globais.\n- Arquivos alterados: `src/app/layout.tsx`, `src/app/globals.css`, `src/app/admin/(dashboard)/layout.tsx`, `src/app/admin/login/LoginForm.tsx`, `src/app/admin/verify-2fa/page.tsx`, `src/app/admin/setup-2fa/page.tsx`, `src/app/admin/security/page.tsx`.\n- Evidência pré-correção: Playwright observou `body` com `rgb(3,0,20)` em `http://localhost:3000/`, correspondente ao fundo cósmico do admin.\n- Testes reportados: `npx tsc --noEmit` exit 0; `npx eslint` nos arquivos alterados exit 0, com dois avisos preexistentes; `npm run lint` exit 1 porque o script usa `next lint`, indisponível no Next 16. O último resultado não é regressão deste card."
+      },
+      {
+        "heading": "Hipótese de Causa",
+        "content": "Confirmada pela leitura do código e pela evidência pré-correção: `src/app/layout.tsx` aplicava `className=\"dark\"`, `colorScheme: 'dark'`, fundo `#030014` e texto branco no layout raiz; `src/app/globals.css` aplicava scrollbar cósmico roxo globalmente. Os oito roots administrativos já possuíam wrappers próprios com `min-h-screen bg-[#030014] text-white`; a landing não possuía wrapper equivalente, portanto os estilos raiz vazavam para as páginas públicas."
+      },
+      {
+        "heading": "Plano de Correção",
+        "content": "1. Identificar os seletores globais responsáveis pelo fundo e scrollbar.\n2. Escopar estilos exclusivos do admin ao layout ou a uma classe raiz do painel.\n3. Definir as cores da landing separadamente, mantendo scrollbar funcional e visualmente coerente.\n4. Testar navegação landing → admin → landing em desktop e móvel, verificando ausência de vazamento visual.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Validação",
+        "content": "A correção foi aplicada nos sete arquivos listados em Contexto Técnico. `src/app/layout.tsx` voltou à neutralidade de tema; o scrollbar global foi neutralizado em `src/app/globals.css`; o scrollbar cósmico foi escopado por `html:has(.admin-shell)`, `.admin-shell` e `.admin-shell *`; e o marcador `admin-shell` foi adicionado aos oito roots administrativos em cinco arquivos. O humano informou validação visual positiva. QA pós-correção por navegador, screenshots antes/depois e navegação automatizada landing → admin → landing não foram executados pelo agente e permanecem não verificados.\n\n- [x] Causa do vazamento identificada no escopo global\n- [x] Correção de escopo aplicada e arquivos registrados\n- [x] TypeScript termina sem erro (`npx tsc --noEmit`, exit 0)\n- [x] ESLint termina sem erro (`npx eslint`, exit 0; dois avisos preexistentes registrados)\n- [x] Validação visual humana informada\n- [x] Limitação de QA pós-correção registrada como não verificada\n- [x] **Pasta renomeada para `[done]-estilos-admin-vazam-landing` e movida para `archive/bugs/`**"
+      }
+    ],
+    "path": "docs/archive/bugs/[done]-estilos-admin-vazam-landing"
   },
   {
     "id": "falha-silenciosa-build-docker-vps-sigsegv",
@@ -1253,6 +1400,59 @@
     "path": "docs/archive/features/[done]-admin-layout-painel"
   },
   {
+    "id": "demonstracao-integrada-sete-papeis",
+    "title": "Demonstração integrada dos sete papéis",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-27",
+    "priority": "baixa",
+    "tags": [
+      "infra",
+      "dx",
+      "docs"
+    ],
+    "progress": 93,
+    "progressFraction": {
+      "done": 13,
+      "total": 14
+    },
+    "summary": "Demonstrar de ponta a ponta o fluxo humano e técnico dos sete papéis do workspace Maestri em um cenário mínimo e seguro.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Comprovar, antes da validação humana final do workspace, que os sete papéis do Maestri participam de um fluxo único governado pelo Kanban: planejamento, aprovação humana, delegação, implementação mínima, revisão visual, QA com navegador e consolidação documental."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "A demonstração acrescenta ao Hero da página inicial um pequeno marcador visual de ambiente de demonstração, com texto curto e acessível, sem backend, persistência ou nova infraestrutura. O Planejador especifica a alteração; o humano aprova o card; um Programador implementa com propriedade exclusiva e o outro faz revisão técnica somente leitura; Íris revisa a apresentação com screenshots; Lúmen verifica o comportamento em navegador real; o Git Manager faz somente revisão de status/diff; e o Orquestrador consolida as evidências no Kanban e no diário.\n\nO marcador proposto deve exibir **“Demonstração multiagente”** como badge estático, discreto, responsivo e removível, próximo à apresentação principal do Hero, reutilizando os estilos existentes. O humano definiu esse texto e localização ao autorizar o envio para review em 2026-10-28. A remoção ocorrerá apenas mediante solicitação posterior. Nenhum agente pode iniciar implementação enquanto o card não estiver aprovado e o humano não autorizar expressamente o início."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Planejamento somente leitura pelo papel Planejador Web.\n- Uma alteração visual mínima e reversível no Hero da página inicial, limitada a `src/components/main/Hero.tsx`; `src/app/page.tsx` é alternativa somente se surgir necessidade real de posicionamento entre seções e houver nova delimitação de escopo.\n- Implementação por um Programador com propriedade exclusiva e revisão técnica somente leitura pelo segundo, evitando uma divisão artificial de escrita.\n- Revisão visual por Íris com screenshot local.\n- Verificação por Lúmen em navegador local via Playwright MCP.\n- Revisão somente leitura do status e diff pelo papel Git Manager Web.\n- Registro append-only no LOG deste card, atualização do Panorama e sincronização do roadmap.\n\n### Não inclui (por ora)\n- Backend, banco, autenticação, i18n, APIs, dependências novas ou alteração de infraestrutura.\n- Mudança nos cards ou códigos atualmente em andamento fora dos arquivos explicitamente atribuídos.\n- Reexecução dos 25 testes documentais ou dos testes de paralelismo OpenCode já aprovados.\n- Commit, push, merge, landing, exclusão de floor/branch ou marcação automática de done/Validação."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- Camadas envolvidas: frontend estático e documentação do fluxo.\n- Dependências ou integrações necessárias: Maestri, OpenCode nos papéis de implementação/design/QA, Playwright MCP já validado e servidor local do portfólio.\n- Impactos em outras partes do sistema: nenhum contrato de API ou persistência; a alteração deve respeitar tema, responsividade, acessibilidade e i18n existente ou ser neutra a idioma.\n- Segurança: somente ambiente local; nenhuma navegação externa; nenhuma credencial; operações Git somente leitura.\n- Governança: cada agente deve conferir este card e sua aprovação antes de executar; o Orquestrador é o único proprietário de README/LOG e `docs/DIARIO.md` no checkout canônico."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Planejador produz um plano curto, aponta os arquivos candidatos e separa responsabilidades sem editar arquivos.\n2. Humano revisa este draft, autoriza `ready-for-review`, aprova o card e autoriza o início da implementação em mensagens explícitas.\n3. Orquestrador registra a decisão, inicia ou reutiliza o servidor local autorizado e delega `src/components/main/Hero.tsx` com propriedade exclusiva ao Programador 1; nenhum executor altera Kanban ou diário.\n4. Programador 1 implementa somente no Hero; Programador 2 revisa o diff em modo somente leitura quanto a escopo, semântica, acessibilidade e responsividade. Ambos retornam resultados reais pelo Maestri.\n5. Íris captura ou analisa screenshots locais em viewport desktop e móvel, verificando legibilidade, contraste, ausência de corte/sobreposição e coerência visual; não altera arquivos sem delegação explícita posterior.\n6. Lúmen executa smoke test local via Playwright MCP, incluindo carregamento da Home, marcador único e visível, texto aprovado, responsividade e ausência de erro crítico novo atribuível ao marcador.\n7. Git Manager revisa status, diff e `git diff --check` somente leitura; confirma que apenas arquivos autorizados mudaram e que não houve staging, commit, dependências ou mudanças externas.\n8. Orquestrador consolida LOG e diário, sincroniza roadmap e apresenta o resultado mantendo o card in-progress para validação humana."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Plano real do Planejador recebido e registrado antes da implementação.\n- [x] Aprovação humana e autorização de início registradas antes de qualquer código.\n- [x] Implementação mínima concluída pelo Programador 1 em `src/components/main/Hero.tsx`, seguida de revisão somente leitura pelo Programador 2, sem tocar arquivos fora do escopo.\n- [x] Revisão visual de Íris registrada com screenshots locais desktop/móvel e resultado real sobre legibilidade, contraste, corte/sobreposição e coerência.\n- [x] Smoke test de Lúmen via Playwright MCP registrado com resultado real e sem erro crítico novo atribuível ao marcador.\n- [x] Revisão somente leitura do Git Manager registrada, sem commit ou mutação Git.\n- [x] LOG, Panorama e roadmap refletem a demonstração sem repetir testes já aprovados.\n- [x] Card permanece in-progress para validação humana final.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> Validação humana registrada em 2026-10-28 pela mensagem: “esta aprovado”. Em seguida, o humano autorizou especificamente encerrar, arquivar e desfazer a alteração demonstrativa pela mensagem: “como é uma desmontração pode marcar como done, arquivar e desfazer, agora vamos pros trabalhos reais”. Operações Git continuam fora desta autorização.\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-demonstracao-integrada-sete-papeis` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-demonstracao-integrada-sete-papeis"
+  },
+  {
     "id": "i18n-fundacao-pt-en",
     "title": "Sistema de Idioma PT/EN — Fundação (i18next)",
     "category": "features",
@@ -1316,6 +1516,133 @@
       }
     ],
     "path": "docs/archive/features/[done]-i18n-fundacao-pt-en"
+  },
+  {
+    "id": "i18n-painel-export-import",
+    "title": "Painel de Traduções — Export/Import (Fase 3.2.2)",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-14",
+    "priority": "média",
+    "tags": [
+      "frontend",
+      "backend",
+      "api"
+    ],
+    "progress": 94,
+    "progressFraction": {
+      "done": 17,
+      "total": 18
+    },
+    "summary": "Funcionalidade de exportação e importação de traduções com diff preview antes de confirmar, construída sobre o core do card 3.2.1.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Adicionar ao painel `/admin/language` as seções de Export e Import:\n- **Export:** gerar um `.json` com os valores em uso (override + fallback JSON) por categoria e idioma selecionados\n- **Import:** carregar um `.json`, calcular o diff chave a chave, mostrar prévia (antes/depois) e confirmar antes de aplicar"
+      },
+      {
+        "heading": "Depende de",
+        "content": "Card 3.2.1 concluído (`[done]-i18n-painel-traducoes-core`) ✅ — rotas de CRUD e `src/lib/i18n-utils.ts` já existentes."
+      },
+      {
+        "heading": "Referência de Arquitetura",
+        "content": "`dev/utils/reference/SISTEMA_TRADUCAO.md` — mesmo padrão do sistema de referência, com melhoria do diff antes de confirmar.\n\n---"
+      },
+      {
+        "heading": "Decisões de Design aplicáveis a este card",
+        "content": "| # | Decisão |\n|---|---|\n| 1 | Export reflete o valor **em uso** (override do banco OU fallback do JSON) — não só overrides |\n| 2 | Export com escopo: seletor de categorias (checkbox múltiplo) + idioma (PT / EN / ambos) |\n| 3 | Import: diff chave a chave contra valor atual → prévia → confirmação explícita para aplicar |\n| 4 | Import só aplica chaves com valor **diferente** do atual — não regrava o que não mudou |\n| 5 | Rotas de export/import exigem sessão de admin |\n\n---"
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- `GET /api/admin/translations/export?categories={cat1,cat2}&langs={pt,en}` — gera JSON com valores em uso, escopo selecionado\n- `POST /api/admin/translations/import/preview` — recebe JSON, retorna diff sem aplicar\n- `POST /api/admin/translations/import/confirm` — aplica o diff confirmado\n- Seção **Export** na tela `/admin/language`: checkboxes de categoria, seletor de idioma, botão Exportar\n- Seção **Import** na tela `/admin/language`: input de arquivo, botão Analisar, prévia de diff (tabela antes/depois), botão Confirmar Importação\n\n### Não inclui\n\n- Criação de chaves novas via import\n- Categorias `projects` e `blog` (conteúdo dinâmico — Fases 5/6)\n\n---"
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- Importar `flatten` de `src/lib/i18n-utils.ts` — **não redefinir** em nenhuma rota\n- `GET /api/admin/translations/export`: merge `{ ...base, ...overrides }` filtrado por categoria\n- `POST /api/admin/translations/import/preview`: comparar `incoming[key]` vs `overrides[key] ?? base[key]` — só retornar chaves diferentes\n- `POST /api/admin/translations/import/confirm`: iterar sobre o diff confirmado e chamar `upsertOverride`\n- UI de Import: duas fases distintas — fase 1 (Analisar) mostra diff; fase 2 (Confirmar) aplica\n\n---"
+      },
+      {
+        "heading": "Rotas",
+        "content": "### `GET /api/admin/translations/export`\n\n```\n?categories=hero,nav    → só essas categorias (omitir = todas)\n&langs=pt,en            → idiomas (omitir = ambos)\n```\n\nRetorna:\n```json\n{\n  \"pt\": { \"hero.role\": \"Desenvolvedor Full-Stack\" },\n  \"en\": { \"hero.role\": \"Full-Stack Developer\" }\n}\n```\n\n### `POST /api/admin/translations/import/preview`\n\nBody:\n```json\n{ \"translations\": { \"pt\": { \"hero.role\": \"novo valor\" }, \"en\": { ... } } }\n```\n\nRetorna:\n```json\n{ \"diff\": [{ \"key\": \"hero.role\", \"lang\": \"pt\", \"currentValue\": \"valor atual\", \"newValue\": \"novo valor\" }] }\n```\n\n### `POST /api/admin/translations/import/confirm`\n\nBody:\n```json\n{ \"diff\": [{ \"key\": \"hero.role\", \"lang\": \"pt\", \"newValue\": \"novo valor\" }] }\n```\n\nRetorna:\n```json\n{ \"ok\": true, \"applied\": 1 }\n```\n\n---"
+      },
+      {
+        "heading": "Layout das seções na tela",
+        "content": "```\nEXPORT:\n  Categorias: [✓] hero [✓] nav [✓] skills [✓] experience [✓] resume [✓] footer [✓] contact\n              [Selecionar todas] [Limpar]\n  Idioma:     (•) PT  ( ) EN  ( ) Ambos\n  [Exportar JSON]  → download do arquivo\n\nIMPORT:\n  [Escolher arquivo .json] — exibe nome do arquivo selecionado\n  [Analisar]\n\n  → (após analisar) Prévia de mudanças:\n  ┌────────────────────┬──────────────┬──────────────────┬──────────────────┐\n  │ Chave              │ Idioma       │ Valor atual      │ Novo valor       │\n  ├────────────────────┼──────────────┼──────────────────┼──────────────────┤\n  │ hero.role          │ EN           │ Full-Stack Dev   │ Full Stack Dev   │\n  └────────────────────┴──────────────┴──────────────────┴──────────────────┘\n  X chave(s) serão alteradas.\n  [Cancelar]  [Confirmar Importação]\n```\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] `GET /api/admin/translations/export` importa `flatten` de `i18n-utils`, sem redefinição local\n- [x] Export de categoria `hero` em PT → arquivo com apenas chaves `hero.*` e valores em uso\n- [x] Export de todas as categorias em ambos os idiomas → arquivo completo e correto\n- [x] `POST /api/admin/translations/import/preview` retorna só as chaves com valor diferente\n- [x] Import com 1 chave alterada → prévia mostra só 1 linha, confirmar aplica só essa\n- [x] Import com arquivo idêntico ao estado atual → prévia vazia, nada é aplicado\n- [x] Confirmar importação → overrides gravados, página recarrega estado do banco\n- [x] Rotas exigem sessão admin — sem sessão retorna 401\n- [x] `npm run build` sem erros de TypeScript\n- [x] Testado em produção na VPS antes de marcar como `[done]`\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> _(preencher após execução e teste)_\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Export testado com escopos variados (uma categoria, todas, PT, EN, ambos)\n- [x] Import testado com arquivo válido e com arquivo sem diferenças\n- [x] Nenhuma regressão nos critérios do card 3.2.1\n- [x] **Pasta renomeada para `[done]-i18n-painel-export-import` e movida para `archive/features/`**\n- [x] Se for o último card da Fase 3, atualizar `dev/utils/ROADMAP-EXECUCAO.md`"
+      }
+    ],
+    "path": "docs/archive/features/[done]-i18n-painel-export-import"
+  },
+  {
+    "id": "i18n-painel-traducoes-core",
+    "title": "Painel de Traduções — Core: Edição em Tempo Real (Fase 3.2.1)",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-14",
+    "priority": "alta",
+    "tags": [
+      "frontend",
+      "backend",
+      "i18n",
+      "admin"
+    ],
+    "progress": 87,
+    "progressFraction": {
+      "done": 13,
+      "total": 15
+    },
+    "summary": "Schema SQLite, rotas de leitura/escrita e tela `/admin/idioma` com batch editing completo (editar, salvar, descartar, restaurar por campo e global). Export/Import ficam no card 3.2.2.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Substituir o placeholder de `/admin/idioma` pela interface real de edição de traduções, com:\n- Overrides persistidos no SQLite (overlay sobre `pt.json`/`en.json`)\n- Site público consumindo overrides via `GET /api/translations` em tempo real\n- Interface batch: editar livremente → Salvar global / Descartar / Restaurar padrão"
+      },
+      {
+        "heading": "Depende de",
+        "content": "Fase 3 fundação concluída (`[done]-i18n-fundacao-pt-en`) ✅ — `config.ts` com `TODO Fase 3.2` já reservado."
+      },
+      {
+        "heading": "Próximo card",
+        "content": "`[approved]-i18n-painel-export-import` (Fase 3.2.2) — Export/Import de traduções."
+      },
+      {
+        "heading": "Referência de Arquitetura",
+        "content": "`dev/utils/reference/SISTEMA_TRADUCAO.md` — padrão validado no projeto Thiago Bahls.\n\n---"
+      },
+      {
+        "heading": "Decisões de Design aplicáveis a este card",
+        "content": "| # | Decisão |\n|---|---|\n| 1 | Banco SQLite armazena **apenas overrides** — `pt.json`/`en.json` são a base/fallback |\n| 2 | Sem criação de chaves novas pelo painel — só edição de valores existentes |\n| 3 | Painel organizado pelas 7 categorias dos JSONs |\n| 4 | **Batch edit:** editar livremente → Salvar global (modal) / Descartar tudo (modal) / Descartar por categoria (sem modal) |\n| 5 | **Restaurar padrão por campo:** sem confirmação, entra no draft como `to-delete` — DELETE executado só no Salvar |\n| 6 | **Restaurar tudo ao padrão:** botão global com modal de confirmação, também entra no draft |\n| 7 | Badge `● N alterações não salvas` no header da página, navegação livre, aviso `beforeunload` |\n| 8 | `GET /api/translations` é pública — rotas de escrita exigem sessão de admin |\n\n---"
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- `src/lib/i18n-utils.ts` — função `flatten` compartilhada (usada aqui e pelo card 3.2.2)\n- Tabela `translation_overrides` (`key`, `lang`, `value`, `updated_at`) no SQLite\n- `GET /api/translations?lang={lng}` — pública, retorna overrides ativos do idioma\n- `GET /api/admin/translations` — autenticada, retorna overrides de ambos os idiomas\n- `PUT /api/admin/translations` — upsert de overrides em lote\n- `DELETE /api/admin/translations` — remoção de overrides em lote\n- Ativar o `TODO Fase 3.2` no `config.ts`: fetch inicial + `languageChanged` com `addResourceBundle`\n- Tela `/admin/idioma` completa: abas de categoria, batch editing, restaurar por campo, restaurar global, badge dirty count\n\n> **Convenção:** `?lang=` em todas as rotas — sem exceção.\n\n### Não inclui (→ card 3.2.2)\n\n- `GET /api/admin/translations/export`\n- `POST /api/admin/translations/import/preview`\n- `POST /api/admin/translations/import/confirm`\n- Seções de Export e Import na UI\n\n---"
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- `src/lib/i18n-utils.ts` exporta `flatten` — Passos 4c/4d/4e do card 3.2.2 importam daqui\n- Estado duplo: `committed` (banco) e `draft` (edições locais)\n- `dirtyCount` skipa keys em `toDelete` para evitar double-count\n- `handleSave` sincroniza `draft` com `newCommitted` após salvar\n\n---"
+      },
+      {
+        "heading": "Validação e Evidências de Execução",
+        "content": "### 1. Schema SQLite (`src/lib/db.ts`) e Helpers (`src/lib/translations.ts`)\n```sql\nCREATE TABLE IF NOT EXISTS translation_overrides (\n  key        TEXT    NOT NULL,\n  lang       TEXT    NOT NULL,\n  value      TEXT    NOT NULL,\n  updated_at TEXT    NOT NULL DEFAULT (datetime('now')),\n  PRIMARY KEY (key, lang)\n);\n\nCREATE INDEX IF NOT EXISTS idx_translation_overrides_lang\n  ON translation_overrides(lang);\n```\n- Testado via `src/lib/translations.ts`:\n  - `getOverridesByLang('pt')` / `getOverridesByLang('en')`\n  - `upsertOverride(key, lang, value)`\n  - `deleteOverride(key, lang)`\n  - `deleteAllOverrides()`\n\n### 2. Utilitários de Transformação (`src/lib/i18n-utils.ts`)\n- Funções `flatten` e `unflatten` criadas para compatibilidade total entre chaves escalares (`hero.role`) e arrays aninhados de histórico profissional (`experience.jobs.0.title`, `experience.jobs.0.achievements.0`).\n\n### 3. Rota Pública de Overrides (`src/app/api/translations/route.ts`)\n- `GET /api/translations?lang=pt` acessível sem autenticação (200 OK) retornando objeto de overrides ativos.\n\n### 4. Integração Dinâmica no i18n (`src/i18n/config.ts`)\n- `applyServerOverrides(lng)` chamada no carregamento inicial (`typeof window !== 'undefined'`) e a cada troca de idioma (`i18n.on('languageChanged')`).\n- Merge via `i18n.addResourceBundle(lng, 'translation', data, true, true)` com emissão de evento reativo para atualização imediata dos componentes React.\n\n### 5. Rotas Autenticadas do Painel Admin (`src/app/api/admin/translations/route.ts`)\n- `GET`: retorna overrides por idioma ou ambos `{ pt: {...}, en: {...} }` (401 sem sessão).\n- `PUT`: upsert em lote `{ updates: [{ key, lang, value }] }` (401 sem sessão).\n- `DELETE`: remoção em lote `{ deletes: [{ key, lang }] }` ou `{ all: true }` (401 sem sessão).\n\n### 6. Interface do Painel Administrativo (`src/app/admin/(dashboard)/idioma/page.tsx`)\n- Visual cósmico em harmonia com `#030014`, gradientes púrpuras, vidro fumê e feedback de status.\n- Navegação entre as 7 categorias: `hero`, `nav`, `skills`, `experience`, `resume`, `footer`, `contact`.\n- Renderização especializada de `experience.jobs` em cards expansíveis para cada uma das 3 empresas/cargos (`SCHOTT`, `Avanth`, `CREN`), incluindo realizações.\n- Suporte a edição em lote (batch), contagem reativa de `dirtyCount`, avisos `beforeunload`, descarte por categoria, descarte total com modal de confirmação e restauração global com modal de confirmação.\n\n### 7. Testes de Integração e Ciclo Completo no Navegador\n1. Acesso à rota `/admin/idioma` com autenticação.\n2. Edição do campo `hero.role` em inglês para `\"Senior Full-Stack Engineer\"`.\n3. Notificação e badge de rascunho ativados (`1 alteração não salva`).\n4. Clique em \"Salvar Alterações\" → Modal de confirmação exibindo 1 atualização → Gravado no SQLite com sucesso.\n5. Verificação na landing page pública (`http://localhost:3000`): ao selecionar English, o cargo refletiu `\"Senior Full-Stack Engineer\"` em tempo real sem rebuild.\n6. Retorno ao painel administrativo → Clique em \"Restaurar padrão\" em `hero.role` → Indicador de restauração pendente exibido.\n7. Confirmação do salvamento → Override excluído do SQLite.\n8. Verificação na landing page pública: cargo restaurado para `\"Full-Stack Developer\"`.\n9. `npm run build` executado com sucesso e zero erros de TypeScript."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] `src/lib/i18n-utils.ts` criado com `flatten` exportado\n- [x] Schema `translation_overrides` criado sem erros\n- [x] `GET /api/translations?lang=` retorna overrides sem autenticação\n- [x] `config.ts` busca overrides no carregamento inicial e ao trocar idioma\n- [x] Editar `hero.role` em EN pelo painel → site público reflete sem rebuild\n- [x] Chave sem override exibe valor do JSON normalmente\n- [x] Restaurar padrão por campo entra no draft como `to-delete`, executado no Salvar\n- [x] Restaurar tudo ao padrão (modal) marca todos os overrides para delete via Salvar\n- [x] Descartar tudo reverte estado local ao banco\n- [x] Badge de alterações visível durante edição\n- [x] Rotas de escrita retornam 401 sem sessão admin\n- [x] `npm run build` sem erros de TypeScript\n- [ ] Testado em produção na VPS antes de marcar como `[done]`\n\n---"
+      }
+    ],
+    "path": "docs/archive/features/[done]-i18n-painel-traducoes-core"
   },
   {
     "id": "login-email-senha",
@@ -1642,6 +1969,59 @@
     "path": "docs/archive/enhancements/[done]-failfast-auth-secret-boot"
   },
   {
+    "id": "hardening-import-traducoes",
+    "title": "Hardening do Import de Traduções (validação de tipo e de chave)",
+    "category": "enhancements",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-06",
+    "priority": "média",
+    "tags": [
+      "backend",
+      "segurança",
+      "api"
+    ],
+    "progress": 94,
+    "progressFraction": {
+      "done": 15,
+      "total": 16
+    },
+    "summary": "Impedir que o import grave valores inválidos (ex.: null virando \"null\") e que o confirm aceite chaves que não existem nos dicionários base.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "O painel `/admin/language` permite exportar e importar traduções em JSON (Fase 3.2.2). O fluxo tem duas rotas: `import/preview` (calcula o diff) e `import/confirm` (grava os overrides). Na auditoria de fechamento da Fase 3 (`dev/relatorio-execucao-auditoria-fase-3.md`), o Agente Executor testou casos de borda e reportou os dois comportamentos abaixo. Os trechos e linhas citados vêm desse relatório e foram reconfirmados no código real antes da implementação."
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "1. **Coerção de tipo no preview:** Em [`src/app/api/admin/translations/import/preview/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/admin/translations/import/preview/route.ts#L49), o valor era convertido com `String(val)`. Um JSON com `\"hero.role\": null` gerava diff com `newValue: \"null\"` (string literal), e um número `12345` virava `\"12345\"`. Se o admin confirmasse, o site público passava a exibir \"null\".\n2. **Confirm sem validar a chave:** Em [`src/app/api/admin/translations/import/confirm/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/admin/translations/import/confirm/route.ts#L25-L31), o loop só verificava se `item.key` estava preenchida, `item.lang` em `pt`/`en` e `newValue` do tipo string. Diferente do preview, não verificava se a chave existia nos dicionários base. Uma chamada direta à rota (com sessão admin válida) conseguia gravar override de chave inventada.\n3. O confirm confiava no `diff` enviado pelo cliente em vez de recalcular a partir do estado atual ou validar as chaves contra os dicionários base.\n4. **Chaves herdadas e itens inválidos no confirm:** O uso do operador `in` aceitava propriedades herdadas de `Object.prototype` (`toString`, `constructor`), elementos `null` no diff causavam erro 500, e valores vazios `\"\"` eram gravados como overrides.\n\nImpacto atual: baixo para segurança (rotas exigem sessão admin, comprovado na auditoria), médio para integridade do conteúdo público."
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "- **Preview:** valores que não sejam `string` (ex.: `null`, números, booleanos ou objetos) e valores vazios são ignorados ou rejeitados, impedindo coerção silenciosa para texto ou gravação de strings vazias.\n- **Confirm:** rejeitar (ou ignorar de forma explícita e reportada) itens cuja chave não exista como propriedade própria na base de PT/EN, reaproveitando `flatten` de `src/lib/i18n-utils.ts` (não reescrever).\n- Resposta de ambas as rotas deve informar o que foi descartado/ignorado, para o painel poder exibir feedback transparente.\n- Banner da interface com ícone Lucide padronizado e mensagem informativa unificada."
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- Elimina a possibilidade de publicar \"null\"/números por engano via import.\n- Mantém o contrato do preview e do confirm consistente entre si.\n- Afeta o administrador (feedback mais claro no modal de import); sem mudança para o visitante."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Reconfirmar no código real os pontos (citar trecho e linhas).\n2. Fechar as decisões com o dono do produto.\n3. Ajustar o preview conforme a decisão sobre valores não-string e valores vazios.\n4. Ajustar o confirm para validar propriedade própria contra a base (via `Object.hasOwn`), sanitizar tipos do array diff e tratar valores vazios.\n5. Ajustar o banner do modal de import para usar componente Lucide `<Info />` e texto padronizado.\n6. Testar com os casos de borda (null, número, objeto, chave inexistente, chaves herdadas, itens não-objeto no diff, valor vazio, JSON vazio, JSON inválido).\n\n**Decisões registradas e aprovadas pelo dono do produto (06/10/2026):**\n- **Valor não-string no arquivo:** Descartar pontualmente apenas os itens com valor não-string e listá-los como ignorados na resposta do preview (`ignored: [...]`).\n- **Chave inexistente no confirm:** Filtrar e ignorar chaves inexistentes, gravando apenas as válidas e reportando a contagem de itens aplicados e descartados (`{ ok: true, applied, ignored }`).\n- **Estratégia do confirm:** Validar individualmente cada item do diff recebido contra a lista de chaves base válidas e tipo string antes de persistir.\n- **Valor vazio no import:** Ignorar e listar como ignorado (decisão do dono do produto em 06/10/2026).\n\n**Relação com outros cards:** `[draft]-otimizacoes-painel-traducoes` (transação atômica no confirm e atalho `Esc`) mexe no mesmo `confirm/route.ts`. Sugestão de ordem: este card primeiro, depois a transação, para não haver conflito de edição."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Importar JSON com valor `null`, número ou objeto não gera mais diff com texto coagido\n- [x] Preview e confirm aplicam a mesma regra de validação de chave\n- [x] Confirm com chave inexistente não grava nada para aquela chave (comportamento conforme decisão registrada)\n- [x] A resposta das rotas informa os itens descartados\n- [x] Rotas continuam retornando 401 sem sessão admin\n- [x] `flatten` continua vindo de `src/lib/i18n-utils.ts`, sem redefinição local\n- [x] `npx tsc --noEmit` e `npm run build` sem erros\n- [x] Validação de chave por propriedade própria em preview e confirm (chaves herdadas ignoradas)\n- [x] Itens não-objeto no `diff` do confirm ignorados sem erro 500\n- [x] Valor vazio ignorado e listado em preview e confirm\n- [x] Banner com ícone Lucide e texto único nos dois cenários\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "Validação completa executada em 06/10/2026: (1) Chaves herdadas de Object.prototype ignoradas em preview e confirm via Object.hasOwn; (2) Elementos inválidos no array diff (especialmente null) tratados sem erro 500; (3) Valores vazios descartados com reason 'Valor vazio'; (4) Banner de interface padronizado com Lucide Info; (5) Export e persistência SSR sem regressões, validados com tsc e build limpos.\n\n- [x] Melhoria perceptível e funcional\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-hardening-import-traducoes` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/archive/enhancements/[done]-hardening-import-traducoes"
+  },
+  {
     "id": "login-social-popup",
     "title": "Login Social via Janela Popup com Loading Visual",
     "category": "enhancements",
@@ -1856,6 +2236,58 @@
     "path": "docs/archive/enhancements/[done]-navbar-mobile-menu-reorganizacao"
   },
   {
+    "id": "admin-rota-idioma-para-language",
+    "title": "Renomear rota admin /idioma para /language",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-09-14",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "dx"
+    ],
+    "progress": 92,
+    "progressFraction": {
+      "done": 11,
+      "total": 12
+    },
+    "summary": "Rota /admin/idioma renomeada para /admin/language para seguir a convenção em inglês adotada para todas as rotas e pastas do projeto.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O usuário definiu que futuramente todas as rotas e pastas do projeto serão em inglês. A rota `/admin/idioma` foi criada em português durante a Fase 3.2.1 e precisava ser alinhada à convenção antes de avançar para a Fase 3.2.2."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "- Pasta: `src/app/admin/(dashboard)/idioma/`\n- Referência no dashboard: `href: '/admin/idioma'`\n- Referência no `SidebarNav`: `/admin/language` (criado já no padrão correto)"
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- Pasta: `src/app/admin/(dashboard)/language/`\n- Referência no dashboard: `href: '/admin/language'`\n- Breadcrumb: segmento `language` mapeado para label `\"Traduções\"`\n- Sidebar: item já criado com `/admin/language`"
+      },
+      {
+        "heading": "Riscos",
+        "content": "Baixo — a rota ainda não foi linkada externamente. Mudança puramente interna."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Mover pasta `(dashboard)/idioma/` → `(dashboard)/language/` via `Move-Item`\n2. Atualizar `href` no `page.tsx` do dashboard\n3. Confirmar que nenhuma outra referência a `/admin/idioma` existe no `src/`\n4. Limpar cache `.next/types` e validar com `tsc --noEmit`"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Pasta movida para `(dashboard)/language/`\n- [x] Href atualizado no `page.tsx`\n- [x] Zero ocorrências de `/admin/idioma` no código (`grep` confirmado)\n- [x] `tsc --noEmit` sem erros\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "- [x] Rota `/admin/language` acessível e funcional (testado no navegador com print comprovado)\n- [x] Rota `/admin/idioma` não existe mais (removida do disco e do git)\n- [x] Sidebar exibe \"Traduções\" com link correto para `/admin/language`\n- [x] Breadcrumb exibe \"Traduções\" ao acessar a rota\n- [x] Nenhuma regressão em outras rotas do admin\n- [x] Mover para `archive/refactoring/` após aprovação do teste pelo usuário"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-admin-rota-idioma-para-language"
+  },
+  {
     "id": "deploy-automatico-github-actions",
     "title": "Deploy Automático via GitHub Actions (SSH na VPS)",
     "category": "refactoring",
@@ -2008,6 +2440,58 @@
       }
     ],
     "path": "docs/archive/refactoring/[done]-migracao-porta-vps-8083"
+  },
+  {
+    "id": "padronizar-rotas-portugues-para-ingles",
+    "title": "Padronizar rotas restantes do admin para inglês",
+    "category": "refactoring",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-28",
+    "priority": "média",
+    "tags": [
+      "frontend",
+      "dx"
+    ],
+    "progress": 71,
+    "progressFraction": {
+      "done": 10,
+      "total": 14
+    },
+    "summary": "Renomear os segmentos /admin/curriculo e /admin/projetos para URLs em inglês e impedir novas rotas em português.",
+    "sections": [
+      {
+        "heading": "Motivação",
+        "content": "O painel administrativo adotou inglês para segmentos de URL e nomes de pastas que viram rotas. A migração de `/admin/idioma` para `/admin/language` foi concluída, mas o inventário somente leitura de 2026-10-28 encontrou dois segmentos ainda expostos em português: `/admin/curriculo` e `/admin/projetos`. Consolidar a convenção agora reduz inconsistência, evita novos links divergentes e prepara os próximos módulos do painel.\n\nLabels visíveis, títulos e conteúdo podem continuar em português. Este refactoring trata apenas de segmentos técnicos de URL e das pastas do App Router que os produzem."
+      },
+      {
+        "heading": "Situação Atual",
+        "content": "Rotas vigentes em português confirmadas no código:\n\n- `/admin/curriculo`, produzida por `src/app/admin/(dashboard)/curriculo/page.tsx`.\n- `/admin/projetos`, produzida por `src/app/admin/(dashboard)/projetos/page.tsx`.\n\nReferências runtime confirmadas:\n\n- `src/app/admin/(dashboard)/page.tsx:54` aponta para `/admin/curriculo`.\n- `src/app/admin/(dashboard)/page.tsx:63` aponta para `/admin/projetos`.\n- `src/app/admin/(dashboard)/components/SidebarNav.tsx:21-22` contém os mesmos destinos.\n- `src/app/admin/(dashboard)/components/Breadcrumb.tsx:11-12` reconhece os segmentos `curriculo` e `projetos`.\n\n`/admin/language` já está em inglês. `/admin/idioma` não é rota vigente e pertence apenas ao histórico do refactoring concluído; não integra esta migração.\n\nO middleware preserva qualquer pathname protegido no cookie `admin_redirect` (`src/middleware.ts:27-34` e `src/middleware.ts:92-100`). Esse destino reaparece após login ou 2FA em `src/middleware.ts:51-69` e `src/app/api/admin/redirect-target/route.ts:8-23`, portanto deep-linking precisa ser testado durante a troca."
+      },
+      {
+        "heading": "Situação Desejada",
+        "content": "- Pasta `src/app/admin/(dashboard)/curriculo/` renomeada para `resume/`, expondo `/admin/resume`.\n- Pasta `src/app/admin/(dashboard)/projetos/` renomeada para `projects/`, expondo `/admin/projects`.\n- Dashboard, SidebarNav e Breadcrumb atualizados para os novos segmentos.\n- Fluxos de login, cookie `admin_redirect`, 2FA e acesso direto preservam corretamente os destinos ingleses.\n- Nenhuma pasta sob `src/app` que gere URL usa segmento em português.\n- Labels visíveis continuam independentes da convenção técnica e podem permanecer em português."
+      },
+      {
+        "heading": "Riscos",
+        "content": "- Bookmarks e links antigos para `/admin/curriculo` e `/admin/projetos` deixam de funcionar se a migração for tratada como breaking change sem redirects.\n- Um cookie `admin_redirect` gravado antes da implantação pode conter uma URL antiga e redirecionar o usuário para um destino removido após login ou 2FA.\n- Auth.js, middleware e 2FA preservam pathnames dinamicamente; a renomeação pode parecer correta na navegação normal e ainda falhar em deep-linking.\n- Documentação histórica contém URLs antigas e não deve ser alterada indiscriminadamente nem confundida com referência runtime.\n- O card arquivado `admin-rota-idioma-para-language` é precedente da convenção, mas não deve ser reaberto nem sobrepor o novo escopo.\n- Deve ser decidido em review humano se as URLs antigas receberão redirect permanente/temporário ou se a mudança será intencionalmente incompatível."
+      },
+      {
+        "heading": "Estratégia de Execução",
+        "content": "1. Definir em review se `/admin/curriculo` e `/admin/projetos` terão redirects de compatibilidade ou serão removidas sem fallback.\n2. Renomear as pastas para `resume/` e `projects/`, com propriedade exclusiva por arquivo e sem misturar labels visíveis com segmentos técnicos.\n3. Atualizar os destinos em `src/app/admin/(dashboard)/page.tsx` e `src/app/admin/(dashboard)/components/SidebarNav.tsx`.\n4. Atualizar as chaves de segmento em `src/app/admin/(dashboard)/components/Breadcrumb.tsx`, preservando os labels apresentados ao usuário.\n5. Auditar `src/middleware.ts`, `src/app/api/admin/redirect-target/route.ts`, `src/app/api/admin/2fa/verify/route.ts`, `src/app/api/admin/2fa/confirm-sensitive-action/route.ts`, `src/app/admin/login/LoginForm.tsx` e `src/auth.config.ts` quanto a deep-linking e contratos de redirect; alterar somente se existir referência ou comportamento incompatível comprovado.\n6. Verificar TypeScript/build e executar smoke tests locais com acesso direto, navegação, login e 2FA, cobrindo destino preservado no cookie.\n7. Confirmar por busca runtime que `/admin/curriculo` e `/admin/projetos` não permanecem, exceto em redirects explicitamente aprovados ou documentação histórica."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [ ] `/admin/resume` substitui `/admin/curriculo` e renderiza o mesmo conteúdo autorizado.\n- [ ] `/admin/projects` substitui `/admin/projetos` e renderiza o mesmo conteúdo autorizado.\n- [x] Dashboard, SidebarNav e Breadcrumb usam os novos segmentos sem alterar indevidamente os labels visíveis.\n- [x] Nenhuma pasta ou segmento de URL em português permanece sob `src/app`.\n- [x] Busca no código runtime não encontra `/admin/curriculo` nem `/admin/projetos`, salvo redirects legados explicitamente aprovados.\n- [ ] Acesso direto, login, middleware, 2FA e deep-linking preservam corretamente `/admin/resume` e `/admin/projects`.\n- [x] A estratégia para URLs antigas foi decidida e testada: breaking change intencional, sem redirects legados, seguindo o precedente `/admin/idioma` → `/admin/language`; sem autenticação, as URLs antigas são interceptadas pelo middleware e redirecionadas ao login antes da resolução da rota.\n- [x] TypeScript e build terminam sem erro atribuível à migração.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "O humano informou em 2026-10-28: “Testado e aprovado, pode marcar como done”. O QA autenticado confirmou que o deep-linking preserva `/admin/resume` após o login; o ambiente publicado ainda servia o build anterior, com `/admin/resume` e `/admin/projects` em HTTP 404 e `/admin/curriculo` e `/admin/projetos` em HTTP 200. A decisão humana aprova o card apesar da necessidade de publicação posterior para revalidar o build novo.\n\n- [x] Comportamento idêntico ao anterior\n- [x] Nenhuma regressão identificada no escopo deste card\n- [x] Dívida técnica removida\n- [x] **Pasta renomeada para `[done]-padronizar-rotas-portugues-para-ingles` e movida para `archive/refactoring/`**"
+      }
+    ],
+    "path": "docs/archive/refactoring/[done]-padronizar-rotas-portugues-para-ingles"
   },
   {
     "id": "preparar-repositorio-publico",

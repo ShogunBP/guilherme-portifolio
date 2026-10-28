@@ -297,8 +297,14 @@ logServer('Geração inicial...');
 try {
   generateData();
   logServer('Geração inicial concluída com sucesso!');
+  if (process.argv.includes('--sync') || process.argv.includes('--build')) {
+    process.exit(0);
+  }
 } catch (err) {
   logError('Erro na geração inicial:', err);
+  if (process.argv.includes('--sync') || process.argv.includes('--build')) {
+    process.exit(1);
+  }
 }
 
 // Recursive watch helper with fallback for other OS

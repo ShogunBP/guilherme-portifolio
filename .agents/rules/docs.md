@@ -4,13 +4,14 @@ description: Aplica as regras de /docs (active/archive, categorização, status,
 ---
 
 # Padronização de Documentação (/docs)
-Este projeto segue rigorosamente o `docs/PADRONIZATION.md`. Ao criar, editar ou
+Este projeto segue rigorosamente o `docs/docs/PADRONIZATION.md`. Ao criar, editar ou
 discutir qualquer README dentro de /docs, siga estas regras sem exceção:
 
 ## Estrutura obrigatória
-- Cada tema vive em `/docs/active/{categoria}/[status]-nome-em-kebab-case/README.md`
-  enquanto estiver ativo, e em `/docs/archive/{categoria}/[status]-nome-em-kebab-case/README.md`
-  depois de finalizado.
+- Estrutura canônica no repositório:
+  - Ativos: `docs/docs/active/{categoria}/[status]-nome-em-kebab-case/README.md`
+  - Arquivados: `docs/docs/archive/{categoria}/[status]-nome-em-kebab-case/README.md`
+- **Atenção:** Nunca crie pastas soltas em `docs/active` ou `docs/archive` diretamente na raiz de docs. O servidor do roadmap visual lê exclusivamente dentro de `docs/docs/`.
 - Categorias válidas: `bugs/`, `features/`, `enhancements/`, `refactoring/`
 - Use o template exato da categoria correspondente (definido em PADRONIZATION.md)
   — não invente seções novas, não remova seções do template.
@@ -53,14 +54,20 @@ discutir qualquer README dentro de /docs, siga estas regras sem exceção:
   peça explicitamente ou confirme que está pronto.
 - `[approved]` só acontece depois de review humano real — nunca se autoaprove.
 - **Ao chegar em `[done]` ou `[cancelled]`**: além de renomear o prefixo, MOVA
-  a pasta inteira de `/docs/active/{categoria}/` para `/docs/archive/{categoria}/`.
+  a pasta inteira de `docs/docs/active/{categoria}/` para `docs/docs/archive/{categoria}/`.
   Nunca deixe uma pasta `[done]` ou `[cancelled]` esquecida dentro de `active/`.
-- Ao criar uma nova entrada, ela SEMPRE nasce dentro de `active/{categoria}/`,
+- Ao criar uma nova entrada, ela SEMPRE nasce dentro de `docs/docs/active/{categoria}/`,
   nunca diretamente em `archive/`.
 - **Revogar um status já avançado** (ex: reverter `[approved]` pra
   `[ready-for-review]`, ou desmarcar uma "Decisão: Aprovado" já registrada)
   exige o mesmo cuidado que avançar: sinalize explicitamente ao usuário que
   isso está sendo feito e por quê, nunca troque silenciosamente.
+
+### Manipulação de Pastas no Windows (PowerShell)
+- Como os nomes de pastas usam colchetes `[status]`, o PowerShell interpreta `[` e `]` como caracteres curinga (wildcards/regex) ao usar o parâmetro `-Path`.
+- **NUNCA** use `Move-Item -Path` ou `Remove-Item -Path` em caminhos contendo colchetes.
+- **SEMPRE** use `Move-Item -LiteralPath "..." -Destination "..."` ou execute a movimentação via Node.js:
+  `node -e "const fs = require('fs'); fs.renameSync('origem', 'destino');"`
 
 ## Rastreabilidade de tentativas (obrigatório em revisões de hipótese)
 - Se uma hipótese de causa ou plano de correção já tentado for substituído
@@ -99,6 +106,11 @@ discutir qualquer README dentro de /docs, siga estas regras sem exceção:
 - Se estiver descrevendo "o que existe hoje" num README, isso só pode vir de
   evidência real (código lido, print, confirmação do usuário) — nunca de
   suposição, mesmo que pareça razoável.
+
+## Convenção de rotas
+- Rotas e segmentos de URL sob `src/app` devem usar somente inglês em lowercase kebab-case.
+- Labels visíveis, títulos e conteúdo podem permanecer em português; a regra se aplica aos nomes técnicos de pastas que viram URL.
+- Novas rotas ou segmentos em português são proibidos. Antes de criar uma rota, confira os segmentos irmãos e as referências de navegação, redirects, middleware e deep-linking.
 
 ## Antes de finalizar qualquer README
 Pergunte a si mesmo:

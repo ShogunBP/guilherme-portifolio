@@ -132,7 +132,7 @@ function SecurityContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="admin-shell min-h-screen bg-[#030014] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Glow cósmico */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />
@@ -447,7 +447,7 @@ export default function AdminSecurityPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#030014] text-white flex flex-col items-center justify-center">
+        <div className="admin-shell min-h-screen bg-[#030014] text-white flex flex-col items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-purple-400 mb-3" />
           <p className="text-xs text-gray-400">Carregando painel de segurança...</p>
         </div>

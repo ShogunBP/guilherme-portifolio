@@ -1,0 +1,288 @@
+- generic [active] [ref=f9e1]:
+  - generic [ref=f9e2]:
+    - generic [ref=f9e4]:
+      - generic [ref=f9e5]:
+        - link "Navigate to About section" [ref=f9e6] [cursor=pointer]:
+          - /url: "#about"
+          - img "Guilherme Menezes" [ref=f9e7]
+          - generic [ref=f9e8]:
+            - generic [ref=f9e9]: gui@home:~$
+            - generic [ref=f9e10]: █
+        - generic [ref=f9e11]:
+          - link "Sobre" [ref=f9e12] [cursor=pointer]:
+            - /url: "#about"
+          - link "Skills" [ref=f9e16] [cursor=pointer]:
+            - /url: "#skills"
+          - link "Experiência" [ref=f9e20] [cursor=pointer]:
+            - /url: "#experience"
+          - link "Projetos" [ref=f9e24] [cursor=pointer]:
+            - /url: "#projects"
+          - link "Blog" [ref=f9e28] [cursor=pointer]:
+            - /url: "#blogs"
+        - generic [ref=f9e32]:
+          - button "PT Toggle language" [ref=f9e33] [cursor=pointer]:
+            - text: PT
+            - generic [ref=f9e34]: Toggle language
+          - button "Toggle theme" [ref=f9e35]
+          - button [ref=f9e37]
+      - generic [aria-hidden]:
+        - link:
+          - /url: "#about"
+          - generic:
+            - generic: gui@home:~$
+            - generic: █
+        - generic:
+          - link:
+            - /url: "#about"
+          - link:
+            - /url: "#skills"
+          - link:
+            - /url: "#experience"
+          - link:
+            - /url: "#projects"
+          - link:
+            - /url: "#blogs"
+        - generic:
+          - button:
+            - text: PT
+            - generic: Toggle language
+          - button:
+            - generic: Toggle theme
+          - button
+    - separator [ref=f9e39]
+  - generic [ref=f9e41]:
+    - generic [ref=f9e43]:
+      - generic [ref=f9e44]: The Developer
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Guilherme Menezes
+        - generic [ref=f9e48]: Desenvolvedor Full-Stack
+        - generic [ref=f9e50]: Migração de legados, performance e escalabilidade com Vue.js e .NET.
+      - generic [ref=f9e51]:
+        - generic "Scroll Down" [ref=f9e52] [cursor=pointer]: Vamos Conversar ↓
+        - link "github" [ref=f9e54] [cursor=pointer]:
+          - /url: https://github.com/ShogunBP/
+          - generic [ref=f9e57]: GitHub
+    - region [ref=f9e58]:
+      - generic [ref=f9e62]:
+        - heading "Especialidade Técnica" [level=2] [ref=f9e63]
+        - paragraph [ref=f9e64]: Uma seleção refinada das minhas habilidades em ferramentas e tecnologias modernas de desenvolvimento
+      - generic [ref=f9e66]:
+        - listitem ".NET" [ref=f9e67]:
+          - img "skill image" [ref=f9e70]
+        - listitem "ASP.NET" [ref=f9e72]:
+          - img "skill image" [ref=f9e75]
+        - listitem "Azure DevOps" [ref=f9e77]:
+          - img "skill image" [ref=f9e80]
+        - listitem "BootstrapVue" [ref=f9e82]:
+          - img "skill image" [ref=f9e85]
+        - listitem "Chart.js" [ref=f9e87]:
+          - img "skill image" [ref=f9e90]
+        - listitem "Docker" [ref=f9e92]:
+          - img "skill image" [ref=f9e95]
+        - listitem "GitHub" [ref=f9e97]:
+          - img "skill image" [ref=f9e100]
+        - listitem "JavaScript" [ref=f9e102]:
+          - img "skill image" [ref=f9e105]
+        - listitem "MySQL" [ref=f9e107]:
+          - img "skill image" [ref=f9e110]
+        - listitem "Node.js" [ref=f9e112]:
+          - img "skill image" [ref=f9e115]
+        - listitem "SQL Server" [ref=f9e117]:
+          - img "skill image" [ref=f9e120]
+        - listitem "TypeScript" [ref=f9e122]:
+          - img "skill image" [ref=f9e125]
+        - listitem "Vite" [ref=f9e127]:
+          - img "skill image" [ref=f9e130]
+        - listitem "Vue.js" [ref=f9e132]:
+          - img "skill image" [ref=f9e135]
+      - paragraph [ref=f9e137]: Constantemente refinando e expandindo meu conjunto de habilidades técnicas
+    - generic [ref=f9e138]:
+      - generic [ref=f9e139]:
+        - heading "Meu Currículo" [level=2] [ref=f9e140]
+        - paragraph [ref=f9e141]: Veja minhas qualificações profissionais e experiência em desenvolvimento full-stack.
+      - link "Baixar Currículo" [ref=f9e143] [cursor=pointer]:
+        - /url: /resume.pdf
+    - generic [ref=f9e147]:
+      - generic [ref=f9e148]:
+        - heading "Experiência Profissional & Projetos" [level=1] [ref=f9e149]
+        - paragraph [ref=f9e150]: Destaques da minha carreira e projetos relevantes que demonstram minhas habilidades e impacto.
+      - generic [ref=f9e153]:
+        - generic [ref=f9e154]:
+          - heading "Jan 2024 – Mar 2025" [level=3] [ref=f9e158]
+          - generic [ref=f9e160]:
+            - generic [ref=f9e161]:
+              - img "SCHOTT Logo" [ref=f9e162]
+              - generic [ref=f9e163]:
+                - heading "Desenvolvedor Full-Stack" [level=3] [ref=f9e164]
+                - paragraph [ref=f9e165]: SCHOTT • Diadema – São Paulo – Brasil
+                - paragraph [ref=f9e166]: Jan 2024 – Mar 2025
+            - paragraph [ref=f9e167]: Migração Vue 2 → 3, redesign de dashboard e plataforma de monitoramento industrial com Vue 3 e ASP.NET.
+            - list [ref=f9e168]:
+              - listitem [ref=f9e169]: Liderou migração e redesign de dashboard (+40% performance).
+              - listitem [ref=f9e170]: Desenvolveu plataforma com sensores, temas dark/light e KPIs em tempo real.
+              - listitem [ref=f9e171]: Evoluiu filtros dinâmicos e painéis com dados atualizados.
+              - listitem [ref=f9e172]: "Stack: Vue.js 2/3, TypeScript, ASP.NET, Entity Framework, MySQL, Docker, Azure DevOps."
+        - generic [ref=f9e173]:
+          - heading "Fev 2023 – Out 2023" [level=3] [ref=f9e177]
+          - generic [ref=f9e179]:
+            - generic [ref=f9e180]:
+              - img "Avanth Logo" [ref=f9e181]
+              - generic [ref=f9e182]:
+                - heading "Desenvolvedor" [level=3] [ref=f9e183]
+                - paragraph [ref=f9e184]: Avanth • Brasil
+                - paragraph [ref=f9e185]: Fev 2023 – Out 2023
+            - paragraph [ref=f9e186]: Dashboard para fintech com Vue.js 2 e .NET 7, APIs RESTful com JWT e RBAC.
+            - list [ref=f9e187]:
+              - listitem [ref=f9e188]: Redução de 40% no tempo de processamento de operações financeiras.
+              - listitem [ref=f9e189]: APIs .NET 7 com autenticação JWT e controle de acesso RBAC.
+              - listitem [ref=f9e190]: "Stack: Vue.js 2, Vuex, JavaScript, .NET 7, SQL Server, Swagger."
+        - generic [ref=f9e191]:
+          - heading "Jan 2022 – Dez 2022" [level=3] [ref=f9e195]
+          - generic [ref=f9e197]:
+            - generic [ref=f9e198]:
+              - img "CREN Logo" [ref=f9e199]
+              - generic [ref=f9e200]:
+                - heading "Desenvolvedor" [level=3] [ref=f9e201]
+                - paragraph [ref=f9e202]: CREN • Brasil
+                - paragraph [ref=f9e203]: Jan 2022 – Dez 2022
+            - paragraph [ref=f9e204]: Prontuário eletrônico em WinForms com foco em usabilidade e conformidade LGPD.
+            - list [ref=f9e205]:
+              - listitem [ref=f9e206]: +40% de agilidade e -70% em erros de digitação.
+              - listitem [ref=f9e207]: "Stack: C#, WinForms, MySQL, Dapper, DevExpress."
+    - generic [ref=f9e208]:
+      - generic [ref=f9e210]:
+        - heading "My Projects" [level=1] [ref=f9e211]
+        - paragraph [ref=f9e212]: A collection of innovative projects showcasing technical expertise & creativity.
+      - generic [ref=f9e213]:
+        - generic [ref=f9e214]:
+          - generic [ref=f9e215]: Mock Preview
+          - generic [ref=f9e217]:
+            - generic [ref=f9e222]: Projeto Mock 1
+            - generic [ref=f9e224]:
+              - paragraph [ref=f9e225]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=f9e226]:
+                - link "GitHub (Mock)" [ref=f9e227]:
+                  - /url: "#"
+                - link [ref=f9e228]:
+                  - /url: "#"
+        - generic [ref=f9e232]:
+          - generic [ref=f9e233]: Mock Preview
+          - generic [ref=f9e235]:
+            - generic [ref=f9e240]: Projeto Mock 2
+            - generic [ref=f9e242]:
+              - paragraph [ref=f9e243]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=f9e244]:
+                - link "GitHub (Mock)" [ref=f9e245]:
+                  - /url: "#"
+                - link [ref=f9e246]:
+                  - /url: "#"
+        - generic [ref=f9e250]:
+          - generic [ref=f9e251]: Mock Preview
+          - generic [ref=f9e253]:
+            - generic [ref=f9e256]: Projeto Mock 3
+            - generic [ref=f9e258]:
+              - paragraph [ref=f9e259]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=f9e260]:
+                - link "GitHub (Mock)" [ref=f9e261]:
+                  - /url: "#"
+                - link [ref=f9e262]:
+                  - /url: "#"
+        - generic [ref=f9e266]:
+          - generic [ref=f9e267]: Mock Preview
+          - generic [ref=f9e269]:
+            - generic [ref=f9e276]: Projeto Mock 4
+            - generic [ref=f9e278]:
+              - paragraph [ref=f9e279]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=f9e280]:
+                - link "GitHub (Mock)" [ref=f9e281]:
+                  - /url: "#"
+                - link [ref=f9e282]:
+                  - /url: "#"
+        - generic [ref=f9e286]:
+          - generic [ref=f9e287]: Mock Preview
+          - generic [ref=f9e289]:
+            - generic [ref=f9e293]: Projeto Mock 5
+            - generic [ref=f9e295]:
+              - paragraph [ref=f9e296]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=f9e297]:
+                - link "GitHub (Mock)" [ref=f9e298]:
+                  - /url: "#"
+                - link [ref=f9e299]:
+                  - /url: "#"
+    - generic [ref=f9e304]:
+      - heading "Blogs" [level=2] [ref=f9e305]
+      - generic [ref=f9e306]:
+        - generic [ref=f9e307]:
+          - generic [ref=f9e308]:
+            - 'heading "📝 Post Mock 1: Título de Exemplo" [level=3] [ref=f9e309]'
+            - paragraph [ref=f9e310]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=f9e311]
+        - generic [ref=f9e312]:
+          - generic [ref=f9e313]:
+            - 'heading "💡 Post Mock 2: Título de Exemplo" [level=3] [ref=f9e314]'
+            - paragraph [ref=f9e315]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=f9e316]
+        - generic [ref=f9e317]:
+          - generic [ref=f9e318]:
+            - 'heading "🚀 Post Mock 3: Título de Exemplo" [level=3] [ref=f9e319]'
+            - paragraph [ref=f9e320]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=f9e321]
+    - generic [ref=f9e325]:
+      - generic [ref=f9e326]:
+        - heading "Fale comigo" [level=2] [ref=f9e327]
+        - paragraph [ref=f9e328]: Tem um projeto ou dúvida? Me chame e vamos transformar suas ideias em realidade.
+        - generic [ref=f9e329]:
+          - generic [ref=f9e330]:
+            - generic [ref=f9e333]: guilhermemenezes1337@gmail.com
+            - button "Copy email" [ref=f9e334]
+          - generic [ref=f9e337]:
+            - generic [ref=f9e340]: (11) 94888-3857
+            - button "Copy phone number" [ref=f9e341]
+          - generic [ref=f9e344]: Diadema – São Paulo – Brasil
+      - form "Contact Form" [ref=f9e349]:
+        - textbox "name" [ref=f9e354]:
+          - /placeholder: Nome
+        - textbox "email" [ref=f9e359]:
+          - /placeholder: E-mail
+        - textbox "subject" [ref=f9e364]:
+          - /placeholder: Assunto
+        - textbox "Message" [ref=f9e366]:
+          - /placeholder: Digite sua mensagem...
+        - button "Enviar Mensagem" [ref=f9e367]
+  - contentinfo [ref=f9e368]:
+    - generic [ref=f9e370]:
+      - generic [ref=f9e371]:
+        - generic [ref=f9e372]:
+          - heading "Guilherme Menezes" [level=1] [ref=f9e373]
+          - paragraph [ref=f9e374]: Criando aplicações web escaláveis, ferramentas open-source e experiências digitais inovadoras.
+        - generic [ref=f9e375]:
+          - heading "Links Rápidos" [level=2] [ref=f9e376]
+          - list [ref=f9e377]:
+            - listitem [ref=f9e378]:
+              - link "Navigate to Sobre section" [ref=f9e379] [cursor=pointer]:
+                - /url: "#about"
+                - text: Sobre
+            - listitem [ref=f9e380]:
+              - link "Navigate to Skills section" [ref=f9e381] [cursor=pointer]:
+                - /url: "#skills"
+                - text: Skills
+            - listitem [ref=f9e382]:
+              - link "Navigate to Projetos section" [ref=f9e383] [cursor=pointer]:
+                - /url: "#projects"
+                - text: Projetos
+        - generic [ref=f9e384]:
+          - heading "Conecte-se" [level=2] [ref=f9e385]
+          - generic [ref=f9e386]:
+            - link "Visit my GitHub profile" [ref=f9e387] [cursor=pointer]:
+              - /url: https://github.com/ShogunBP/
+            - link "Visit my LinkedIn profile" [ref=f9e390] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/mr-guilherme/
+            - link "Visit my Twitter profile" [ref=f9e393] [cursor=pointer]:
+              - /url: https://x.com/dev_ShogunBP
+      - generic [ref=f9e396]:
+        - link [ref=f9e397] [cursor=pointer]:
+          - /url: https://www.dmca.com/Protection/Status.aspx?ID=13bc7f35-14af-4ecc-9c0b-5e19f1f8795b
+          - img "DMCA.com Protection Status" [ref=f9e398]
+        - paragraph [ref=f9e399]: © 2026 Feito com ❤️ por Guilherme Menezes.
+        - paragraph [ref=f9e400]: "Visitantes: 0"
+  - button "Open Next.js Dev Tools" [ref=f9e406] [cursor=pointer]

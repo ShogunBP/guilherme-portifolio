@@ -2,9 +2,12 @@ import Footer from '@/components/main/Footer'
 import { Navbar } from '@/components/main/Navbar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { I18nProvider } from '@/components/providers/I18nProvider'
+import { getOverridesByLang } from '@/lib/translations'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+
+export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -27,16 +30,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const overrides = {
+    pt: getOverridesByLang('pt'),
+    en: getOverridesByLang('en'),
+  }
+
   return (
-    <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#030014] text-white overflow-x-hidden min-h-screen`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden min-h-screen`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <I18nProvider>
+          <I18nProvider overrides={overrides}>
             <Navbar />
             {children}
             <Footer />

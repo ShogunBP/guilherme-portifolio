@@ -51,7 +51,7 @@ export default async function AdminDashboardPage() {
       description: 'Linha do tempo de carreira profissional, histórico acadêmico e upload de arquivo PDF.',
       icon: FileText,
       tag: 'Fase 6',
-      href: '/admin/curriculo',
+      href: '/admin/resume',
       status: 'Em breve',
       actionLabel: 'Visualizar',
     },
@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
       description: 'Catálogo de projetos em destaque, capas, tecnologias aplicadas e links de deploy/repositório.',
       icon: FolderGit2,
       tag: 'Fase 7',
-      href: '/admin/projetos',
+      href: '/admin/projects',
       status: 'Em breve',
       actionLabel: 'Visualizar',
     },
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
       description: 'Gerenciamento centralizado de chaves de internacionalização (i18n) em Português e Inglês.',
       icon: Globe2,
       tag: 'Fase 3',
-      href: '/admin/idioma',
+      href: '/admin/language',
       status: 'Em breve',
       actionLabel: 'Visualizar',
     },
@@ -138,11 +138,10 @@ export default async function AdminDashboardPage() {
               className="group block h-full focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-2xl"
             >
               <div
-                className={`h-full flex flex-col justify-between bg-[#0b0826]/70 border rounded-2xl p-6 transition-all duration-300 backdrop-blur-sm shadow-md hover:shadow-xl hover:shadow-purple-950/40 ${
-                  isSecurity
+                className={`h-full flex flex-col justify-between bg-[#0b0826]/70 border rounded-2xl p-6 transition-all duration-300 backdrop-blur-sm shadow-md hover:shadow-xl hover:shadow-purple-950/40 ${isSecurity
                     ? 'border-purple-500/30 hover:border-purple-500/60 bg-gradient-to-b from-[#0e0a30]/80 to-[#0b0826]/70'
                     : 'border-purple-500/20 hover:border-purple-500/45 hover:bg-[#0e0a30]/60'
-                }`}
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -166,9 +165,8 @@ export default async function AdminDashboardPage() {
                   <div>
                     {isSecurity ? (
                       <span
-                        className={`font-medium ${
-                          twoFactorActive ? 'text-emerald-400' : 'text-yellow-400'
-                        }`}
+                        className={`font-medium ${twoFactorActive ? 'text-emerald-400' : 'text-yellow-400'
+                          }`}
                       >
                         {section.status}
                       </span>

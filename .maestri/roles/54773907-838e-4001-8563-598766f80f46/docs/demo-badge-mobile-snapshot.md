@@ -1,0 +1,247 @@
+- generic [active] [ref=e1] [box=0,0,365,8343]:
+  - generic [ref=e2] [box=0,0,365,68]:
+    - generic [ref=e403] [box=16,17,333,35]:
+      - link "Navigate to About section" [ref=e404] [cursor=pointer] [box=16,17,32,35]:
+        - /url: "#about"
+        - img "Guilherme Menezes" [ref=e405] [box=16,17,32,35]
+      - generic [box=145,21,75,28]: Portfólio
+    - separator [ref=e39] [box=14,67,338,1]
+  - generic [ref=e41] [box=0,0,375,7696]:
+    - generic [ref=e42] [box=0,0,375,800]:
+      - generic [box=0,80,375,26]:
+        - paragraph [box=16,80,343,26]:
+          - generic [box=100,80,174,26]: Demonstração multiagente
+      - generic [ref=e43] [box=0,107,375,587]:
+        - generic [ref=e44] [box=128,108,120,22]: The Developer
+        - generic [ref=e46] [box=-84,262,343,246]:
+          - generic [ref=e47] [box=-84,262,343,90]: Guilherme Menezes
+          - generic [ref=e48] [box=-84,364,343,84]: Desenvolvedor Full-Stack
+          - generic [ref=e50] [box=-84,460,343,48]: Migração de legados, performance e escalabilidade com Vue.js e .NET.
+        - generic [ref=e51] [box=145,556,285,36]:
+          - generic "Scroll Down" [ref=e52] [cursor=pointer] [box=145,556,171,36]: Vamos Conversar ↓
+          - link "github" [ref=e54] [cursor=pointer] [box=325,556,105,36]:
+            - /url: https://github.com/ShogunBP/
+            - generic [ref=e57] [box=367,564,47,20]: GitHub
+    - region [ref=e58] [box=0,880,375,827]:
+      - generic [ref=e62] [box=16,944,343,104]:
+        - heading "Especialidade Técnica" [level=2] [ref=e63] [box=16,944,343,36]
+        - paragraph [ref=e64] [box=16,988,343,60]: Uma seleção refinada das minhas habilidades em ferramentas e tecnologias modernas de desenvolvimento
+      - generic [ref=e66] [box=16,1088,343,451]:
+        - listitem ".NET" [ref=e67] [box=16,1103,77,112]:
+          - img "skill image" [ref=e70] [box=30,1123,48,48]
+        - listitem "ASP.NET" [ref=e72] [box=105,1103,77,112]:
+          - img "skill image" [ref=e75] [box=119,1123,48,48]
+        - listitem "Azure DevOps" [ref=e77] [box=194,1103,77,112]:
+          - img "skill image" [ref=e80] [box=208,1115,48,48]
+        - listitem "BootstrapVue" [ref=e82] [box=282,1103,77,112]:
+          - img "skill image" [ref=e85] [box=297,1123,48,48]
+        - listitem "Chart.js" [ref=e87] [box=16,1227,77,96]:
+          - img "skill image" [ref=e90] [box=30,1239,48,48]
+        - listitem "Docker" [ref=e92] [box=105,1227,77,96]:
+          - img "skill image" [ref=e95] [box=119,1243,48,41]
+        - listitem "GitHub" [ref=e97] [box=194,1227,77,96]:
+          - img "skill image" [ref=e100] [box=208,1239,48,48]
+        - listitem "JavaScript" [ref=e102] [box=282,1227,77,96]:
+          - img "skill image" [ref=e105] [box=297,1239,48,48]
+        - listitem "MySQL" [ref=e107] [box=16,1335,77,112]:
+          - img "skill image" [ref=e110] [box=30,1356,48,47]
+        - listitem "Node.js" [ref=e112] [box=105,1335,77,112]:
+          - img "skill image" [ref=e115] [box=119,1351,48,57]
+        - listitem "SQL Server" [ref=e117] [box=194,1335,77,112]:
+          - img "skill image" [ref=e120] [box=208,1347,48,48]
+        - listitem "TypeScript" [ref=e122] [box=282,1335,77,112]:
+          - img "skill image" [ref=e125] [box=297,1355,48,48]
+        - listitem "Vite" [ref=e127] [box=16,1459,77,95]:
+          - img "skill image" [ref=e130] [box=30,1471,48,47]
+        - listitem "Vue.js" [ref=e132] [box=105,1459,77,95]:
+          - img "skill image" [ref=e135] [box=119,1474,48,42]
+      - paragraph [ref=e137] [box=16,1603,343,40]: Constantemente refinando e expandindo meu conjunto de habilidades técnicas
+    - generic [ref=e138] [box=0,1787,375,667]:
+      - generic [ref=e139] [box=24,1891,327,84]:
+        - heading "Meu Currículo" [level=2] [ref=e140] [box=24,1891,327,36]
+        - paragraph [ref=e141] [box=24,1935,327,40]: Veja minhas qualificações profissionais e experiência em desenvolvimento full-stack.
+      - link "Baixar Currículo" [ref=e143] [cursor=pointer] [box=94,2009,187,48]:
+        - /url: /resume.pdf
+    - generic [ref=e147] [box=0,2614,375,1660]:
+      - generic [ref=e148] [box=16,2594,343,232]:
+        - heading "Experiência Profissional & Projetos" [level=1] [ref=e149] [box=16,2594,343,144]
+        - paragraph [ref=e150] [box=16,2754,343,72]: Destaques da minha carreira e projetos relevantes que demonstram minhas habilidades e impacto.
+      - generic [ref=e153] [box=16,2910,343,1364]:
+        - generic [ref=e159] [box=16,2950,343,504]:
+          - heading "Jan 2024 – Mar 2025" [level=3] [ref=e408] [box=96,2950,247,32]
+          - generic [ref=e160] [box=96,2998,247,456]:
+            - generic [ref=e161] [box=96,2998,247,116]:
+              - img "SCHOTT Logo" [ref=e162] [box=96,3036,40,40]
+              - generic [ref=e163] [box=152,2998,191,116]:
+                - heading "Desenvolvedor Full-Stack" [level=3] [ref=e164] [box=152,2998,191,56]
+                - paragraph [ref=e165] [box=152,3054,191,40]: SCHOTT • Diadema – São Paulo – Brasil
+                - paragraph [ref=e166] [box=152,3094,191,20]: Jan 2024 – Mar 2025
+            - paragraph [ref=e167] [box=96,3138,247,80]: Migração Vue 2 → 3, redesign de dashboard e plataforma de monitoramento industrial com Vue 3 e ASP.NET.
+            - list [ref=e168] [box=96,3242,247,212]:
+              - listitem [ref=e169] [box=116,3242,227,40]: Liderou migração e redesign de dashboard (+40% performance).
+              - listitem [ref=e170] [box=116,3286,227,60]: Desenvolveu plataforma com sensores, temas dark/light e KPIs em tempo real.
+              - listitem [ref=e171] [box=116,3350,227,40]: Evoluiu filtros dinâmicos e painéis com dados atualizados.
+              - listitem [ref=e172] [box=116,3394,227,60]: "Stack: Vue.js 2/3, TypeScript, ASP.NET, Entity Framework, MySQL, Docker, Azure DevOps."
+        - generic [ref=e178] [box=16,3494,343,352]:
+          - heading "Fev 2023 – Out 2023" [level=3] [ref=e409] [box=96,3494,247,32]
+          - generic [ref=e179] [box=96,3542,247,304]:
+            - generic [ref=e180] [box=96,3542,247,68]:
+              - img "Avanth Logo" [ref=e181] [box=96,3552,48,48]
+              - generic [ref=e182] [box=160,3542,127,68]:
+                - heading "Desenvolvedor" [level=3] [ref=e183] [box=160,3542,127,28]
+                - paragraph [ref=e184] [box=160,3570,127,20]: Avanth • Brasil
+                - paragraph [ref=e185] [box=160,3590,127,20]: Fev 2023 – Out 2023
+            - paragraph [ref=e186] [box=96,3634,247,40]: Dashboard para fintech com Vue.js 2 e .NET 7, APIs RESTful com JWT e RBAC.
+            - list [ref=e187] [box=96,3698,247,148]:
+              - listitem [ref=e188] [box=116,3698,227,60]: Redução de 40% no tempo de processamento de operações financeiras.
+              - listitem [ref=e189] [box=116,3762,227,40]: APIs .NET 7 com autenticação JWT e controle de acesso RBAC.
+              - listitem [ref=e190] [box=116,3806,227,40]: "Stack: Vue.js 2, Vuex, JavaScript, .NET 7, SQL Server, Swagger."
+        - generic [ref=e196] [box=16,3886,343,308]:
+          - heading "Jan 2022 – Dez 2022" [level=3] [ref=e410] [box=96,3886,247,32]
+          - generic [ref=e197] [box=96,3934,247,260]:
+            - generic [ref=e198] [box=96,3934,247,68]:
+              - img "CREN Logo" [ref=e199] [box=96,3944,48,48]
+              - generic [ref=e200] [box=160,3934,126,68]:
+                - heading "Desenvolvedor" [level=3] [ref=e201] [box=160,3934,126,28]
+                - paragraph [ref=e202] [box=160,3962,126,20]: CREN • Brasil
+                - paragraph [ref=e203] [box=160,3982,126,20]: Jan 2022 – Dez 2022
+            - paragraph [ref=e204] [box=96,4026,247,60]: Prontuário eletrônico em WinForms com foco em usabilidade e conformidade LGPD.
+            - list [ref=e205] [box=96,4110,247,84]:
+              - listitem [ref=e206] [box=116,4110,227,40]: +40% de agilidade e -70% em erros de digitação.
+              - listitem [ref=e207] [box=116,4154,227,40]: "Stack: C#, WinForms, MySQL, Dapper, DevExpress."
+    - generic [ref=e208] [box=0,4434,375,1512]:
+      - generic [ref=e210] [box=16,4534,343,104]:
+        - heading "My Projects" [level=1] [ref=e211] [box=16,4534,343,40]
+        - paragraph [ref=e212] [box=16,4590,343,48]: A collection of innovative projects showcasing technical expertise & creativity.
+      - generic [ref=e213] [box=0,4682,375,1184]:
+        - generic [ref=e214] [box=0,4682,180,384]:
+          - generic [ref=e215] [box=17,4699,146,96]: Mock Preview
+          - generic [ref=e217] [box=17,4811,146,238]:
+            - generic [ref=e222] [box=17,4835,146,24]: Projeto Mock 1
+            - generic [ref=e224] [box=17,4867,146,182]:
+              - paragraph [ref=e225] [box=17,4867,146,140]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=e226] [box=17,5011,146,38]:
+                - link "GitHub (Mock)" [ref=e227] [box=17,5011,114,38]:
+                  - /url: "#"
+                - link "Demo (Mock)" [ref=e228] [box=143,5011,80,38]:
+                  - /url: "#"
+        - generic [ref=e232] [box=196,4682,180,384]:
+          - generic [ref=e233] [box=213,4699,146,96]: Mock Preview
+          - generic [ref=e235] [box=213,4811,146,238]:
+            - generic [ref=e240] [box=213,4835,146,24]: Projeto Mock 2
+            - generic [ref=e242] [box=213,4867,146,182]:
+              - paragraph [ref=e243] [box=213,4867,146,140]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=e244] [box=213,5011,146,38]:
+                - link "GitHub (Mock)" [ref=e245] [box=213,5011,114,38]:
+                  - /url: "#"
+                - link "Demo (Mock)" [ref=e246] [box=339,5011,80,38]:
+                  - /url: "#"
+        - generic [ref=e250] [box=0,5082,180,384]:
+          - generic [ref=e251] [box=17,5099,146,96]: Mock Preview
+          - generic [ref=e253] [box=17,5211,146,238]:
+            - generic [ref=e256] [box=17,5235,146,24]: Projeto Mock 3
+            - generic [ref=e258] [box=17,5267,146,182]:
+              - paragraph [ref=e259] [box=17,5267,146,140]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=e260] [box=17,5411,146,38]:
+                - link "GitHub (Mock)" [ref=e261] [box=17,5411,114,38]:
+                  - /url: "#"
+                - link "Demo (Mock)" [ref=e262] [box=143,5411,80,38]:
+                  - /url: "#"
+        - generic [ref=e266] [box=196,5082,180,384]:
+          - generic [ref=e267] [box=213,5099,146,96]: Mock Preview
+          - generic [ref=e269] [box=213,5211,146,238]:
+            - generic [ref=e276] [box=213,5235,146,24]: Projeto Mock 4
+            - generic [ref=e278] [box=213,5267,146,182]:
+              - paragraph [ref=e279] [box=213,5267,146,140]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=e280] [box=213,5411,146,38]:
+                - link "GitHub (Mock)" [ref=e281] [box=213,5411,114,38]:
+                  - /url: "#"
+                - link "Demo (Mock)" [ref=e282] [box=339,5411,80,38]:
+                  - /url: "#"
+        - generic [ref=e286] [box=0,5482,180,384]:
+          - generic [ref=e287] [box=17,5499,146,96]: Mock Preview
+          - generic [ref=e289] [box=17,5611,146,238]:
+            - generic [ref=e293] [box=17,5635,146,24]: Projeto Mock 5
+            - generic [ref=e295] [box=17,5667,146,182]:
+              - paragraph [ref=e296] [box=17,5667,146,140]: Descrição de exemplo — projeto demonstrativo. O conteúdo real será gerenciado via painel administrativo em breve.
+              - generic [ref=e297] [box=17,5811,146,38]:
+                - link "GitHub (Mock)" [ref=e298] [box=17,5811,114,38]:
+                  - /url: "#"
+                - link "Demo (Mock)" [ref=e299] [box=143,5811,80,38]:
+                  - /url: "#"
+    - generic [ref=e304] [box=0,6074,375,544]:
+      - heading "Blogs" [level=2] [ref=e305] [box=16,6074,343,36]
+      - generic [ref=e306] [box=16,6142,343,476]:
+        - generic [ref=e307] [box=16,6142,343,148]:
+          - generic [ref=e308] [box=32,6158,231,116]:
+            - 'heading "📝 Post Mock 1: Título de Exemplo" [level=3] [ref=e309] [box=32,6158,231,56]'
+            - paragraph [ref=e310] [box=32,6214,231,60]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=e311] [box=279,6198,64,36]
+        - generic [ref=e312] [box=16,6306,343,148]:
+          - generic [ref=e313] [box=32,6322,231,116]:
+            - 'heading "💡 Post Mock 2: Título de Exemplo" [level=3] [ref=e314] [box=32,6322,231,56]'
+            - paragraph [ref=e315] [box=32,6378,231,60]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=e316] [box=279,6362,64,36]
+        - generic [ref=e317] [box=16,6470,343,148]:
+          - generic [ref=e318] [box=32,6486,231,116]:
+            - 'heading "🚀 Post Mock 3: Título de Exemplo" [level=3] [ref=e319] [box=32,6486,231,56]'
+            - paragraph [ref=e320] [box=32,6542,231,60]: Resumo de exemplo — publicação fictícia enquanto o painel administrativo não está pronto.
+          - button "Read" [ref=e321] [box=279,6526,64,36]
+    - generic [ref=e325] [box=56,6927,263,688]:
+      - generic [ref=e326] [box=63,6981,250,240]:
+        - heading "Fale comigo" [level=2] [ref=e327] [box=63,6981,250,36]
+        - paragraph [ref=e328] [box=63,7039,250,70]: Tem um projeto ou dúvida? Me chame e vamos transformar suas ideias em realidade.
+        - generic [ref=e329] [box=63,7131,250,90]:
+          - generic [ref=e330] [box=63,7131,250,18]:
+            - generic [ref=e333] [box=81,7131,206,18]: guilhermemenezes1337@gmail.com
+            - button "Copy email" [ref=e334] [box=298,7133,14,14]
+          - generic [ref=e337] [box=63,7167,250,18]:
+            - generic [ref=e340] [box=90,7167,90,18]: (11) 94888-3857
+            - button "Copy phone number" [ref=e341] [box=191,7169,14,14]
+          - generic [ref=e344] [box=63,7203,250,18]: Diadema – São Paulo – Brasil
+      - form "Contact Form" [ref=e349] [box=63,7283,250,370]:
+        - textbox "name" [ref=e354] [box=44,7283,250,43]:
+          - /placeholder: Nome
+        - textbox "email" [ref=e359] [box=44,7344,250,43]:
+          - /placeholder: E-mail
+        - textbox "subject" [ref=e364] [box=44,7405,250,43]:
+          - /placeholder: Assunto
+        - textbox "Message" [ref=e366] [box=44,7467,250,130]:
+          - /placeholder: Digite sua mensagem...
+        - button "Enviar Mensagem" [ref=e367] [box=63,7620,250,32]
+  - contentinfo [ref=e368] [box=0,7776,365,567]:
+    - generic [ref=e370] [box=24,7825,317,470]:
+      - generic [ref=e371] [box=24,7845,317,346]:
+        - generic [ref=e372] [box=24,7855,317,94]:
+          - heading "Guilherme Menezes" [level=1] [ref=e373] [box=24,7855,317,32]
+          - paragraph [ref=e374] [box=24,7903,317,46]: Criando aplicações web escaláveis, ferramentas open-source e experiências digitais inovadoras.
+        - generic [ref=e375] [box=24,7981,317,112]:
+          - heading "Links Rápidos" [level=2] [ref=e376] [box=24,7981,317,20]
+          - list [ref=e377] [box=24,8017,317,76]:
+            - listitem [ref=e378] [box=24,8017,317,20]:
+              - link "Navigate to Sobre section" [ref=e379] [cursor=pointer] [box=24,8017,36,19]:
+                - /url: "#about"
+                - text: Sobre
+            - listitem [ref=e380] [box=24,8045,317,20]:
+              - link "Navigate to Skills section" [ref=e381] [cursor=pointer] [box=24,8045,31,19]:
+                - /url: "#skills"
+                - text: Skills
+            - listitem [ref=e382] [box=24,8073,317,20]:
+              - link "Navigate to Projetos section" [ref=e383] [cursor=pointer] [box=24,8073,51,19]:
+                - /url: "#projects"
+                - text: Projetos
+        - generic [ref=e384] [box=24,8125,317,76]:
+          - heading "Conecte-se" [level=2] [ref=e385] [box=24,8125,317,20]
+          - generic [ref=e386] [box=24,8161,317,40]:
+            - link "Visit my GitHub profile" [ref=e387] [cursor=pointer] [box=24,8161,40,40]:
+              - /url: https://github.com/ShogunBP/
+            - link "Visit my LinkedIn profile" [ref=e390] [cursor=pointer] [box=76,8161,40,40]:
+              - /url: https://www.linkedin.com/in/mr-guilherme/
+            - link "Visit my Twitter profile" [ref=e393] [cursor=pointer] [box=128,8161,40,40]:
+              - /url: https://x.com/dev_ShogunBP
+      - generic [ref=e396] [box=24,8229,317,76]:
+        - link [ref=e397] [cursor=pointer] [box=133,8229,100,20]:
+          - /url: https://www.dmca.com/Protection/Status.aspx?ID=13bc7f35-14af-4ecc-9c0b-5e19f1f8795b
+          - img "DMCA.com Protection Status" [ref=e398] [box=133,8229,100,20]
+        - paragraph [ref=e399] [box=59,8261,248,16]: © 2026 Feito com ❤️ por Guilherme Menezes.
+        - paragraph [ref=e400] [box=151,8289,63,16]: "Visitantes: 0"

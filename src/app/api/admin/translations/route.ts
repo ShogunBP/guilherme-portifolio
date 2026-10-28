@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import { revalidatePath } from 'next/cache'
 import {
   getOverridesByLang,
   upsertOverride,
@@ -14,8 +15,8 @@ export async function GET(request: Request) {
   const lang = url.searchParams.get('lang')
 
   if (lang) {
-    if (!['pt', 'en'].includes(lang)) return Response.json({}, { status: 400 })
-    return Response.json(getOverridesByLang(lang))
+    const normalizedLang = lang.toLowerCase().startsWith('en') ? 'en' : 'pt'
+    return Response.json(getOverridesByLang(normalizedLang))
   }
 
   // Sem ?lang= → retorna ambos os idiomas (usado na inicialização do painel)
@@ -40,6 +41,7 @@ export async function PUT(request: Request) {
     upsertOverride(key, lang, value)
   }
 
+  revalidatePath('/', 'layout')
   return Response.json({ ok: true })
 }
 
@@ -52,6 +54,7 @@ export async function DELETE(request: Request) {
 
   if (body.all === true) {
     deleteAllOverrides()
+    revalidatePath('/', 'layout')
     return Response.json({ ok: true })
   }
 
@@ -61,6 +64,7 @@ export async function DELETE(request: Request) {
       if (!['pt', 'en'].includes(lang)) continue
       deleteOverride(key, lang)
     }
+    revalidatePath('/', 'layout')
     return Response.json({ ok: true })
   }
 

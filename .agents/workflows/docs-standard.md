@@ -4,12 +4,13 @@ description: Ativa as regras de padronização de /docs, incluindo campos estrut
 
 # /docs-padronizacao
 
-Antes de continuar, aplique rigorosamente as regras de `docs/PADRONIZATION.md` para toda criação, edição ou movimentação de README dentro de /docs.
+Antes de continuar, aplique rigorosamente as regras de `docs/docs/PADRONIZATION.md` para toda criação, edição ou movimentação de README dentro de /docs. Para operações do Kanban, consulte também `.agents/skills/docs-standard/SKILL.md`.
 
 ## Estrutura obrigatória
-- Cada tema vive em `/docs/active/{categoria}/[status]-nome-em-kebab-case/README.md`
-  enquanto ativo, e em `/docs/archive/{categoria}/[status]-nome-em-kebab-case/README.md`
-  depois de finalizado.
+- Estrutura canônica no repositório:
+  - Ativos: `docs/docs/active/{categoria}/[status]-nome-em-kebab-case/README.md`
+  - Arquivados: `docs/docs/archive/{categoria}/[status]-nome-em-kebab-case/README.md`
+- **Atenção:** Nunca crie pastas soltas em `docs/active` ou `docs/archive` diretamente na raiz de docs. O servidor do roadmap visual lê exclusivamente dentro de `docs/docs/`.
 - Categorias válidas: `bugs/`, `features/`, `enhancements/`, `refactoring/`
 - Use o template exato da categoria (definido em PADRONIZATION.md) — não invente
   seções novas, não remova seções do template.
@@ -51,12 +52,22 @@ Antes de continuar, aplique rigorosamente as regras de `docs/PADRONIZATION.md` p
   está pronto.
 - `[approved]` só acontece após review humano real — nunca se autoaprove.
 - Ao chegar em `[done]` ou `[cancelled]`, MOVA a pasta inteira de
-  `active/{categoria}/` para `archive/{categoria}/`, além de renomear.
-- Toda entrada nova nasce em `active/{categoria}/`, nunca direto em `archive/`.
+  `docs/docs/active/{categoria}/` para `docs/docs/archive/{categoria}/`, além de renomear.
+- Toda entrada nova nasce em `docs/docs/active/{categoria}/`, nunca direto em `archive/`.
 - **Revogar um status já avançado** (ex: reverter `[approved]` pra
   `[ready-for-review]`, ou desmarcar uma "Decisão: Aprovado" já registrada)
   exige o mesmo cuidado que avançar: sinalize explicitamente ao usuário que
   isso está sendo feito e por quê, nunca troque silenciosamente.
+
+### Manipulação de Pastas no Windows (PowerShell)
+- Como os nomes de pastas usam colchetes `[status]`, o PowerShell interpreta `[` e `]` como caracteres curinga (wildcards/regex) ao usar o parâmetro `-Path`.
+- **NUNCA** use `Move-Item -Path` ou `Remove-Item -Path` em caminhos contendo colchetes.
+- **SEMPRE** use `Move-Item -LiteralPath "..." -Destination "..."` ou execute a movimentação via Node.js:
+  `node -e "const fs = require('fs'); fs.renameSync('origem', 'destino');"`
+
+### Sincronização do Roadmap Visual
+- Após criar, mover ou alterar o status de qualquer card, sincronize os arquivos do roadmap executando:
+  `node docs/roadmap/roadmap-server.js --sync`
 
 ## Rastreabilidade de tentativas (obrigatório em revisões de hipótese)
 - Se uma hipótese de causa ou plano de correção já tentado for substituído

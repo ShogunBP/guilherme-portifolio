@@ -4,10 +4,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getOverridesByLang } from '@/lib/translations'
 
 export async function GET(request: NextRequest) {
-  const lang = request.nextUrl.searchParams.get('lang') || 'pt'
-  if (!['pt', 'en'].includes(lang)) {
-    return NextResponse.json({}, { status: 400 })
-  }
+  const rawLang = request.nextUrl.searchParams.get('lang') || 'pt'
+  
+  // Normalização tolerante a subtags regionais (ex: pt-BR -> pt, en-US -> en)
+  const lang = rawLang.toLowerCase().startsWith('en') ? 'en' : 'pt'
+
   const overrides = getOverridesByLang(lang)
   return NextResponse.json(overrides)
 }

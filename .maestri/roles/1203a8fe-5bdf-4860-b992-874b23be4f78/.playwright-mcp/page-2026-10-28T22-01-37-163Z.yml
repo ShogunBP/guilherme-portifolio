@@ -1,0 +1,24 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - heading "Painel Administrativo" [level=1] [ref=f4e10]
+      - paragraph [ref=f4e11]: Área restrita. Insira suas credenciais de administrador.
+    - generic [ref=f4e12]:
+      - generic [ref=f4e13]:
+        - generic [ref=f4e14]: E-mail
+        - textbox "E-mail" [active] [ref=f4e16]:
+          - /placeholder: admin@exemplo.com
+          - text: "a\x00\x00d\x01\x00m\x02\x00i\x03\x00n\x04\x00@guilhermemenezes.dev"
+      - generic [ref=f4e17]:
+        - generic [ref=f4e18]: Senha
+        - textbox "Senha" [ref=f4e20]:
+          - /placeholder: ••••••••••••
+          - text: "a\x00\x00d\x01\x00m\x02\x00i\x03\x00n\x04\x00"
+      - button "Acessar Painel" [ref=f4e21] [cursor=pointer]
+    - generic [ref=f4e23]: ou continue com
+    - generic [ref=f4e28]:
+      - button "Entrar com Google" [ref=f4e29] [cursor=pointer]
+      - button "Entrar com GitHub" [ref=f4e36] [cursor=pointer]
+    - link "← Voltar ao site público" [ref=f4e41] [cursor=pointer]:
+      - /url: /
+  - alert [ref=f4e42]

@@ -1,0 +1,95 @@
+- generic [active] [ref=f2e1]:
+  - button "Open Next.js Dev Tools" [ref=f2e43] [cursor=pointer]
+  - alert [ref=f2e47]
+  - generic [ref=f2e49]:
+    - banner [ref=f2e50]:
+      - button "Abrir menu de navegação" [ref=f2e52] [cursor=pointer]
+      - generic [ref=f2e54]:
+        - link "Segurança" [ref=f2e55] [cursor=pointer]:
+          - /url: /admin/security
+        - link "Ver site" [ref=f2e60] [cursor=pointer]:
+          - /url: /
+        - button "Sair" [ref=f2e67] [cursor=pointer]
+    - main [ref=f2e72]:
+      - generic [ref=f2e73]:
+        - generic [ref=f2e74]:
+          - generic [ref=f2e75]:
+            - generic [ref=f2e76]: Sessão Ativa
+            - generic [ref=f2e78]: Auth.js v5 (JWT Session)
+            - generic [ref=f2e79]: 2FA Desativado
+          - heading "Painel Administrativo" [level=1] [ref=f2e80]
+          - paragraph [ref=f2e81]: Bem-vindo ao centro de controle do seu portfólio. As 7 seções abaixo estruturam o roadmap completo da aplicação. Navegue pelas rotas através do menu lateral ou pelos cards de acesso rápido abaixo.
+          - generic [ref=f2e82]:
+            - generic [ref=f2e83]: "Operando como:"
+            - generic [ref=f2e84]: admin@guilhermemenezes.dev
+        - generic [ref=f2e85]:
+          - link "Fase 2.4 Segurança & 2FA Gerenciamento de autenticação de dois fatores (TOTP), códigos de backup e sessões ativas. 2FA Desativado Configurar" [ref=f2e86] [cursor=pointer]:
+            - /url: /admin/security
+            - generic [ref=f2e87]:
+              - generic [ref=f2e88]:
+                - generic [ref=f2e89]: Fase 2.4
+                - heading "Segurança & 2FA" [level=2] [ref=f2e94]
+                - paragraph [ref=f2e95]: Gerenciamento de autenticação de dois fatores (TOTP), códigos de backup e sessões ativas.
+              - generic [ref=f2e96]:
+                - generic [ref=f2e97]: 2FA Desativado
+                - generic [ref=f2e98]: Configurar
+          - link "Fase 4 Hero & Bio Gerenciamento dos textos de apresentação, foto de perfil, slogans e links de redes sociais. Em breve Visualizar" [ref=f2e102] [cursor=pointer]:
+            - /url: /admin/hero
+            - generic [ref=f2e103]:
+              - generic [ref=f2e104]:
+                - generic [ref=f2e105]: Fase 4
+                - heading "Hero & Bio" [level=2] [ref=f2e111]
+                - paragraph [ref=f2e112]: Gerenciamento dos textos de apresentação, foto de perfil, slogans e links de redes sociais.
+              - generic [ref=f2e113]:
+                - generic [ref=f2e114]: Em breve
+                - generic [ref=f2e115]: Visualizar
+          - link "Fase 5 Skills & Habilidades Edição das categorias técnicas (Frontend, Backend, Cloud, DevOps) e proficiências. Em breve Visualizar" [ref=f2e119] [cursor=pointer]:
+            - /url: /admin/skills
+            - generic [ref=f2e120]:
+              - generic [ref=f2e121]:
+                - generic [ref=f2e122]: Fase 5
+                - heading "Skills & Habilidades" [level=2] [ref=f2e129]
+                - paragraph [ref=f2e130]: Edição das categorias técnicas (Frontend, Backend, Cloud, DevOps) e proficiências.
+              - generic [ref=f2e131]:
+                - generic [ref=f2e132]: Em breve
+                - generic [ref=f2e133]: Visualizar
+          - link "Fase 6 Experiência & Currículo Linha do tempo de carreira profissional, histórico acadêmico e upload de arquivo PDF. Em breve Visualizar" [ref=f2e137] [cursor=pointer]:
+            - /url: /admin/resume
+            - generic [ref=f2e138]:
+              - generic [ref=f2e139]:
+                - generic [ref=f2e140]: Fase 6
+                - heading "Experiência & Currículo" [level=2] [ref=f2e146]
+                - paragraph [ref=f2e147]: Linha do tempo de carreira profissional, histórico acadêmico e upload de arquivo PDF.
+              - generic [ref=f2e148]:
+                - generic [ref=f2e149]: Em breve
+                - generic [ref=f2e150]: Visualizar
+          - link "Fase 7 Projetos & Portfólio Catálogo de projetos em destaque, capas, tecnologias aplicadas e links de deploy/repositório. Em breve Visualizar" [ref=f2e154] [cursor=pointer]:
+            - /url: /admin/projects
+            - generic [ref=f2e155]:
+              - generic [ref=f2e156]:
+                - generic [ref=f2e157]: Fase 7
+                - heading "Projetos & Portfólio" [level=2] [ref=f2e165]
+                - paragraph [ref=f2e166]: Catálogo de projetos em destaque, capas, tecnologias aplicadas e links de deploy/repositório.
+              - generic [ref=f2e167]:
+                - generic [ref=f2e168]: Em breve
+                - generic [ref=f2e169]: Visualizar
+          - link "Fase 3 Idioma & Traduções Gerenciamento centralizado de chaves de internacionalização (i18n) em Português e Inglês. Em breve Visualizar" [ref=f2e173] [cursor=pointer]:
+            - /url: /admin/language
+            - generic [ref=f2e174]:
+              - generic [ref=f2e175]:
+                - generic [ref=f2e176]: Fase 3
+                - heading "Idioma & Traduções" [level=2] [ref=f2e184]
+                - paragraph [ref=f2e185]: Gerenciamento centralizado de chaves de internacionalização (i18n) em Português e Inglês.
+              - generic [ref=f2e186]:
+                - generic [ref=f2e187]: Em breve
+                - generic [ref=f2e188]: Visualizar
+          - link "Fase 8 Guestbook & Mensagens Moderação de comentários deixados pela comunidade e consulta de mensagens do formulário. Em breve Visualizar" [ref=f2e192] [cursor=pointer]:
+            - /url: /admin/guestbook
+            - generic [ref=f2e193]:
+              - generic [ref=f2e194]:
+                - generic [ref=f2e195]: Fase 8
+                - heading "Guestbook & Mensagens" [level=2] [ref=f2e201]
+                - paragraph [ref=f2e202]: Moderação de comentários deixados pela comunidade e consulta de mensagens do formulário.
+              - generic [ref=f2e203]:
+                - generic [ref=f2e204]: Em breve
+                - generic [ref=f2e205]: Visualizar

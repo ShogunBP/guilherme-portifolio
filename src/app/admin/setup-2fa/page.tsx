@@ -120,7 +120,7 @@ export default function Setup2FaPage() {
 
   if (loadingSetup) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#030014] text-white">
+      <div className="admin-shell min-h-screen flex flex-col items-center justify-center bg-[#030014] text-white">
         <Loader2 className="w-8 h-8 animate-spin text-purple-400 mb-3" />
         <p className="text-sm text-gray-400">Gerando chave de segurança 2FA...</p>
       </div>
@@ -130,7 +130,7 @@ export default function Setup2FaPage() {
   // Etapa Final: Exibição Única dos Códigos de Backup
   if (backupCodes) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
+      <div className="admin-shell min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-emerald-600/10 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] bg-purple-600/15 rounded-full blur-[120px] pointer-events-none" />
 
@@ -229,7 +229,7 @@ export default function Setup2FaPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
+    <div className="admin-shell min-h-screen flex items-center justify-center bg-[#030014] px-4 py-12 text-white relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />

@@ -7,6 +7,13 @@ function getDatabasePath(): string {
   // Remove 'file:' prefix if present
   const cleanPath = envPath.replace(/^file:/, '')
   if (path.isAbsolute(cleanPath)) return cleanPath
+
+  // Se executando dentro de .next/standalone, resolve para o diretório raiz do projeto
+  const standaloneParent = path.resolve(process.cwd(), '..', '..', cleanPath)
+  if (process.cwd().includes('.next') && fs.existsSync(standaloneParent)) {
+    return standaloneParent
+  }
+
   return path.join(/*turbopackIgnore: true*/ process.cwd(), cleanPath)
 }
 

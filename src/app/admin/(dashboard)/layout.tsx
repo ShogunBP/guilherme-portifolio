@@ -31,7 +31,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white flex">
+    <div className="admin-shell min-h-screen bg-[#030014] text-white flex">
       {/* DESKTOP SIDEBAR */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r border-purple-500/15 bg-[#07041f]/95 backdrop-blur-xl z-40">
         {/* Brand */}

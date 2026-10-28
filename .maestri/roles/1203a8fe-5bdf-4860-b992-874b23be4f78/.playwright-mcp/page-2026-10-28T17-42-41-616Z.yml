@@ -1,0 +1,21 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - heading "Painel Administrativo" [level=1] [ref=f2e10]
+      - paragraph [ref=f2e11]: Área restrita. Insira suas credenciais de administrador.
+    - generic [ref=f2e12]:
+      - generic [ref=f2e13]:
+        - generic [ref=f2e14]: E-mail
+        - textbox "E-mail" [ref=f2e16]:
+          - /placeholder: admin@exemplo.com
+      - generic [ref=f2e17]:
+        - generic [ref=f2e18]: Senha
+        - textbox "Senha" [ref=f2e20]:
+          - /placeholder: ••••••••••••
+      - button "Acessar Painel" [ref=f2e21] [cursor=pointer]
+    - generic [ref=f2e23]: ou continue com
+    - button "Entrar com Google" [ref=f2e29] [cursor=pointer]
+    - link "← Voltar ao site público" [ref=f2e37] [cursor=pointer]:
+      - /url: /
+  - button "Open Next.js Dev Tools" [ref=f2e43] [cursor=pointer]
+  - alert [ref=f2e47]

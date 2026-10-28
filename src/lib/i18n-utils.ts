@@ -6,7 +6,7 @@
 /**
  * Achata um objeto ou array aninhado para notação de ponto ('hero.role', 'experience.jobs.0.title').
  */
-export function flatten(obj: Record<string, unknown>, prefix = ''): Record<string, string> {
+export function flatten<T = any>(obj: Record<string, unknown>, prefix = ''): Record<string, T> {
   return Object.entries(obj).reduce((acc, [key, val]) => {
     const fullKey = prefix ? `${prefix}.${key}` : key
     if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
@@ -16,14 +16,14 @@ export function flatten(obj: Record<string, unknown>, prefix = ''): Record<strin
         if (typeof item === 'object' && item !== null) {
           Object.assign(acc, flatten(item as Record<string, unknown>, `${fullKey}.${index}`))
         } else {
-          acc[`${fullKey}.${index}`] = String(item)
+          acc[`${fullKey}.${index}`] = item as T
         }
       })
     } else {
-      acc[fullKey] = String(val)
+      acc[fullKey] = val as T
     }
     return acc
-  }, {} as Record<string, string>)
+  }, {} as Record<string, T>)
 }
 
 /**
