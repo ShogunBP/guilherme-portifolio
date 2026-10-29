@@ -1,11 +1,11 @@
-import { auth } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import pt from '@/i18n/locales/pt.json'
 import en from '@/i18n/locales/en.json'
 import { flatten } from '@/lib/i18n-utils'
 import { getOverridesByLang } from '@/lib/translations'
 
 export async function GET(request: Request) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }

@@ -62,6 +62,15 @@ function initDatabase(dbPath: string): Database.Database {
 
     CREATE INDEX IF NOT EXISTS idx_translation_overrides_lang
       ON translation_overrides(lang);
+
+    CREATE TABLE IF NOT EXISTS admin_credentials (
+      id                 INTEGER PRIMARY KEY CHECK (id = 1),
+      email              TEXT    NOT NULL CHECK (length(trim(email)) > 0),
+      password_hash      TEXT    NOT NULL CHECK (length(trim(password_hash)) > 0),
+      credential_version INTEGER NOT NULL DEFAULT 1 CHECK (credential_version > 0),
+      created_at         TEXT    NOT NULL DEFAULT (datetime('now')),
+      updated_at         TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
   `)
 
   return db

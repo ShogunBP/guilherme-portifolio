@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import {
   getTwoFactorRecord,
   verifyTotpCode,
@@ -14,7 +14,7 @@ import {
 import { sanitizeLocalRedirect } from '@/lib/safe-redirect'
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session?.user) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }

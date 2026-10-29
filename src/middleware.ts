@@ -54,15 +54,11 @@ export default auth(async (req) => {
     const verifiedCookie = req.cookies.get(COOKIE_2FA_VERIFIED)?.value
     const is2FaVerified = await verify2FaVerifiedToken(verifiedCookie)
 
-    // A) Se estiver na página de login:
+    // A) A página de login sempre chega ao runtime Node. O middleware Edge não
+    // conhece `credentialVersion`; decidir aqui com um JWT legado criaria loop
+    // entre `/admin/login` e o guard Node das páginas protegidas.
     if (isLoginPage) {
-      if (is2FaEnabled && !is2FaVerified) {
-        return NextResponse.redirect(new URL('/admin/verify-2fa', nextUrl))
-      }
-      const dest = sanitizeLocalRedirect(req.cookies.get('admin_redirect')?.value)
-      const response = NextResponse.redirect(new URL(dest, nextUrl))
-      response.cookies.delete('admin_redirect')
-      return response
+      return NextResponse.next()
     }
 
     // B) Se estiver na página de verificação de 2FA (/admin/verify-2fa):

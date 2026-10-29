@@ -1,119 +1,5 @@
 [
   {
-    "id": "admin-troca-credenciais",
-    "title": "Gerenciamento de Credenciais do Admin pelo Painel",
-    "category": "features",
-    "status": "draft",
-    "area": "active",
-    "date": "2026-08-31",
-    "priority": "baixa",
-    "tags": [
-      "frontend",
-      "backend",
-      "segurança"
-    ],
-    "progress": 0,
-    "progressFraction": {
-      "done": 0,
-      "total": 10
-    },
-    "summary": "Permitir trocar senha e e-mail do admin pelo painel, sem depender de variável de ambiente + redeploy.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Permitir que o administrador do portfólio altere seu e-mail e senha de login diretamente pelo painel administrativo, eliminando a dependência atual de editar variáveis de ambiente (`ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH`) e disparar um redeploy na VPS."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "Na área de configurações do painel admin, o usuário autenticado terá um formulário para:\n1. Alterar o e-mail de acesso (com validação de formato e confirmação).\n2. Alterar a senha de acesso (exigindo a confirmação da senha atual e nova senha com requisitos de segurança).\nApós a alteração bem-sucedida, as novas credenciais passam a valer imediatamente para os próximos logins, invalidando sessões anteriores se necessário."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n- Formulário de troca de e-mail e senha dentro do painel admin.\n- Validação de senha atual antes de autorizar a troca.\n- Persistência das credenciais alteradas no banco de dados SQLite (`portfolio.db`).\n\n### Não inclui (por ora)\n- Recuperação de senha por e-mail tipo \"Esqueci minha senha\" (fluxo complexo com tokens temporários).\n- Múltiplos perfis de usuário / RBAC."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- Camadas envolvidas: frontend (interface do painel), backend (Server Actions / API de autenticação), banco (tabela de credenciais no SQLite).\n- Dependências ou integrações necessárias: `bcryptjs` / hashing seguro, `better-sqlite3`.\n- Impactos em outras partes do sistema: a lógica de autorização no `src/auth.ts` precisará verificar se existem credenciais salvas no banco de dados antes de recorrer às variáveis de ambiente como fallback."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. _(a detalhar quando o card for priorizado para execução)_"
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Formulário de troca de credenciais acessível no painel administrativo\n- [ ] Validação obrigatória da senha atual antes de aplicar alterações\n- [ ] Novas credenciais persistidas no SQLite e válidas para o próximo login\n- [ ] Fallback seguro caso o banco ainda não possua credenciais customizadas\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-admin-troca-credenciais` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[draft]-admin-troca-credenciais"
-  },
-  {
-    "id": "sso-path-projetos-satelite",
-    "title": "Decisão de Arquitetura: SSO e URL em Path/Subdomínio para Projetos Satélite",
-    "category": "features",
-    "status": "draft",
-    "area": "active",
-    "date": "2026-09-05",
-    "priority": "média",
-    "tags": [
-      "backend",
-      "infra",
-      "segurança"
-    ],
-    "progress": 0,
-    "progressFraction": {
-      "done": 0,
-      "total": 12
-    },
-    "summary": "Decisão de arquitetura para SSO entre o painel admin e futuros projetos satélite via path e/ou subdomínio, usando JWT assinado padrão em vez do formato proprietário do NextAuth.",
-    "sections": [
-      {
-        "heading": "Objetivo",
-        "content": "Permitir que o dono do portfólio, já logado no `/admin`, acesse projetos satélite futuros sem precisar logar novamente, independente de esses projetos rodarem como path (`guilhermemenezes.dev/projects/{slug}`) ou subdomínio (`{slug}.guilhermemenezes.dev`), e mesmo que rodem em containers Docker separados e em stacks tecnológicas distintas."
-      },
-      {
-        "heading": "Descrição Funcional",
-        "content": "O administrador realiza login no portfólio principal (`guilhermemenezes.dev/admin`) utilizando qualquer um dos métodos suportados (credenciais ou OAuth) e valida o segundo fator (TOTP). Ao navegar para qualquer projeto satélite hospedado no mesmo domínio sob path (ex: `guilhermemenezes.dev/projects/test`) ou subdomínio (ex: `galeria.guilhermemenezes.dev`), o projeto satélite intercepta a requisição, lê o cookie de sessão compartilhado e valida a assinatura do token JWT diretamente, reconhecendo a identidade do administrador sem exigir uma nova tela de login ou sincronização de banco de dados."
-      },
-      {
-        "heading": "Depende de",
-        "content": "Subfase 2.4 (`[in-progress]-2fa-layout-painel-admin`) deve estar concluída e arquivada como `[done]` antes desta mudança de token ser implementada em código, para não interferir na estabilização do fluxo de login e 2FA atual. A execução prática desta decisão ocorrerá na Fase 5 (Revamp de Projects) ou como preparação para o primeiro container satélite."
-      },
-      {
-        "heading": "Escopo",
-        "content": "### Inclui\n\n- Trocar a estratégia de sessão do Auth.js/NextAuth no Guilherme-Portifólio de JWE criptografado proprietário (padrão) para JWT assinado padrão (via `jose` ou callbacks customizados de `encode`/`decode`), mantendo total compatibilidade com os fluxos de login já implementados (email/senha, Google, GitHub, 2FA).\n- Documentar o contrato de validação da sessão (algoritmo de assinatura como HS256, claims esperadas como `email`, `id`, `exp`) para que qualquer projeto satélite em qualquer linguagem/stack (Node.js, Python, Go, Rust) consiga validar o token de forma independente.\n- Compartilhar a chave de assinatura (`AUTH_SECRET` ou chave derivada especificamente para esse propósito) com os containers dos projetos satélite via variável de ambiente própria de cada um.\n- **Suportar os dois cenários de escopo de cookie**, decidindo caso a caso por projeto satélite, não como uma escolha única e global:\n  - **Path** (ex: `guilhermemenezes.dev/projects/test`): cookie no escopo do domínio exato já basta, nenhuma configuração extra de domínio necessária.\n  - **Subdomínio** (ex: `galeria.guilhermemenezes.dev`): exige configurar o cookie do Guilherme-Portifólio com escopo `.guilhermemenezes.dev` (com o ponto), para que subdomínios também recebam o cookie automaticamente.\n\n### Não inclui (por ora)\n\n- Implementação de nenhum projeto satélite específico (isso é escopo de tarefas futuras de projetos individuais, incluindo os exemplos mapeados abaixo).\n- Domínios totalmente diferentes de `guilhermemenezes.dev` (fora do escopo desta decisão — exigiria abordagem de token de entrada temporário, não cookie compartilhado).\n- Alteração imediata no código de autenticação da Fase 2 (esta decisão é documentada agora para nortear a Fase 5 sem retrabalho)."
-      },
-      {
-        "heading": "Exemplos Mapeados (para referência futura)",
-        "content": "1. **Linktree** — será uma página/rota *dentro do mesmo código/container* do Guilherme-Portifólio (ex: `/linktree`, ou um subdomínio configurado no Nginx apontando de volta para o mesmo container). Não precisa de SSO nem desta decisão — é a mesma aplicação, mesma sessão, sem nenhuma questão de compartilhamento de cookie entre containers.\n2. **Galeria/portfólio de imagens** — projeto Docker separado, com área administrativa própria que deve reconhecer a sessão do `/admin` sem exigir novo login. **Ainda não decidido** se será path ou subdomínio — qualquer uma das duas opções é suportada pela arquitetura de JWT assinado descrita acima; a decisão final de path vs. subdomínio para este projeto específico fica para quando ele for de fato planejado."
-      },
-      {
-        "heading": "Requisitos Técnicos",
-        "content": "- **Camadas envolvidas:** backend (formato de token de sessão no NextAuth), infra (roteamento Nginx `proxy_pass` por path ou subdomínio, escopo de cookie `.guilhermemenezes.dev`, variáveis de ambiente).\n- **Dependências ou integrações necessárias:** biblioteca `jose` (ou Web Crypto API nativa) para codificação e assinatura de tokens JWT padrão.\n- **Impactos em outras partes do sistema:** a alteração da codificação do cookie exigirá que sessões ativas façam re-login quando for implantada."
-      },
-      {
-        "heading": "Plano de Implementação",
-        "content": "1. Concluir e estabilizar a Fase 2 (2FA e layout do painel).\n2. Customizar os métodos `jwt.encode` e `jwt.decode` no `src/auth.config.ts` / `src/auth.ts` utilizando `jose` para gerar JWTs assinados com algoritmo HS256 e payload padronizado.\n3. Se houver projeto satélite em subdomínio, ajustar a configuração de cookies no Auth.js (`domain: '.guilhermemenezes.dev'`).\n4. Criar utilitário/middleware de referência (exemplo em Node.js e Python) para consumo em projetos satélite.\n5. Configurar regras de `proxy_pass` no Nginx do host VPS (para path ou bloco de subdomínio).\n6. Validar o compartilhamento do cookie e o acesso autenticado automático no primeiro projeto satélite."
-      }
-    ],
-    "criteriaSections": [
-      {
-        "heading": "Critérios de Conclusão",
-        "content": "- [ ] Estratégia de sessão do Guilherme-Portifólio emite JWT assinado legível por bibliotecas padrão como `jose`\n- [ ] Configuração de escopo de cookie suporta tanto path quanto subdomínios sob `guilhermemenezes.dev`\n- [ ] Login e sessão no painel `/admin` continuam operando normalmente sem quebras\n- [ ] Contrato e exemplo de verificação do token documentados para projetos satélite\n- [ ] Nginx configurado adequadamente para rotear o projeto satélite\n- [ ] Projeto satélite de teste valida sessão do admin sem exigir novo login\n\n---"
-      },
-      {
-        "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-sso-path-projetos-satelite` e movida para `archive/features/`**"
-      }
-    ],
-    "path": "docs/active/features/[draft]-sso-path-projetos-satelite"
-  },
-  {
     "id": "workspace-multiagente-maestri",
     "title": "Workspace multiagente de desenvolvimento web no Maestri",
     "category": "features",
@@ -168,58 +54,65 @@
     "path": "docs/active/features/[in-progress]-workspace-multiagente-maestri"
   },
   {
-    "id": "otimizacoes-painel-traducoes",
-    "title": "Otimizações no Painel de Traduções (Transações e Acessibilidade)",
-    "category": "enhancements",
-    "status": "draft",
+    "id": "sso-path-projetos-satelite",
+    "title": "Decisão de Arquitetura: SSO e URL em Path/Subdomínio para Projetos Satélite",
+    "category": "features",
+    "status": "ready-for-review",
     "area": "active",
-    "date": "2026-10-05",
-    "priority": "baixa",
+    "date": "2026-09-05",
+    "priority": "média",
     "tags": [
-      "frontend",
       "backend",
-      "banco",
-      "ui-ux"
+      "infra",
+      "segurança"
     ],
     "progress": 0,
     "progressFraction": {
       "done": 0,
-      "total": 9
+      "total": 12
     },
-    "summary": "Transação atômica em lote no SQLite para importação e suporte ao atalho Esc no modal de traduções.",
+    "summary": "Decisão de arquitetura para SSO entre o painel admin e futuros projetos satélite via path e/ou subdomínio, usando JWT assinado padrão em vez do formato proprietário do NextAuth.",
     "sections": [
       {
-        "heading": "Contexto",
-        "content": "A Fase 3.2.2 entregou o sistema de Exportação e Importação de traduções no painel `/admin/language`, integrando:\n- Download de arquivos `.json` com filtro de categorias e idiomas.\n- Upload de arquivos `.json` com cálculo de diff chave a chave.\n- Gravação das substituições no SQLite e invalidação de cache SSR com `revalidatePath`.\n\nA funcionalidade está homologada e plenamente operacional. Durante a revisão técnica do Tech Lead, foram identificadas duas oportunidades de melhoria incremental para robustez de banco e refinamento de experiência do usuário.\n\n---"
+        "heading": "Objetivo",
+        "content": "Permitir que o dono do portfólio, já logado no `/admin`, acesse projetos satélite futuros sem precisar logar novamente, independente de esses projetos rodarem como path (`guilhermemenezes.dev/projects/{slug}`) ou subdomínio (`{slug}.guilhermemenezes.dev`), e mesmo que rodem em containers Docker separados e em stacks tecnológicas distintas."
       },
       {
-        "heading": "Problema Atual",
-        "content": "1. **Persistência Sequencial no SQLite (Ausência de Transação Explícita):**\n   No endpoint [`src/app/api/admin/translations/import/confirm/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/admin/translations/import/confirm/route.ts), as alterações confirmadas são gravadas através de um loop sequencial simples:\n   ```typescript\n   for (const item of diff) {\n     if (!item.key || !item.lang || typeof item.newValue !== 'string') continue\n     if (!['pt', 'en'].includes(item.lang)) continue\n\n     upsertOverride(item.key, item.lang, item.newValue)\n     appliedCount++\n   }\n   ```\n   Embora o volume de chaves do portfólio seja pequeno (~130 chaves) e a execução no SQLite leve poucos milissegundos, a ausência de uma transação atômica (`db.transaction`) significa que, em caso de falha inesperada ou interrupção no meio do loop, parte do diff ficaria gravada e parte não.\n\n2. **Acessibilidade no Modal (Fechamento via Teclado):**\n   No componente [`src/app/admin/(dashboard)/language/page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/%28dashboard%29/language/page.tsx), o modal de Exportar/Importar fecha ao clicar no botão `X`, no botão `Cancelar`/`Fechar` ou no backdrop. No entanto, não há captura da tecla `Escape` (`Esc`) para fechar o modal via teclado, o que é um padrão recomendado de acessibilidade e agilidade para o usuário.\n\n---"
+        "heading": "Descrição Funcional",
+        "content": "O administrador realiza login no portfólio principal (`guilhermemenezes.dev/admin`) utilizando qualquer um dos métodos suportados (credenciais ou OAuth) e valida o segundo fator (TOTP). Ao navegar para qualquer projeto satélite hospedado no mesmo domínio sob path (ex: `guilhermemenezes.dev/projects/test`) ou subdomínio (ex: `galeria.guilhermemenezes.dev`), o projeto satélite intercepta a requisição, lê o cookie de sessão compartilhado e valida a assinatura do token JWT diretamente, reconhecendo a identidade do administrador sem exigir uma nova tela de login ou sincronização de banco de dados."
       },
       {
-        "heading": "Melhoria Proposta",
-        "content": "1. **Helper de Transação no Banco:**\n   Implementar em `src/lib/translations.ts` a função `upsertOverridesBatch(items: Array<{ key: string, lang: string, value: string }>)` utilizando o método nativo `db.transaction()` do `better-sqlite3`. Isso garante rollback automático total se qualquer registro falhar.\n\n2. **Atalho de Teclado no Modal:**\n   Adicionar um listener de `keydown` no `useEffect` dentro da tela `/admin/language` para que pressionar `Esc` execute `handleCloseExportImportModal()` caso o modal esteja aberto.\n\n---"
+        "heading": "Depende de",
+        "content": "Subfase 2.4 (`[in-progress]-2fa-layout-painel-admin`) deve estar concluída e arquivada como `[done]` antes desta mudança de token ser implementada em código, para não interferir na estabilização do fluxo de login e 2FA atual. A execução prática desta decisão ocorrerá na Fase 5 (Revamp de Projects) ou como preparação para o primeiro container satélite."
       },
       {
-        "heading": "Impacto Esperado",
-        "content": "- **Confiabilidade no Banco:** Garantia matemática de atomicidade (ACID) na importação de traduções em lote.\n- **Experiência do Usuário (UX/Acessibilidade):** Navegação mais fluida e intuitiva permitindo dispensar modais rapidamente com o teclado.\n\n---"
+        "heading": "Escopo",
+        "content": "### Inclui\n\n- Trocar a estratégia de sessão do Auth.js/NextAuth no Guilherme-Portifólio de JWE criptografado proprietário (padrão) para JWT assinado padrão (via `jose` ou callbacks customizados de `encode`/`decode`), mantendo total compatibilidade com os fluxos de login já implementados (email/senha, Google, GitHub, 2FA).\n- Documentar o contrato de validação da sessão (algoritmo de assinatura como HS256, claims esperadas como `email`, `id`, `exp`) para que qualquer projeto satélite em qualquer linguagem/stack (Node.js, Python, Go, Rust) consiga validar o token de forma independente.\n- Compartilhar a chave de assinatura (`AUTH_SECRET` ou chave derivada especificamente para esse propósito) com os containers dos projetos satélite via variável de ambiente própria de cada um.\n- **Suportar os dois cenários de escopo de cookie**, decidindo caso a caso por projeto satélite, não como uma escolha única e global:\n  - **Path** (ex: `guilhermemenezes.dev/projects/test`): cookie no escopo do domínio exato já basta, nenhuma configuração extra de domínio necessária.\n  - **Subdomínio** (ex: `galeria.guilhermemenezes.dev`): exige configurar o cookie do Guilherme-Portifólio com escopo `.guilhermemenezes.dev` (com o ponto), para que subdomínios também recebam o cookie automaticamente.\n\n### Não inclui (por ora)\n\n- Implementação de nenhum projeto satélite específico (isso é escopo de tarefas futuras de projetos individuais, incluindo os exemplos mapeados abaixo).\n- Domínios totalmente diferentes de `guilhermemenezes.dev` (fora do escopo desta decisão — exigiria abordagem de token de entrada temporário, não cookie compartilhado).\n- Alteração imediata no código de autenticação da Fase 2 (esta decisão é documentada agora para nortear a Fase 5 sem retrabalho)."
+      },
+      {
+        "heading": "Exemplos Mapeados (para referência futura)",
+        "content": "1. **Linktree** — será uma página/rota *dentro do mesmo código/container* do Guilherme-Portifólio (ex: `/linktree`, ou um subdomínio configurado no Nginx apontando de volta para o mesmo container). Não precisa de SSO nem desta decisão — é a mesma aplicação, mesma sessão, sem nenhuma questão de compartilhamento de cookie entre containers.\n2. **Galeria/portfólio de imagens** — projeto Docker separado, com área administrativa própria que deve reconhecer a sessão do `/admin` sem exigir novo login. **Ainda não decidido** se será path ou subdomínio — qualquer uma das duas opções é suportada pela arquitetura de JWT assinado descrita acima; a decisão final de path vs. subdomínio para este projeto específico fica para quando ele for de fato planejado."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- **Camadas envolvidas:** backend (formato de token de sessão no NextAuth), infra (roteamento Nginx `proxy_pass` por path ou subdomínio, escopo de cookie `.guilhermemenezes.dev`, variáveis de ambiente).\n- **Dependências ou integrações necessárias:** biblioteca `jose` (ou Web Crypto API nativa) para codificação e assinatura de tokens JWT padrão.\n- **Impactos em outras partes do sistema:** a alteração da codificação do cookie exigirá que sessões ativas façam re-login quando for implantada."
       },
       {
         "heading": "Plano de Implementação",
-        "content": "1. Criar `upsertOverridesBatch` em `src/lib/translations.ts` envelopado em `db.transaction(() => { ... })()`.\n2. Refatorar `src/app/api/admin/translations/import/confirm/route.ts` para invocar a função em lote.\n3. Adicionar listener da tecla `Escape` em `src/app/admin/(dashboard)/language/page.tsx` com limpeza adequada no desmontar do componente.\n4. Validar o build e a navegação por teclado.\n\n---"
+        "content": "1. Registrar a decisão de escopo do primeiro consumidor: path ou subdomínio; não assumir `Domain=.guilhermemenezes.dev` como padrão global.\n2. Definir contrato versionado do token: algoritmo, emissor, audiência, claims mínimas, expiração, rotação de chave, logout e revogação.\n3. Criar um protótipo local isolado de emissão e validação, sem substituir o cookie usado pelo painel atual.\n4. Criar um projeto satélite de teste local que valide o contrato em uma segunda aplicação, usando segredo de teste separado e sem credenciais de produção.\n5. Avaliar a interoperabilidade de Auth.js com `jwt.encode`/`jwt.decode` customizados e confirmar impacto de re-login das sessões existentes.\n6. Definir a configuração de cookie por consumidor e documentar `Secure`, `HttpOnly`, `SameSite`, `Path` e `Domain`.\n7. Documentar exemplos de validação em Node.js e Python somente depois de o contrato ser testado.\n8. Configurar Nginx apenas em ambiente controlado e após existir um satélite de teste; nenhuma alteração de produção entra neste card sem autorização específica.\n9. Migrar o formato do cookie principal somente após aprovação separada da prova local e do plano de rollback."
       }
     ],
     "criteriaSections": [
       {
         "heading": "Critérios de Conclusão",
-        "content": "- [ ] Importação de traduções confirmada executa dentro de uma transação SQLite atômica.\n- [ ] Pressionar `Esc` com o modal de Exportar/Importar aberto fecha a interface com segurança.\n- [ ] Nenhum listener de evento residual deixado no `window`.\n- [ ] `npm run build` passa sem erros de tipagem.\n\n---"
+        "content": "- [ ] Estratégia de sessão do Guilherme-Portifólio emite JWT assinado legível por bibliotecas padrão como `jose`\n- [ ] Configuração de escopo de cookie suporta tanto path quanto subdomínios sob `guilhermemenezes.dev`\n- [ ] Login e sessão no painel `/admin` continuam operando normalmente sem quebras\n- [ ] Contrato e exemplo de verificação do token documentados para projetos satélite\n- [ ] Nginx configurado adequadamente para rotear o projeto satélite\n- [ ] Projeto satélite de teste valida sessão do admin sem exigir novo login\n\n---"
       },
       {
         "heading": "Validação",
-        "content": "> _(preencher após execução e teste)_\n\n- [ ] Melhoria perceptível e funcional\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-otimizacoes-painel-traducoes` e movida para `archive/enhancements/`**"
+        "content": "> _(preencher após execução e teste)_\n\n- [ ] Todos os critérios de conclusão atendidos\n- [ ] Testado manualmente do ponto de vista do usuário\n- [ ] Nenhuma regressão identificada\n- [ ] **Pasta renomeada para `[done]-sso-path-projetos-satelite` e movida para `archive/features/`**"
       }
     ],
-    "path": "docs/active/enhancements/[draft]-otimizacoes-painel-traducoes"
+    "path": "docs/active/features/[ready-for-review]-sso-path-projetos-satelite"
   },
   {
     "id": "admin-layout-componentes-faltando",
@@ -1856,6 +1749,59 @@
     "path": "docs/archive/features/[done]-admin-layout-painel"
   },
   {
+    "id": "admin-troca-credenciais",
+    "title": "Gerenciamento de Credenciais do Admin pelo Painel",
+    "category": "features",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-08-31",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "backend",
+      "segurança"
+    ],
+    "progress": 90,
+    "progressFraction": {
+      "done": 9,
+      "total": 10
+    },
+    "summary": "Permitir trocar senha e e-mail do admin pelo painel, sem depender de variável de ambiente + redeploy.",
+    "sections": [
+      {
+        "heading": "Objetivo",
+        "content": "Permitir que o administrador do portfólio altere seu e-mail e senha de login diretamente pelo painel administrativo, eliminando a dependência atual de editar variáveis de ambiente (`ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH`) e disparar um redeploy na VPS."
+      },
+      {
+        "heading": "Descrição Funcional",
+        "content": "Na área de configurações do painel admin, o usuário autenticado terá um formulário para:\n1. Alterar o e-mail de acesso (com validação de formato e confirmação).\n2. Alterar a senha de acesso (exigindo a confirmação da senha atual e nova senha com requisitos de segurança).\nApós a alteração bem-sucedida, as novas credenciais passam a valer imediatamente para os próximos logins, invalidando sessões anteriores se necessário."
+      },
+      {
+        "heading": "Escopo",
+        "content": "### Inclui\n- Formulário de troca de e-mail e senha dentro do painel admin.\n- Validação de senha atual antes de autorizar a troca.\n- Persistência das credenciais alteradas no banco de dados SQLite (`portfolio.db`).\n\n### Não inclui (por ora)\n- Recuperação de senha por e-mail tipo \"Esqueci minha senha\" (fluxo complexo com tokens temporários).\n- Múltiplos perfis de usuário / RBAC."
+      },
+      {
+        "heading": "Requisitos Técnicos",
+        "content": "- Camadas envolvidas: frontend (interface do painel), backend (Server Actions / API de autenticação), banco (tabela de credenciais no SQLite).\n- Dependências ou integrações necessárias: `bcryptjs` / hashing seguro, `better-sqlite3`.\n- Impactos em outras partes do sistema: a lógica de autorização no `src/auth.ts` precisará verificar se existem credenciais salvas no banco de dados antes de recorrer às variáveis de ambiente como fallback."
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Definir `AdminCredential` como identidade única completa: e-mail normalizado, hash bcrypt, `credential_version`, `created_at` e `updated_at`. Não permitir registro parcial.\n2. Criar a tabela SQLite e helpers síncronos para ler a fonte efetiva, validar a versão e atualizar por transação com controle otimista de concorrência.\n3. Manter `ADMIN_EMAIL` e `ADMIN_PASSWORD_HASH` somente como bootstrap quando não houver registro customizado. Em erro de banco, negar autenticação; não fazer fallback silencioso.\n4. Refatorar o provider Credentials de `src/auth.ts` para obter e-mail, hash e versão da mesma fonte efetiva, preservando a comparação bcrypt custosa contra tentativa de enumeração temporal.\n5. Definir e provar a fronteira de invalidação antes da UI: incluir `credentialVersion` nos JWTs de credenciais e OAuth e comparar a versão vigente em todas as páginas e APIs administrativas protegidas. Resolver explicitamente a separação entre `src/auth.ts` e o middleware baseado em `auth.config.ts`, sem levar `better-sqlite3` a runtime incompatível.\n6. Criar endpoint autenticado para a operação sensível, exigindo senha atual, origem same-site, validação de e-mail, confirmação de senha, política mínima, limite de tamanho e rate limiting. Atualizar e-mail/senha/versão atomicamente; retornar conflito em versão concorrente.\n7. Integrar o formulário à página `/admin/security`, com campos separados, estados acessíveis e mensagens que não exponham qual validação sensível falhou. Após sucesso, limpar cookies auxiliares de 2FA e encerrar a sessão atual para novo login.\n8. Cobrir em harness SQLite temporário: bootstrap por ambiente, precedência customizada, banco indisponível, registro incompleto rejeitado, senha atual inválida, atualização válida, rollback, concorrência, versão de sessão antiga rejeitada, login novo, OAuth permitido e 2FA preservado.\n9. Executar migração e rollback em cópia local do SQLite; não tocar no banco de produção nesta fase. Documentar procedimento administrativo explícito para remover o registro customizado se o rollback for autorizado."
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Formulário de troca de credenciais acessível no painel administrativo\n- [x] Validação obrigatória da senha atual antes de aplicar alterações\n- [x] Novas credenciais persistidas no SQLite e válidas para o próximo login\n- [x] Fallback seguro caso o banco ainda não possua credenciais customizadas\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "Validação humana autorizada em 2026-10-29 após o QA local completo. A sessão antiga paralela e OAuth externo não foram exercitados ponta a ponta, conforme registrado no LOG; essas limitações foram aceitas ao autorizar a conclusão do card.\n\n- [x] Todos os critérios de conclusão atendidos\n- [x] Testado manualmente do ponto de vista do usuário\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-admin-troca-credenciais` e movida para `archive/features/`**"
+      }
+    ],
+    "path": "docs/archive/features/[done]-admin-troca-credenciais"
+  },
+  {
     "id": "demonstracao-integrada-sete-papeis",
     "title": "Demonstração integrada dos sete papéis",
     "category": "features",
@@ -2742,6 +2688,60 @@
       }
     ],
     "path": "docs/archive/enhancements/[done]-navbar-mobile-menu-reorganizacao"
+  },
+  {
+    "id": "otimizacoes-painel-traducoes",
+    "title": "Otimizações no Painel de Traduções (Transações e Acessibilidade)",
+    "category": "enhancements",
+    "status": "done",
+    "area": "archive",
+    "date": "2026-10-05",
+    "priority": "baixa",
+    "tags": [
+      "frontend",
+      "backend",
+      "banco",
+      "ui-ux"
+    ],
+    "progress": 89,
+    "progressFraction": {
+      "done": 8,
+      "total": 9
+    },
+    "summary": "Transação atômica em lote no SQLite para importação e suporte ao atalho Esc no modal de traduções.",
+    "sections": [
+      {
+        "heading": "Contexto",
+        "content": "A Fase 3.2.2 entregou o sistema de Exportação e Importação de traduções no painel `/admin/language`, integrando:\n- Download de arquivos `.json` com filtro de categorias e idiomas.\n- Upload de arquivos `.json` com cálculo de diff chave a chave.\n- Gravação das substituições no SQLite e invalidação de cache SSR com `revalidatePath`.\n\nA funcionalidade está homologada e plenamente operacional. Durante a revisão técnica do Tech Lead, foram identificadas duas oportunidades de melhoria incremental para robustez de banco e refinamento de experiência do usuário.\n\n---"
+      },
+      {
+        "heading": "Problema Atual",
+        "content": "1. **Persistência Sequencial no SQLite (Ausência de Transação Explícita):**\n   No endpoint [`src/app/api/admin/translations/import/confirm/route.ts`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/api/admin/translations/import/confirm/route.ts), as alterações confirmadas são gravadas através de um loop sequencial simples:\n   ```typescript\n   for (const item of diff) {\n     if (!item.key || !item.lang || typeof item.newValue !== 'string') continue\n     if (!['pt', 'en'].includes(item.lang)) continue\n\n     upsertOverride(item.key, item.lang, item.newValue)\n     appliedCount++\n   }\n   ```\n   Embora o volume de chaves do portfólio seja pequeno (~130 chaves) e a execução no SQLite leve poucos milissegundos, a ausência de uma transação atômica (`db.transaction`) significa que, em caso de falha inesperada ou interrupção no meio do loop, parte do diff ficaria gravada e parte não.\n\n2. **Acessibilidade no Modal (Fechamento via Teclado):**\n   No componente [`src/app/admin/(dashboard)/language/page.tsx`](file:///d:/Projetos/Pessoal/Guilherme-Portifolio/src/app/admin/%28dashboard%29/language/page.tsx), o modal de Exportar/Importar fecha ao clicar no botão `X`, no botão `Cancelar`/`Fechar` ou no backdrop. No entanto, não há captura da tecla `Escape` (`Esc`) para fechar o modal via teclado, o que é um padrão recomendado de acessibilidade e agilidade para o usuário.\n\n---"
+      },
+      {
+        "heading": "Melhoria Proposta",
+        "content": "1. **Helper de Transação no Banco:**\n   Implementar em `src/lib/translations.ts` a função `upsertOverridesBatch(items: Array<{ key: string, lang: string, value: string }>)` utilizando o método nativo `db.transaction()` do `better-sqlite3`. Isso garante rollback automático total se qualquer registro falhar.\n\n2. **Atalho de Teclado no Modal:**\n   Adicionar um listener de `keydown` no `useEffect` dentro da tela `/admin/language` para que pressionar `Esc` execute `handleCloseExportImportModal()` caso o modal esteja aberto.\n\n---"
+      },
+      {
+        "heading": "Impacto Esperado",
+        "content": "- **Confiabilidade no Banco:** Garantia matemática de atomicidade (ACID) na importação de traduções em lote.\n- **Experiência do Usuário (UX/Acessibilidade):** Navegação mais fluida e intuitiva permitindo dispensar modais rapidamente com o teclado.\n\n---"
+      },
+      {
+        "heading": "Plano de Implementação",
+        "content": "1. Criar `upsertOverridesBatch` em `src/lib/translations.ts` usando uma statement preparada dentro de `db.transaction(() => { ... })()`; o helper deve ser síncrono, conforme o contrato do `better-sqlite3`.\n2. Refatorar `src/app/api/admin/translations/import/confirm/route.ts` para validar e separar itens aceitos/ignorados antes de executar o lote.\n3. Preservar `appliedCount`, `ignoredCount`, a validação de chaves base e a revalidação de `/` após o commit.\n4. Adicionar listener de `keydown` em `src/app/admin/(dashboard)/language/page.tsx` somente quando `modalExportImportOpen` estiver ativo; fechar apenas para `event.key === 'Escape'`.\n5. Remover o listener no cleanup do `useEffect` e evitar múltiplos registros após re-renderizações.\n6. Validar lote vazio, lote válido, item inválido, falha com rollback, fechamento via Esc e desmontagem sem listener residual.\n7. Executar `npx tsc --noEmit` e `npm run build`; registrar separadamente qualquer falha preexistente do script `npm run lint`.\n\n---"
+      }
+    ],
+    "criteriaSections": [
+      {
+        "heading": "Critérios de Conclusão",
+        "content": "- [x] Importação de traduções confirmada executa dentro de uma transação SQLite atômica.\n- [x] Pressionar `Esc` com o modal de Exportar/Importar aberto fecha a interface com segurança.\n- [x] Nenhum listener de evento residual deixado no `window`.\n- [x] `npm run build` passa sem erros de tipagem.\n\n---"
+      },
+      {
+        "heading": "Validação",
+        "content": "> QA autenticado concluído em 2026-10-28 no ambiente local. Seis ciclos de abertura e fechamento por `Escape` passaram; a instrumentação dinâmica registrou `add=6` e `remove=6`, sem listener residual ou duplicado. Build, harness SQLite e revisões técnicas também passaram. A autorização humana foi para finalizar a validação, não para marcar o card como done.\n\n- [x] Melhoria perceptível e funcional\n- [x] Nenhuma regressão identificada\n- [x] **Pasta renomeada para `[done]-otimizacoes-painel-traducoes` e movida para `archive/enhancements/`**"
+      }
+    ],
+    "path": "docs/archive/enhancements/[done]-otimizacoes-painel-traducoes"
   },
   {
     "id": "admin-rota-idioma-para-language",

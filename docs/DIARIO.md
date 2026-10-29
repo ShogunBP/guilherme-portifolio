@@ -2,10 +2,13 @@
 
 ## Panorama
 
-Atualizado em 2026-10-28 após o arquivamento autorizado de nove cards, pelo board da ferramenta adaptada, que lê `docs/docs/PADRONIZATION.md` e os cards em `docs/docs/`. O quadro possui 3 cards draft, 1 in-progress, 52 done e 2 cancelled. A última validação completa conhecida retornou 51 erros e 39 avisos do acervo; não equivale à aprovação dos cards.
+Atualizado em 2026-10-29 após a validação humana e o arquivamento autorizado de `admin-troca-credenciais`, pelo board da ferramenta adaptada, que lê `docs/docs/PADRONIZATION.md` e os cards em `docs/docs/`. O quadro possui 1 card ready-for-review, 1 in-progress, 54 done e 2 cancelled. A validação completa executada nesta data antes desse arquivamento retornou 56 erros e 39 avisos do acervo; não equivale à aprovação dos demais cards.
 
 **Em andamento**
 - `docs/docs/active/features/[in-progress]-workspace-multiagente-maestri/` — aprovação humana parcial: 25/25 testes, ferramenta documental, recuperação de falhas e paralelismo OpenCode validados; Planejador e os novos agentes OpenCode respondem; Playwright MCP do QA foi validado em página local controlada.
+- `docs/docs/active/features/[ready-for-review]-sso-path-projetos-satelite/` — análise preparada e aguardando revisão humana; nenhuma aprovação ou implementação foi inferida.
+
+O card `admin-troca-credenciais` foi validado pelo humano e arquivado em `docs/docs/archive/features/[done]-admin-troca-credenciais/`. O SQLite local mantém a credencial temporária de QA e `credentialVersion` 1 até rollback administrativo explícito.
 
 Os dois bugs reais de 2026-10-28 foram detalhados e arquivados: `docs/docs/archive/bugs/[done]-admin-retorna-landing-em-desenvolvimento/` foi encerrado como não reproduzido após cinco reproduções controladas sem desvio, sem causa comprovada ou alteração de código; `docs/docs/archive/bugs/[done]-estilos-admin-vazam-landing/` registrou a causa no escopo global, a correção por `admin-shell`, TypeScript/ESLint aprovados e validação visual humana, com QA pós-correção automatizado não verificado.
 
@@ -23,6 +26,21 @@ O card `padronizar-rotas-portugues-para-ingles` foi validado pelo humano, movido
 - Manter card in-progress, baseline de 51 erros e 39 avisos legados, e os dois floors/branches preservados. Landing, commit, merge e exclusão dependem de autorização específica.
 
 ## Entradas
+
+### 2026-10-29
+**Complemento — QA completo da troca de credenciais**
+- O servidor local foi reiniciado após autorização humana e o fluxo autenticado completo de `admin-troca-credenciais` foi exercitado no SQLite local. A identidade bootstrap carregou com versão 0; senha atual incorreta retornou 403 sem gravação; a troca válida persistiu e elevou `credentialVersion` para 1; a sessão foi encerrada; o login antigo foi rejeitado e o novo foi aceito.
+- Um POST autenticado com versão esperada obsoleta retornou 409 e a leitura seguinte confirmou a versão 1 sem alteração adicional. O 2FA permaneceu desativado e sua interface foi preservada. Não houve resposta 5xx, envio de e-mail ou acesso externo.
+- O QA revelou um loop entre um JWT legado aceito no middleware Edge e rejeitado pelo guard Node. `/admin/login` passou a alcançar sempre o runtime Node, permitindo substituir a sessão legada. O formulário também passou a habilitar o envio somente quando há senha atual, versão carregada e alteração efetiva.
+- `npx tsc --noEmit`, ESLint proporcional, `git diff --check` e `npm run build` passaram. Permaneceram apenas os avisos conhecidos sobre a convenção `middleware`, tracing NFT amplo e o link interno preexistente em `LoginForm.tsx`.
+- Não foi possível preservar uma segunda sessão antiga porque o Playwright MCP compartilha contexto e cookies; OAuth externo também não foi exercitado. Esses pontos permanecem não verificados por execução ponta a ponta.
+- O SQLite local permanece com a credencial temporária de QA e versão 1. Nenhum rollback foi executado, pois exige autorização administrativa explícita. O card continua in-progress e aguarda validação humana; Validação, done, arquivamento, commit e push não foram autorizados.
+- O board confirmou inicialmente 1 card ready-for-review, 2 in-progress, 53 done e 2 cancelled. A validação documental completa terminou com código 1, 56 erros e 39 avisos legados no acervo; nenhuma correção automática foi aplicada.
+
+**Complemento — validação humana e arquivamento da troca de credenciais**
+- O humano autorizou marcar a Validação e o card como done. Os quatro critérios de conclusão e as quatro caixas de Validação foram marcados, com as limitações conhecidas de sessão antiga paralela e OAuth externo preservadas no README e no LOG.
+- A ferramenta documental recusou a transição automática com código 2 porque não autentica decisões humanas; a tentativa foi registrada no LOG. A movimentação autorizada foi então executada conforme o workflow, para `docs/docs/archive/features/[done]-admin-troca-credenciais/`.
+- O roadmap foi sincronizado com 58 itens, sendo 2 ativos e 56 arquivados. O board final confirmou 1 ready-for-review, 1 in-progress, 54 done e 2 cancelled. Rollback local, commit, push e merge não foram executados.
 
 ### 2026-10-27
 **Feito**
@@ -194,4 +212,35 @@ O card `padronizar-rotas-portugues-para-ingles` foi validado pelo humano, movido
 - Em 2026-10-28, o humano autorizou marcar os nove cards de PR como `done`. As nove pastas foram renomeadas com prefixo `[done]` e movidas de `docs/docs/active/` para `docs/docs/archive/`; os LOGs receberam registros append-only da transição.
 - As limitações foram preservadas sem inventar validações: fluxo autenticado completo e produção/Cloudflare não foram exercitados; não houve teste de carga/concorrência; o clone invisível de medição da navbar ainda pode receber foco por Tab; nenhum e-mail real foi enviado.
 - O roadmap foi sincronizado com `58 itens encontrados (4 active, 54 archive)`; o board confirmou 3 cards `[draft]`, 1 `[in-progress]`, 52 `[done]` e 2 `[cancelled]`. `validate` retornou exit 1 com 56 erros e 39 avisos, todos na baseline/acervo, incluindo os novos cards parciais arquivados; não foram corrigidos automaticamente.
-- O arquivo canônico `dev/utils/ROADMAP-EXECUCAO.md` foi lido. Os cards em preparação são: `features/admin-troca-credenciais`, `features/sso-path-projetos-satelite` e `enhancements/otimizacoes-painel-traducoes`. Nenhum deles foi implementado ou teve status alterado.
+- O arquivo canônico `dev/utils/ROADMAP-EXECUCAO.md` foi lido. Os cards em preparação eram: `features/admin-troca-credenciais`, `features/sso-path-projetos-satelite` e `enhancements/otimizacoes-painel-traducoes`.
+
+**Complemento — três cards preparados para review**
+- Análise aprofundada concluída sem alteração de produto. Os cards foram enriquecidos com riscos, decisões pendentes, plano de implementação, feedback técnico e LOGs com evidências verificadas.
+- `admin-troca-credenciais`: revisão deve decidir precedência SQLite/ambiente, requisitos mínimos de senha, impacto nos provedores OAuth e invalidação de sessões JWT.
+- `sso-path-projetos-satelite`: revisão deve decidir contrato versionado, consumidor local, escopo de cookie, rotação/revogação e rollback antes de qualquer migração do cookie principal ou alteração de Nginx.
+- `otimizacoes-painel-traducoes`: card isolado e pronto para execução após aprovação; transação síncrona, rollback, listener condicionado ao modal e testes de teclado foram detalhados.
+- Os três cards foram movidos para `[ready-for-review]`. O roadmap foi sincronizado e registrou 58 itens, 4 ativos e 54 arquivados; a validação documental continua com a baseline legada. Nenhum card foi aprovado ou implementado.
+
+**Complemento — otimizações do painel de traduções aprovadas**
+- O humano aprovou `otimizacoes-painel-traducoes` em 2026-10-28. A Decisão foi marcada, o status espelho atualizado e a pasta movida para `docs/docs/active/enhancements/[approved]-otimizacoes-painel-traducoes/`.
+- O roadmap foi sincronizado com 58 itens, 4 ativos e 54 arquivados. A implementação não foi iniciada; aguarda autorização explícita separada.
+
+**Complemento — implementação das otimizações do painel de traduções**
+- Após autorização humana separada para iniciar, o card passou para `docs/docs/active/enhancements/[in-progress]-otimizacoes-painel-traducoes/`. A importação agora valida o diff antes de executar `upsertOverridesBatch` em uma transação SQLite síncrona; uma exceção retorna 500 sem revalidar a landing. O modal registra `keydown` somente enquanto aberto e remove o listener no cleanup, fechando para `Escape`.
+- Harness com banco SQLite temporário passou 16/16, incluindo rollback total, sem alterar o banco do projeto. `npx tsc --noEmit` e `git diff --check` passaram. O ESLint proporcional manteve um erro e um aviso preexistentes em `page.tsx`, também presentes em `HEAD`.
+- `npm run build` passou em Next.js 16.2.6, com avisos não bloqueantes sobre a convenção `middleware` obsoleta e rastreamento NFT amplo. O roadmap permaneceu com 58 itens, 4 ativos e 54 arquivados; `validate` manteve a baseline de 56 erros e 39 avisos do acervo.
+- Duas revisões técnicas independentes e somente leitura — padrões do repositório e aderência à especificação — não encontraram defeitos concretos, violações de `AGENTS.md`, desvios do card ou scope creep nos três arquivos alterados.
+- Após autorização humana para o QA autenticado e a validação final, Lúmen executou seis ciclos locais de abertura e fechamento do modal por `Escape`: 6/6 passaram. Instrumentação dinâmica registrou `add=6` e `remove=6` para `keydown`, sem duplicação ou listener residual; uma pressão adicional com o modal fechado não reabriu a interface nem registrou listener. Nenhum erro novo apareceu no console e nenhum dado foi alterado.
+- Os quatro critérios de conclusão e as caixas “Melhoria perceptível e funcional” e “Nenhuma regressão identificada” foram marcados. O card permanece in-progress porque a autorização não incluiu done, arquivamento, commit ou push.
+
+**Complemento — otimizações do painel de traduções concluídas**
+- O humano autorizou marcar `otimizacoes-painel-traducoes` como done e seguir para o próximo card. O status espelho, a caixa de arquivamento e o LOG foram atualizados; a pasta foi movida para `docs/docs/archive/enhancements/[done]-otimizacoes-painel-traducoes/`.
+- O roadmap foi sincronizado com 58 itens, sendo 3 ativos e 55 arquivados. A autorização não incluiu commit ou push.
+- A revisão prosseguiu para `admin-troca-credenciais`, que permanece em `[ready-for-review]`, sem aprovação ou implementação automática. O plano foi consolidado com fonte completa no SQLite, fallback somente no bootstrap, fail-closed em erro de banco, política mínima de senha, versionamento e checagem server-side de sessões, invalidação também de OAuth, concorrência transacional e integração em `/admin/security`. A separação entre `src/auth.ts` e o middleware baseado em `auth.config.ts` foi registrada como decisão arquitetural obrigatória antes da implementação.
+
+**Complemento — implementação de troca de credenciais em andamento**
+- O humano aprovou o card e autorizou separadamente o início. O card passou a `[in-progress]`; Validação, done, commit e push continuam sem autorização.
+- Foram implementados o singleton `admin_credentials`, a fonte efetiva SQLite/ambiente, atualização `IMMEDIATE` com versão esperada, integração Auth.js para Credentials e OAuth, invalidação server-side, endpoint protegido e formulário em `/admin/security`. Harnesses temporários passaram 33/33 no domínio e 21/21 no endpoint, sem persistir credenciais no banco do projeto.
+- Revisão independente encontrou três lacunas: APIs administrativas sem o guard versionado, POST aceitando ausência de origem e rate limit confiando em cabeçalho de IP. As três foram corrigidas: todas as APIs administrativas usam `requireCurrentAdminSession`, a origem correspondente é obrigatória e o limite é global para a identidade administrativa única.
+- `npx tsc --noEmit`, ESLint proporcional, `git diff --check` e `npm run build` passaram. O build manteve somente os avisos conhecidos de `middleware` obsoleto e tracing NFT amplo.
+- QA autenticado não mutante preservou visualmente o fluxo 2FA, mas usou o processo dev antigo, cuja conexão ainda não conhecia a tabela: GET de credenciais retornou 401 e a UI ficou desabilitada. O schema atual já criou a tabela vazia no SQLite local durante o build; é necessário reiniciar o processo dev e repetir o QA. Troca válida, conflito, novo login e rejeição da sessão antiga permanecem pendentes de autorização humana específica para mutar o banco local.

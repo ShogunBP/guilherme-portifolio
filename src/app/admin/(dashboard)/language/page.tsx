@@ -522,13 +522,28 @@ export default function AdminLanguagePage() {
     }
   }
 
-  const handleCloseExportImportModal = () => {
+  const handleCloseExportImportModal = useCallback(() => {
     setModalExportImportOpen(false)
     setImportDiff(null)
     setImportIgnored(null)
     setImportFile(null)
     setImportError(null)
-  }
+  }, [])
+
+  // Acessibilidade: fecha o modal de Exportar/Importar com Escape,
+  // registrando o listener apenas enquanto o modal estiver aberto.
+  useEffect(() => {
+    if (!modalExportImportOpen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCloseExportImportModal()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [modalExportImportOpen, handleCloseExportImportModal])
 
   // Filtragem de chaves por termo de busca
   const filteredKeys = useMemo(() => {

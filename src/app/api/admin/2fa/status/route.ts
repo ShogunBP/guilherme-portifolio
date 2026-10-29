@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import { isTwoFactorEnabled, getAvailableBackupCodesCount } from '@/lib/totp'
 
 export async function GET() {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session?.user) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }

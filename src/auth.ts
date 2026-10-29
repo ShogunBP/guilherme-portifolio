@@ -7,6 +7,25 @@ import type { Provider } from 'next-auth/providers'
 import bcrypt from 'bcryptjs'
 import { authConfig } from './auth.config'
 import { isTwoFactorEnabled } from './lib/totp'
+import {
+  AdminCredentialError,
+  getAdminCredentialVersion,
+  getEffectiveAdminCredential,
+} from './lib/admin-credentials'
+
+// Ligação da versão de credencial com a fonte efetiva; qualquer falha (banco
+// indisponível, registro incompleto) retorna `null` e marca a sessão inválida.
+function getCurrentCredentialVersionSafe(): number | null {
+  try {
+    return getAdminCredentialVersion()
+  } catch (error) {
+    console.error(
+      '[Auth] Verificação de versão de credencial falhou; sessão será tratada como inválida.',
+      error instanceof AdminCredentialError ? error.code : 'erro desconhecido',
+    )
+    return null
+  }
+}
 
 const providers: Provider[] = [
   Credentials({
@@ -23,40 +42,40 @@ const providers: Provider[] = [
       const email = String(credentials.email).trim().toLowerCase()
       const password = String(credentials.password)
 
-      const adminEmail = (process.env.ADMIN_EMAIL || '')
-        .replace(/^["']|["']$/g, '')
-        .trim()
-        .toLowerCase()
-      const adminPasswordHashRaw = (process.env.ADMIN_PASSWORD_HASH || '')
-        .replace(/^["']|["']$/g, '')
-        .trim()
-
-      // Decodifica Base64 para recuperar o hash bcrypt ($2b$12$...)
-      const adminPasswordHash = adminPasswordHashRaw
-        ? Buffer.from(adminPasswordHashRaw, 'base64').toString('utf8')
-        : ''
-
-      if (!adminEmail || !adminPasswordHash) {
+      // Fonte efetiva única (banco → bootstrap do ambiente). Erro de banco ou
+      // registro incompleto nega o login: falha fechado, sem fallback silencioso.
+      let credential
+      try {
+        credential = getEffectiveAdminCredential()
+      } catch (error) {
         console.error(
-          '[Auth] ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured in environment'
+          '[Auth] Autenticação negada pela camada de credenciais.',
+          error instanceof AdminCredentialError ? error.code : 'erro desconhecido',
         )
         return null
       }
 
       // Mitigação de enumeração temporal: a comparação custosa (bcrypt) é sempre
       // executada, mesmo com e-mail inválido, para uniformizar o tempo de resposta.
-      const isValid = await bcrypt.compare(password, adminPasswordHash)
+      let isValid = false
+      try {
+        isValid = await bcrypt.compare(password, credential.passwordHash)
+      } catch {
+        // Hash malformado ou bcrypt indisponível: negar sem informação adicional.
+        isValid = false
+      }
 
-      if (email !== adminEmail || !isValid) {
+      if (email !== credential.email || !isValid) {
         return null
       }
 
       const is2FA = isTwoFactorEnabled()
       return {
         id: 'admin',
-        email: adminEmail,
+        email: credential.email,
         name: 'Administrator',
         twoFactorEnabled: is2FA,
+        credentialVersion: credential.credentialVersion,
       }
     },
   }),
@@ -87,25 +106,72 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers,
   callbacks: {
     jwt({ token, user, trigger, session }) {
+      // Ligação com a credencial vigente (fonte efetiva única).
+      const currentVersion = getCurrentCredentialVersionSafe()
+
+      // 1. Login (credenciais ou OAuth): emissão de claims frescos.
       if (user) {
         token.id = user.id
         token.email = user.email
-      }
-      // Sempre sincroniza o status mais recente do SQLite no token JWT
-      token.twoFactorEnabled = isTwoFactorEnabled()
 
+        if ('twoFactorEnabled' in user) {
+          token.twoFactorEnabled = (user as { twoFactorEnabled?: boolean })
+            .twoFactorEnabled
+        }
+
+        if (typeof user.credentialVersion === 'number') {
+          token.credentialVersion = user.credentialVersion
+        } else if (currentVersion === null) {
+          // Falha fechado no emissor: não é possível validar a versão vigente.
+          return { credentialInvalid: true }
+        } else {
+          // OAuth recebe a versão atual no login (mesmo acesso administrativo).
+          token.credentialVersion = currentVersion
+        }
+
+        return token
+      }
+
+      // 2. Apresentações subsequentes: token legado sem claim, versão
+      //    desatualizada (credenciais trocadas) ou estado inválido → fail-closed.
+      if (
+        token.credentialInvalid === true ||
+        currentVersion === null ||
+        typeof token.credentialVersion !== 'number' ||
+        token.credentialVersion !== currentVersion
+      ) {
+        // Nenhum dado de identidade é preservado para os guardas.
+        return { credentialInvalid: true }
+      }
+
+      // 3. Atualização de sessão (ex.: toggle de 2FA) apenas com token válido.
+      // Sempre sincroniza o status mais recente do SQLite no token JWT.
+      token.twoFactorEnabled = isTwoFactorEnabled()
       if (trigger === 'update' && session && typeof session === 'object' && 'twoFactorEnabled' in session) {
         token.twoFactorEnabled = (session as { twoFactorEnabled?: boolean }).twoFactorEnabled
       }
       return token
     },
     session({ session, token }) {
-      if (token && session.user) {
-        session.user.email = token.email as string
-        ;(session as unknown as { twoFactorEnabled?: boolean }).twoFactorEnabled = Boolean(
-          token.twoFactorEnabled
-        )
+      const isTokenInvalid =
+        !token ||
+        token.credentialInvalid === true ||
+        typeof token.credentialVersion !== 'number' ||
+        typeof token.email !== 'string' ||
+        !token.email
+
+      if (isTokenInvalid) {
+        // Sessão sem identidade: guardas falham fechado e nada sensível é exposto.
+        delete (session as { user?: unknown }).user
+        session.twoFactorEnabled = false
+        return session
       }
+
+      if (session.user) {
+        session.user.id = typeof token.id === 'string' ? token.id : 'admin'
+        session.user.email = token.email as string
+      }
+      session.twoFactorEnabled = Boolean(token.twoFactorEnabled)
       return session
     },
     async signIn({ user, account, profile }) {

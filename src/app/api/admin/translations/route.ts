@@ -1,4 +1,4 @@
-import { auth } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import { revalidatePath } from 'next/cache'
 import {
   getOverridesByLang,
@@ -8,7 +8,7 @@ import {
 } from '@/lib/translations'
 
 export async function GET(request: Request) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const url = new URL(request.url)
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json().catch(() => null)
@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json().catch(() => null)

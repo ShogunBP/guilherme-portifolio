@@ -1,6 +1,6 @@
 # ✨ Decisão de Arquitetura: SSO e URL em Path/Subdomínio para Projetos Satélite
 
-**Status:** draft
+**Status:** ready-for-review
 **Data:** 2026-09-05
 **Prioridade:** média
 **Tags:** `backend`, `infra`, `segurança`
@@ -50,12 +50,15 @@ Subfase 2.4 (`[in-progress]-2fa-layout-painel-admin`) deve estar concluída e ar
 
 ## Plano de Implementação
 
-1. Concluir e estabilizar a Fase 2 (2FA e layout do painel).
-2. Customizar os métodos `jwt.encode` e `jwt.decode` no `src/auth.config.ts` / `src/auth.ts` utilizando `jose` para gerar JWTs assinados com algoritmo HS256 e payload padronizado.
-3. Se houver projeto satélite em subdomínio, ajustar a configuração de cookies no Auth.js (`domain: '.guilhermemenezes.dev'`).
-4. Criar utilitário/middleware de referência (exemplo em Node.js e Python) para consumo em projetos satélite.
-5. Configurar regras de `proxy_pass` no Nginx do host VPS (para path ou bloco de subdomínio).
-6. Validar o compartilhamento do cookie e o acesso autenticado automático no primeiro projeto satélite.
+1. Registrar a decisão de escopo do primeiro consumidor: path ou subdomínio; não assumir `Domain=.guilhermemenezes.dev` como padrão global.
+2. Definir contrato versionado do token: algoritmo, emissor, audiência, claims mínimas, expiração, rotação de chave, logout e revogação.
+3. Criar um protótipo local isolado de emissão e validação, sem substituir o cookie usado pelo painel atual.
+4. Criar um projeto satélite de teste local que valide o contrato em uma segunda aplicação, usando segredo de teste separado e sem credenciais de produção.
+5. Avaliar a interoperabilidade de Auth.js com `jwt.encode`/`jwt.decode` customizados e confirmar impacto de re-login das sessões existentes.
+6. Definir a configuração de cookie por consumidor e documentar `Secure`, `HttpOnly`, `SameSite`, `Path` e `Domain`.
+7. Documentar exemplos de validação em Node.js e Python somente depois de o contrato ser testado.
+8. Configurar Nginx apenas em ambiente controlado e após existir um satélite de teste; nenhuma alteração de produção entra neste card sem autorização específica.
+9. Migrar o formato do cookie principal somente após aprovação separada da prova local e do plano de rollback.
 
 ## Critérios de Conclusão
 
@@ -71,11 +74,13 @@ Subfase 2.4 (`[in-progress]-2fa-layout-painel-admin`) deve estar concluída e ar
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+A análise confirmou que o Auth.js permite sobrescrever `jwt.encode` e `jwt.decode`, mas o padrão atual é JWE criptografado. A migração para JWT assinado altera o contrato de sessão e pode invalidar sessões existentes. O card deve ser tratado primeiro como decisão/prova arquitetural: contrato versionado, consumidor local de teste, política de cookie e rollback precisam ser definidos antes de alterar o cookie principal ou o Nginx de produção. Fonte consultada: documentação oficial do Auth.js via Context7, referência de JWT e exemplo de HS256 para interoperabilidade.
 
 ## Decisão
 - [ ] Aprovado
 - [ ] Alterações solicitadas
+
+> Status `ready-for-review`: aguardando revisão e decisão humana. O planejamento não autoriza implementação.
 
 ---
 

@@ -1,9 +1,9 @@
-import { auth } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import { revalidatePath } from 'next/cache'
 import pt from '@/i18n/locales/pt.json'
 import en from '@/i18n/locales/en.json'
 import { flatten } from '@/lib/i18n-utils'
-import { upsertOverride } from '@/lib/translations'
+import { upsertOverridesBatch, type TranslationOverrideInput } from '@/lib/translations'
 
 interface DiffConfirmItem {
   key: string
@@ -12,7 +12,7 @@ interface DiffConfirmItem {
 }
 
 export async function POST(request: Request) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
   if (!session) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -28,9 +28,10 @@ export async function POST(request: Request) {
   }
 
   const diff = body.diff as unknown[]
-  let appliedCount = 0
+  const accepted: TranslationOverrideInput[] = []
   let ignoredCount = 0
 
+  // Fase 1: validar e separar itens aceitos/ignorados antes de tocar no banco
   for (const rawItem of diff) {
     if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
       ignoredCount++
@@ -65,8 +66,19 @@ export async function POST(request: Request) {
       continue
     }
 
-    upsertOverride(item.key, item.lang, item.newValue)
-    appliedCount++
+    accepted.push({ key: item.key, lang: item.lang, value: item.newValue })
+  }
+
+  // Fase 2: gravar o lote aceito em uma única transação atômica (commit ou rollback total)
+  let appliedCount = 0
+  try {
+    appliedCount = upsertOverridesBatch(accepted)
+  } catch (error) {
+    console.error('Falha ao aplicar lote de traduções:', error)
+    return Response.json(
+      { error: 'Falha ao aplicar importação: nenhuma alteração foi gravada' },
+      { status: 500 },
+    )
   }
 
   // Invalida o layout SSR para refletir as novas traduções imediatamente

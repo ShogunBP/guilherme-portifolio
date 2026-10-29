@@ -1,6 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
-import { auth, signOut } from '@/auth'
+import { redirect } from 'next/navigation'
+import { signOut } from '@/auth'
+import { requireCurrentAdminSession } from '@/lib/admin-session'
 import { isTwoFactorEnabled } from '@/lib/totp'
 import {
   ShieldCheck,
@@ -18,7 +20,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
+  const session = await requireCurrentAdminSession()
+  if (!session) redirect('/admin/login')
+
   const twoFactorActive = isTwoFactorEnabled()
 
   async function handleLogout() {

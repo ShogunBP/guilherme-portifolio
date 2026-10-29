@@ -14,6 +14,10 @@ import {
   RefreshCw,
   PowerOff,
   Clock,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 
 function SecurityContent() {
@@ -23,11 +27,48 @@ function SecurityContent() {
   const [loading, setLoading] = useState(true)
   const [enabled, setEnabled] = useState(false)
   const [backupCodesCount, setBackupCodesCount] = useState<number | null>(null)
-  const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(
     justActivated ? 'Autenticação de dois fatores ativada com sucesso!' : null
   )
   const [error, setError] = useState<string | null>(null)
+
+  /* ————— Formulário de alteração de credenciais ————— */
+  const [credLoading, setCredLoading] = useState(false)
+  const [credMessage, setCredMessage] = useState<string | null>(null)
+  const [credError, setCredError] = useState<string | null>(null)
+  const [expectedVersion, setExpectedVersion] = useState<number | null>(null)
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  const [formEmail, setFormEmail] = useState('')
+  const [formCurrentPassword, setFormCurrentPassword] = useState('')
+  const [formNewPassword, setFormNewPassword] = useState('')
+  const [formConfirmPassword, setFormConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+
+  async function loadCredentialVersion() {
+    try {
+      const res = await fetch('/api/admin/credentials', { credentials: 'include' })
+      if (res.status === 401) {
+        window.location.assign('/admin/login')
+        return
+      }
+      if (!res.ok) {
+        setCredError('Não foi possível carregar as credenciais atuais.')
+        return
+      }
+      const data = await res.json()
+      if (typeof data.credentialVersion === 'number') {
+        setExpectedVersion(data.credentialVersion)
+      }
+      if (typeof data.email === 'string' && data.email) {
+        setCurrentEmail(data.email)
+        setFormEmail(data.email)
+      }
+    } catch {
+      setCredError('Não foi possível carregar as credenciais atuais.')
+    }
+  }
 
   useEffect(() => {
     async function checkStatus() {
@@ -47,6 +88,9 @@ function SecurityContent() {
       }
     }
     checkStatus()
+    ;(async () => {
+      await loadCredentialVersion()
+    })()
   }, [])
 
   const [confirmModal, setConfirmModal] = useState<{
@@ -128,6 +172,124 @@ function SecurityContent() {
         loading: false,
         error: 'Erro de comunicação ao validar a confirmação de segurança. Tente novamente.',
       }))
+    }
+  }
+
+  /* ————— Handler: alteração de credenciais ————— */
+  const emailChanged = formEmail.trim().toLowerCase() !== currentEmail
+  const hasCredentialChange = emailChanged || formNewPassword.length > 0
+  const canSubmitCredentials =
+    expectedVersion !== null &&
+    formCurrentPassword.length > 0 &&
+    hasCredentialChange &&
+    !credLoading
+
+  async function handleCredSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setCredLoading(true)
+    setCredMessage(null)
+    setCredError(null)
+
+    const normalizedEmail = formEmail.trim().toLowerCase()
+    const emailValue = normalizedEmail !== currentEmail ? normalizedEmail || undefined : undefined
+    const newPasswordValue = formNewPassword || undefined
+    const confirmPasswordValue = formConfirmPassword || undefined
+
+    // Validação de formato de e-mail (quando informado)
+    if (emailValue !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      setCredError('Informe um e-mail válido.')
+      setCredLoading(false)
+      return
+    }
+
+    // Senha atual é obrigatória
+    if (!formCurrentPassword) {
+      setCredError('A senha atual é obrigatória.')
+      setCredLoading(false)
+      return
+    }
+
+    // Se informar nova senha, exige confirmação e requisitos
+    if (newPasswordValue !== undefined) {
+      if (newPasswordValue.length < 12) {
+        setCredError('A nova senha deve ter pelo menos 12 caracteres.')
+        setCredLoading(false)
+        return
+      }
+      if (!/[A-Za-z]/.test(newPasswordValue) || !/\d/.test(newPasswordValue)) {
+        setCredError('A nova senha deve conter ao menos uma letra e um número.')
+        setCredLoading(false)
+        return
+      }
+      if (newPasswordValue === formCurrentPassword) {
+        setCredError('A nova senha deve ser diferente da senha atual.')
+        setCredLoading(false)
+        return
+      }
+      if (newPasswordValue !== confirmPasswordValue) {
+        setCredError('A confirmação da nova senha não confere.')
+        setCredLoading(false)
+        return
+      }
+    }
+
+    if (emailValue === undefined && newPasswordValue === undefined) {
+      setCredError('Informe um novo e-mail ou uma nova senha.')
+      setCredLoading(false)
+      return
+    }
+
+    if (expectedVersion === null) {
+      setCredError('Não foi possível carregar as credenciais. Recarregue a página.')
+      setCredLoading(false)
+      return
+    }
+
+    try {
+      const res = await fetch('/api/admin/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword: formCurrentPassword,
+          email: emailValue,
+          newPassword: newPasswordValue,
+          confirmPassword: confirmPasswordValue,
+          expectedVersion,
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok || data.error) {
+        setCredError(
+          data.error || 'Não foi possível alterar as credenciais. Verifique os dados e tente novamente.',
+        )
+        setCredLoading(false)
+        return
+      }
+
+      // Sucesso: limpa estado local sensível e cookies auxiliares de 2FA, então encerra sessão
+      setFormEmail(currentEmail ?? '')
+      setFormCurrentPassword('')
+      setFormNewPassword('')
+      setFormConfirmPassword('')
+      setShowNewPassword(false)
+      setShowCurrentPassword(false)
+      if (typeof data.credentialVersion === 'number') {
+        setExpectedVersion(data.credentialVersion)
+      }
+
+      document.cookie = 'admin_2fa_verified=; path=/; max-age=0'
+      document.cookie = 'admin_2fa_status=; path=/; max-age=0'
+      setCredMessage('Credenciais alteradas com sucesso. Faça login novamente.')
+      setCredLoading(false)
+
+      const { signOut } = await import('next-auth/react')
+      await signOut({ callbackUrl: '/admin/login' })
+    } catch {
+      setCredError('Erro de comunicação ao alterar as credenciais. Tente novamente.')
+      setCredLoading(false)
     }
   }
 
@@ -305,6 +467,221 @@ function SecurityContent() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Card de Alteração de Credenciais */}
+        <div className="bg-[#0b0826]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 md:p-8 shadow-2xl shadow-purple-950/40 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-purple-500/15">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-600/20 border border-blue-500/30 text-blue-400">
+                <Lock className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Alterar Credenciais de Acesso</h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Atualize o e-mail e/ou a senha de login administrativo. A senha atual é sempre exigida.
+                </p>
+              </div>
+            </div>
+            {credLoading && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300 font-mono">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Processando...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Notificação de sucesso credenciais */}
+          {credMessage && (
+            <div className="mb-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-sm flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <span>{credMessage}</span>
+            </div>
+          )}
+
+          {/* Notificação de erro credenciais */}
+          {credError && (
+            <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <span>{credError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleCredSubmit} className="space-y-4">
+            {/* E-mail (opcional) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="cred-email" className="text-xs font-medium text-gray-300 flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <span>E-mail de acesso</span>
+                </label>
+                <input
+                  id="cred-email"
+                  name="cred-email"
+                  type="email"
+                  autoComplete="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  placeholder={currentEmail ?? 'exemplo@dominio.com'}
+                  disabled={credLoading}
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 disabled:opacity-70 disabled:cursor-not-allowed"
+                />
+                <p className="text-[10px] text-gray-500">
+                  Opcional. Mantenha o valor atual para não alterar o e-mail.
+                </p>
+              </div>
+
+              {/* Versão (somente leitura, não expõe hash) */}
+              <div className="space-y-2">
+                <label htmlFor="cred-version" className="text-xs font-medium text-gray-300">
+                  Versão das credenciais
+                </label>
+                <input
+                  id="cred-version"
+                  type="text"
+                  readOnly
+                  value={expectedVersion === null ? '—' : String(expectedVersion)}
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-sm text-gray-400 font-mono"
+                />
+                <p className="text-[10px] text-gray-500">
+                  Usada para controle de concorrência otimista. Nunca é o hash da senha.
+                </p>
+              </div>
+            </div>
+
+            {/* Senha atual (obrigatória) */}
+            <div className="space-y-2">
+              <label htmlFor="cred-current-password" className="text-xs font-medium text-gray-300 flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span>Senha atual <span className="text-red-400">*</span></span>
+              </label>
+              <div className="relative">
+                <input
+                  id="cred-current-password"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={formCurrentPassword}
+                  onChange={(e) => setFormCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={credLoading}
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 disabled:opacity-70 disabled:cursor-not-allowed pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  aria-label={showCurrentPassword ? 'Ocultar senha atual' : 'Mostrar senha atual'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-500">
+                Obrigatória para autorizar qualquer alteração.
+              </p>
+            </div>
+
+            {/* Nova senha (opcional) */}
+            <div className="space-y-2">
+              <label htmlFor="cred-new-password" className="text-xs font-medium text-gray-300">
+                Nova senha
+              </label>
+              <div className="relative">
+                <input
+                  id="cred-new-password"
+                  type={showNewPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={formNewPassword}
+                  onChange={(e) => setFormNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={credLoading}
+                  className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 disabled:opacity-70 disabled:cursor-not-allowed pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  aria-label={showNewPassword ? 'Ocultar nova senha' : 'Mostrar nova senha'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-500">
+                Opcional. Se informar, exige confirmação e deve atender aos requisitos abaixo.
+              </p>
+            </div>
+
+            {/* Confirmação de nova senha (opcional) */}
+            <div className="space-y-2">
+              <label htmlFor="cred-confirm-password" className="text-xs font-medium text-gray-300">
+                Confirmar nova senha
+              </label>
+              <input
+                id="cred-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                value={formConfirmPassword}
+                onChange={(e) => setFormConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={credLoading}
+                className="w-full bg-[#060317] border border-purple-500/25 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            {/* Requisitos visíveis */}
+            <div className="p-3 rounded-xl bg-[#060317]/50 border border-purple-500/15">
+              <p className="text-[10px] font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
+                <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span>Requisitos da nova senha</span>
+              </p>
+              <ul className="text-[10px] text-gray-400 space-y-1 list-disc list-inside">
+                <li>Mínimo de 12 caracteres</li>
+                <li>Ao menos uma letra e um número</li>
+                <li>Diferente da senha atual</li>
+                <li>Confirmação obrigatória quando informada</li>
+              </ul>
+            </div>
+
+            {/* Ações */}
+            <div className="pt-4 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormEmail(currentEmail ?? '')
+                  setFormCurrentPassword('')
+                  setFormNewPassword('')
+                  setFormConfirmPassword('')
+                  setCredError(null)
+                  setCredMessage(null)
+                }}
+                disabled={credLoading}
+                className="px-4 py-2 rounded-xl border border-gray-700 text-gray-400 text-sm font-medium hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Limpar
+              </button>
+              <button
+                type="submit"
+                disabled={!canSubmitCredentials}
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-lg shadow-blue-900/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {credLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Salvando...</span>
+                  </span>
+                ) : (
+                  'Salvar alterações'
+                )}
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* Modal de Confirmação de Segundo Fator */}

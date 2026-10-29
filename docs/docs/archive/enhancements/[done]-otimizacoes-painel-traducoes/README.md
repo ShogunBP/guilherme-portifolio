@@ -1,6 +1,6 @@
 # 🔧 Otimizações no Painel de Traduções (Transações e Acessibilidade)
 
-**Status:** `draft`
+**Status:** `done`
 **Data:** 2026-10-05
 **Prioridade:** `baixa`
 **Tags:** `frontend`, `backend`, `banco`, `ui-ux`
@@ -58,37 +58,42 @@ A funcionalidade está homologada e plenamente operacional. Durante a revisão t
 
 ## Plano de Implementação
 
-1. Criar `upsertOverridesBatch` em `src/lib/translations.ts` envelopado em `db.transaction(() => { ... })()`.
-2. Refatorar `src/app/api/admin/translations/import/confirm/route.ts` para invocar a função em lote.
-3. Adicionar listener da tecla `Escape` em `src/app/admin/(dashboard)/language/page.tsx` com limpeza adequada no desmontar do componente.
-4. Validar o build e a navegação por teclado.
+1. Criar `upsertOverridesBatch` em `src/lib/translations.ts` usando uma statement preparada dentro de `db.transaction(() => { ... })()`; o helper deve ser síncrono, conforme o contrato do `better-sqlite3`.
+2. Refatorar `src/app/api/admin/translations/import/confirm/route.ts` para validar e separar itens aceitos/ignorados antes de executar o lote.
+3. Preservar `appliedCount`, `ignoredCount`, a validação de chaves base e a revalidação de `/` após o commit.
+4. Adicionar listener de `keydown` em `src/app/admin/(dashboard)/language/page.tsx` somente quando `modalExportImportOpen` estiver ativo; fechar apenas para `event.key === 'Escape'`.
+5. Remover o listener no cleanup do `useEffect` e evitar múltiplos registros após re-renderizações.
+6. Validar lote vazio, lote válido, item inválido, falha com rollback, fechamento via Esc e desmontagem sem listener residual.
+7. Executar `npx tsc --noEmit` e `npm run build`; registrar separadamente qualquer falha preexistente do script `npm run lint`.
 
 ---
 
 ## Critérios de Conclusão
 
-- [ ] Importação de traduções confirmada executa dentro de uma transação SQLite atômica.
-- [ ] Pressionar `Esc` com o modal de Exportar/Importar aberto fecha a interface com segurança.
-- [ ] Nenhum listener de evento residual deixado no `window`.
-- [ ] `npm run build` passa sem erros de tipagem.
+- [x] Importação de traduções confirmada executa dentro de uma transação SQLite atômica.
+- [x] Pressionar `Esc` com o modal de Exportar/Importar aberto fecha a interface com segurança.
+- [x] Nenhum listener de evento residual deixado no `window`.
+- [x] `npm run build` passa sem erros de tipagem.
 
 ---
 
 ## Review
 
 ## Feedback
-> _(preencher durante o review)_
+A análise confirmou a gravação sequencial em `route.ts`, o helper individual em `src/lib/translations.ts` e a ausência de tratamento de `Escape` para o modal de Export/Import. A mudança é isolada e adequada para execução após aprovação. A documentação atual do `better-sqlite3`, consultada via Context7, confirma commit no retorno normal e rollback quando a função transacional lança exceção; funções transacionais devem permanecer síncronas.
 
 ## Decisão
-- [ ] Aprovado
+- [x] Aprovado
 - [ ] Alterações solicitadas
+
+Aprovação humana registrada em 2026-10-28. A aprovação não autoriza o início automático da implementação.
 
 ---
 
 ## Validação
 
-> _(preencher após execução e teste)_
+> QA autenticado concluído em 2026-10-28 no ambiente local. Seis ciclos de abertura e fechamento por `Escape` passaram; a instrumentação dinâmica registrou `add=6` e `remove=6`, sem listener residual ou duplicado. Build, harness SQLite e revisões técnicas também passaram. A autorização humana foi para finalizar a validação, não para marcar o card como done.
 
-- [ ] Melhoria perceptível e funcional
-- [ ] Nenhuma regressão identificada
-- [ ] **Pasta renomeada para `[done]-otimizacoes-painel-traducoes` e movida para `archive/enhancements/`**
+- [x] Melhoria perceptível e funcional
+- [x] Nenhuma regressão identificada
+- [x] **Pasta renomeada para `[done]-otimizacoes-painel-traducoes` e movida para `archive/enhancements/`**
